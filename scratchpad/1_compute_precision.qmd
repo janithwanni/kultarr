@@ -1,0 +1,135 @@
+---
+title: "Testing claim of intractable precision"
+---
+
+The goal of this document is to showcase that for an arbitary perturbation distribution $D$, local instance $x$ and black-box model $f$, it is intractable to compute the following precision directly.
+
+$$
+prec(A) = E_{D(z|A)} [1_{f(x) = f(z)}]
+$$
+
+## Toy example
+
+Let's consider a simulated dataset with two variables and a non linear classification task.
+
+# Create the population
+
+```{r}
+options(ggplot2.discrete.colour= c("#c3423f", "#5bc0eb"))
+library(tidyverse)
+theme_set(theme_minimal())
+data <- expand.grid(seq(-1,1,by=0.01), seq(-1,1,by=0.01)) |> 
+  as_tibble() |>
+  mutate(class = factor(ifelse((Var1^2 - Var2^2)^2 <= 0.001 , "T", "F")))
+
+data |>
+  ggplot(aes(x = Var1, y = Var2,color = class)) + 
+  geom_point() +
+  coord_equal()
+```
+
+Create a sample dataset
+
+```{r}
+set.seed(256)
+sample_indexes <- c(
+  sample(which(data$class == "T"), 20),
+  sample(which(data$class == "F"), 20)
+)
+model_data <- data[sample_indexes, ]
+```
+
+```{r}
+table(model_data$class)
+```
+
+
+Visualize sample dataset
+
+```{r}
+model_data |> 
+  ggplot(aes(x = Var1,y = Var2, color = class))+
+  geom_point() + coord_equal() +
+  lims(x = c(-1, 1), y = c(-1, 1))
+```
+
+
+Build the model
+
+```{r}
+library(randomForest)
+rf_model <- randomForest(class ~ Var1 + Var2, data = model_data)
+```
+
+Visualize the model on the population
+
+```{r}
+preds <- predict(rf_model, data)
+data |>
+  mutate(preds = preds) |>
+  ggplot(aes(x = Var1, y = Var2, color = preds)) +
+  geom_point() +
+  lims(x = c(-1, 1), y = c(-1, 1))
+```
+
+Select one random instance
+
+```{r}
+set.seed(109)
+random_instance <- sample(nrow(model_data), 1)
+model_data[-random_instance, ] |>
+  ggplot(aes(x = Var1, y = Var2, color = class)) +
+  geom_point()+
+  geom_point(data = model_data[random_instance, ], size = 10) +
+  lims(x = c(-1, 1), y = c(-1, 1))
+```
+
+
+Create a perturbation distribution
+
+```{r}
+normal_distribution_generator <- function(local_instance, data) {
+  purrr::partial(MASS::mvrnorm, mu = local_instance, Sigma = cov(data))
+}
+```
+
+
+```{r}
+local_inst <- model_data[random_instance,] |> select(-class) |> unlist()
+print("mean of distribution")
+print(local_inst)
+print("sigma of distribution")
+print(cov(data |> select(-class)))
+local_norm <- normal_distribution_generator(local_inst, data |> select(-class))
+```
+
+Samples from pertubation distribution
+
+```{r}
+set.seed(110)
+perturb_data <- local_norm(n = 400) |> as_tibble()
+perturb_data |> 
+  as_tibble() |> 
+  ggplot(aes(x = Var1, y = Var2)) +
+  geom_point()+
+  geom_point(data = model_data[random_instance, ], size = 5, color="red") +
+  coord_equal()
+```
+
+
+```{r}
+perturb_preds <- predict(rf_model, perturb_data)
+perturb_data |>
+  mutate(preds = perturb_preds) |>
+  ggplot(aes(x = Var1, y = Var2, color = preds)) +
+  geom_point() +
+  geom_point(data = model_data[random_instance, ], size = 5, color="green")
+```
+
+We have a model and an arbitary perturbation distribution, We need to get the anchors. This is where it becomes intractable. 
+
+```{r}
+
+```
+
+

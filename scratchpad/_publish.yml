@@ -1,0 +1,4 @@
+- source: 3_wiggle_data_impl.qmd
+  quarto-pub:
+    - id: d018459b-8c79-494c-a86c-55e2ac2b1905
+      url: 'https://janithwanni.quarto.pub/anchors-explained-in-1d'

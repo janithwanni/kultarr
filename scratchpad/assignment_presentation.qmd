@@ -1,0 +1,9 @@
+---
+title: "BEX6510 Foundations of Econometrics"
+author: "Janith Wanniarachchi"
+format: revealjs
+---
+
+# What is Explainable AI
+# What are Anchors?
+# DIY anchors

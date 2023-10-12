@@ -3,6 +3,7 @@ title: "Explaining Anchors: High precision model agnostic explanations"
 subtitle: "BEX6510 Foundations of Econometrics"
 author: "Janith Wanniarachchi"
 format: html
+number-sections: true
 ---
 
 <!--
@@ -39,9 +40,9 @@ Machine learning has grown from its humble start to dominating decision making p
 
 Explainable AI is a research area that develops statistical and algorithmic techniques to approximate and communicate the decision process of black box models. There are many classifications of explainable AI methods, and the two most prominent classifications are centered around the model agnosticity and scope of explanations. Explainable AI methods that are capable of explaining any black box models are called model agnostic methods where the internal parameters or gradients are not utilized to explain the model. On the other hand there are model specific methods that utilize the structure of the black box model such as the weights and gradients of neural networks to provide explainations. In terms of the scope of explainations, an explaination can be capable of explaining the entire decision process of the entire all the training data instances or for a single data instance. The former would be called global explaination methods while the latter will be called local explaination methods. Example for global explaination methods would include Partial Dependence Plots and Individiual Conditional Effects while examples for local explaination methods would include LIME, SHAP and Counterfactuals.
 
-This report will discuss and review the paper "Anchors: High precision model agnostic explanations". Section @what-are-anchors will define what anchors are and review the main arguments given by the authors of the paper, while Section @anchors-from-scratch will implement the fundamental concept of anchors in a incremental steps starting with one dimensional data and moving to higher dimensions. Finally, an overall review of the paper and the discussion on the process of reproducing the paper will be discussed in Section @review.
+This report will discuss and review the paper "Anchors: High precision model agnostic explanations". Section @sec-what-are-anchors will define what anchors are and review the main arguments given by the authors of the paper, while Section @sec-anchors-from-scratch will implement the fundamental concept of anchors in a incremental steps starting with one dimensional data and moving to higher dimensions. Finally, an overall review of the paper and the discussion on the process of reproducing the paper will be discussed in Section @sec-review.
 
-# What are Anchors? {#what-are-anchors}
+# What are Anchors? {#sec-what-are-anchors}
 
 ## Theoretical definition
 
@@ -76,7 +77,7 @@ From an implementation perspective the precision of the anchor would then be the
 
 The paper defines the coverage of an anchor $A$ as the probability that it applies to samples from $D$, $cov(A) = E_{D(z)}[A(z)]$. Simply put we would be calculating the proportion of samples from the perturbation distribution that satisfy the boundary of the anchor. However, this would be problematic if our perturbation distribution is dense or sparse around certain areas. 
 
-Therefore, I would argue that picking a boundary that captures the most of the perturbation distribution is not ideal and instead it would be best to compute the coverage based on the proportion of the feature space that is covered. This idea will be covered in detail in the @def-anchors section
+Therefore, I would argue that picking a boundary that captures the most of the perturbation distribution is not ideal and instead it would be best to compute the coverage based on the proportion of the feature space that is covered. This idea will be covered in detail in the @sec-def-anchors section
 
 <!-- TODO: Explain the methodology that was used to build anchors. Including the construction of anchors using beam search, using multi armed bandits and the evaluation using user studies and simulation data -->
 
@@ -99,6 +100,7 @@ The authors argue that while it is possible to generate a very large dataset and
 Multi-armed bandit problems are a classic problem in reinforcement learning where $K$ number of choices ("arms of poker machines") are presented to an agent and each draw ("pull") from a choice gives a certain reward based on an unknown probability distribution. Some arms will give higher rewards than others. The objective is to design an agent that will maximize the average reward by the end of the sequence of draws. While trying to maximize the reward the agent will have to trade off between either exploring the available choices or exploiting the known choices that give high rewards.
 
 There are different strategies used to solve these problems that attempt to balance the exploration-exploitation trade off such as,
+
 1. Epsilon-greedy strategy 
 2. Softmax strategy
 3. Upper Confidence Bound strategy etc.
@@ -111,15 +113,21 @@ Beam search is a heuristic search algorithm similar to Best First Search and Bre
 
 ### The algorithm
 
-The authors have demonstrated how they developed their idea by first showcasing a greedy KL-LUCB strategy based method and then extending it to include a beam search approach.
+The authors have demonstrated how they developed their idea by first showcasing a greedy KL-LUCB strategy based method and then extending it to include a beam search approach. 
 
-<!-- > While the search for anchors is similar in spirit to Probabilistic Inductive Logic Programming (ILP) (De Raedt and Kersting 2008) and other rule-finding methods, one crucial difference is that we do not assume a dataset apriori - instead we have perturbation distributions and a black box model, which we can call to estimate precision and coverage bounds under D. While we could in theory generate a very large dataset and then use methods like ILP to find anchors, the number of perturbed samples and predictions from the black box model would be prohibitive, especially in high-dimensional sparse domains such as text. In order to efficiently explore the model’s behavior in the perturbation space, we turn to a multi-armed bandit formulation. -->
+In the paper anchors are constructed using a bottom up strategy where we start off with an empty anchor $A$ that would cover the entire feature space initially. In each iteration, a set of possible predicates are generated ${a_i}, i = {1,2,\dots, k}$ and the current anchor is extended with these possible predicates to create a set of possible anchors. Picking the right predicate to extend the current anchor with will be decided by the multi armed bandit solution. In the formulated problem, the possible feature predicates were the choices while the reward from pulling a choice was the precision obtained with the pulled feature predicate in the final anchor. Once a predicate has been selected, if the current anchor combined with the new feature predicate satisfies the following criteria 
+
+$$ 
+P(Prec(A) \ge \tau) \ge 1 - \delta
+$$
+
+then the proceess terminates early to provide the derived anchor. Notice how we were not trying to maximize the coverage but were only trying to pick the candidate that gave the highest precision. Since we are starting with an empty anchor the coverage is high and with every new predicate attached the coverage reduces slowly. We assume that the anchors with less number of predicates would generally have higher coverage.
+
+It is limiting to have only one anchor considered as the solution as we would not be exploring other possible solutions. Therefore a set of possible anchors are considered in a beam search approach. The KL LUCB approach is modified to select $B$ number of best candidates. From these candidates the final output will give the one with the highest coverage.
 
 ## Evaluation
 
 Evaluating explainability methods quantitatively is a difficult and seemingly impossible task without utilizing a user study. Anchors is evaluated using simualted and actual users. 
-
-### Experimental setup
 
 <!-- We evaluate anchor explanations for complex models on a
 number of tasks, primarily focusing on how they facilitate
@@ -148,27 +156,19 @@ Therefore, in this section, we simulate different behaviors,
 and perform a study with real users in the following section. -->
 
 ### Simulated user study
-The concept of simulating users is a novel and interseting concept which they have achieved by using the following procedure
+The concept of simulating users is a novel and interseting concept. In this paper the authors have used several popular tabular datasets in the machine learning field that are focused on classification tasks (e.g. The `adult` dataset contains features of adults in America and the task is to predict if their annual salary would be above or below 50,000$). Each dataset would be split into three components: training, validation and testing. For each training dataset, a logistic regression model, a gradient boosted tree and a multilayer perceptron was trained to derive explanations. To compare the performance of anchors they have picked a similar method of generating model agnostic local explanations called LIME. For each instance in validation datasets, explanations will be generated using both LIME and anchors. The evaluation metric was set to be coverage and precision, where coverage was calculated based on the fraction of the instances a simulated user predict after seeing explanations while precision was calculated based on the fraction of the predictions taken by the simulated user were correct on the complete test set. While it is easy to calculate the coverage and precision based on the explanations of anchors since they are rule based methods, calculating how a user would apply LIME explanations was difficult as LIME explanations contained only the effect of the features on a given feature. Therefore they haves simulated two user types where one group would apply the LIME explanations naively while the other group would apply the LIME explanation if it is above a certain threshold. 
 
 ### Real world user study
 
-<!-- We ran a user study with 26 users – students who had or
-were taking a machine learning course – so we could rely on
-familiarity with concepts such as “model”, “prediction”, and
-“cross validation”. For this study, we used the adult and rcdv
-datasets, followed by a multiple-choice VQA system (Ren,
-Kiros, and Zemel 2015) on two images. While the VQA
-model predicts one of 1000 labels, we restrict it to the 5 most
-common answers predicted on questions in D, in order to
-reduce visual overload. -->
+The real world user study utilized 26 students following a machine learning course. The users were first told to predict the behavior of the model without seeing any explanations and also after seeing one or two rounds of explanations from LIME or anchors. 
 
 ## Existing Statistical Software
 
 Currently the anchors package has been implemented in a Java package and an R package. However, the R package simply uses the Java package under the hood. While using the package for my research purposes I found the R package to be computationally inefficient and hard to debug as the underlying computation happens in a completely different environment which is difficult to inspect. Therefore I have decided to reimplement the anchors package in a pure R package that is computationally efficient while also being simple to debug and diagnose.
 
-# Anchors redesigned {#anchors-from-scratch}
+# Anchors redesigned {#sec-anchors-from-scratch}
 
-## Implementing the foundation of anchors {#def-anchors}
+## Implementing the foundation of anchors {#sec-def-anchors}
 
 Below I have defined anchors using as a collection of predicates, while a predicate is defined as the collection of a feature name, a logical operator and a constant value to compare with. 
 
@@ -1097,7 +1097,7 @@ train_df[-local_instance, ] |>
             aes(xmin = x_lb, xmax = x_ub, ymin = y_lb, ymax = y_ub), fill = "transparent", color = "black")
 ```
 
-# Discussion and Review {#review}
+# Discussion and Review {#sec-review}
 
 ## Remarks on the original paper
 
@@ -1107,7 +1107,11 @@ However, the approach taken to achieve this task seems to be, in my personal opi
 
 ## Discussion on reproducing approach
 
-In terms of the attempt to simplify the implementation of anchors, the usage of sequentially greedy approach has proven to be quite useful while trying to use UCB as a balance between exploitation and exploration has proven to be detrimental.
+In terms of the attempt to simplify the implementation of anchors, the usage of sequentially greedy approach has proven to be quite useful while trying to use UCB as a balance between exploitation and exploration has proven to be detrimental. One drawback of the appraoch given in this document compared to the approach given in the paper is that for a dataset of $p$ variables there will be $2 * p$ decision rules which is both restrictive and hard for people to comprehend.
+
+### Software packages used to implement anchors
+
+This report was written entirely in Quarto while the implementation was done completely on R using several R packages including `S7`, `purrr`, `dplyr`, `ggplot2`.
 
 ## Conclusions
 

@@ -1002,7 +1002,7 @@ n_epochs <- 100
 ```
 
 ```{r mab1}
-#| eval: true
+#| eval: !expr "!file.exists(here::here('scratchpad/assignment_state_plot_1.gif'))"
 #| echo: true
 #| output: false
 
@@ -1089,13 +1089,14 @@ if(!file.exists(here::here("scratchpad/assignment_state_plot_1.gif"))){
     ) |> gtools::mixedsort(),
     gif_file = here::here("scratchpad/assignment_state_plot_1.gif"),
     width = 640, height = 480,
-    delay = 0.5, loop = TRUE, progress = TRUE
+    delay = 0.25, loop = TRUE, progress = TRUE
   )
 }
 ```
 
 ![Alt Text](assignment_state_plot_1.gif)
-# Discussion and Review {#sec-review}
+
+# Discussion and Review{#sec-review}
 
 ## Remarks on the original paper
 

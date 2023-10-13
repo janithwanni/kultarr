@@ -170,9 +170,9 @@ Currently the anchors package has been implemented in a Java package and an R pa
 
 ## Implementing the foundation of anchors {#sec-def-anchors}
 
-Below I have defined anchors using as a collection of predicates, while a predicate is defined as the collection of a feature name, a logical operator and a constant value to compare with. 
+Below I have defined anchors as a set or list of predicates, while a predicate is defined as the combination of a feature name, a logical operator and a constant value to compare with. 
 
-`anchors and predicate`
+### `anchors and predicate`
 ```{r}
 #| code-fold: show
 #| code-summary: "Anchors and Predicate implementation using S7 classes"
@@ -202,10 +202,13 @@ anchors <- new_class("anchors",
 )
 ```
 
-In addition, there are several other functions that I have defined that work on top of anchors
+In addition, there are several other functions that I have defined that work on top of anchors to be used when generating anchors.
 
-An anchor should be extendable by a predicate
-`extend`
+
+### `extend`
+
+As we are going to be iteratively generating predicates, an anchor should be extendable by a predicate. 
+
 ```{r}
 #| code-fold: show
 #| code-summary: "extend method implementation"
@@ -219,9 +222,10 @@ S7::method(extend, anchors) <- function(x, pred) {
 }
 ```
 
-Given a dataset it tells how many of the data points are satisfied through the boundary (i.e. how many data points are inside the boundary)
+### `satisfies`
 
-`satisfies`
+Given a dataset the `satisfies` function tells us how many of the data points are satisfied through the boundary defined by the anchor (i.e. how many data points are inside the boundary)
+
 ```{r}
 #| code-fold: show
 #| code-summary: "satisfies method implementation"
@@ -246,8 +250,10 @@ S7::method(satisfies, anchors) <- function(x, data) {
 }
 ```
 
+### `precision`
+
 The way precision is defined is by collecting samples from the perturbation distribution (i.e. the varied realities of the local instance) and then selecting the ones that are within the boundary to apply the model on top of those filtered points and calculating the proportion of class labels. 
-`precision`
+
 ```{r}
 #| code-fold: show
 #| code-summary: "precision method implementation"
@@ -261,7 +267,7 @@ S7::method(precision, anchors) <- function(x, model, dist, n_samples = 100) {
   samples <- dist(n = n_samples)
   satisfying_rows <- which(satisfies(x, samples), arr.ind = TRUE)
   if(length(satisfying_rows) == 0) {
-    message("No satisfying rows found returning NULL")
+    message("No satisfying rows found in samples")
     return(NULL)
   }
   samples <- samples |>
@@ -271,7 +277,10 @@ S7::method(precision, anchors) <- function(x, model, dist, n_samples = 100) {
 }
 ```
 
-`coverage`
+### `coverage`
+
+Covrage is defined from an implementation perspective as the number of samples from the perturbation distribution that the anchor is satisfying.
+
 ```{r}
 #| code-fold: show
 #| code-summary: "coverage method implementation"
@@ -286,6 +295,8 @@ S7::method(coverage, anchors) <- function(x, dist, n_samples = 100) {
 ```
 
 ### Proposal for a new coverage method
+
+However, it would be more sensible to have the coverage be defined by the area of the feature space that the anchor covers in comparison to the entire feature space. Therefore in this function we will be calculating the coverage based on the size of the bounding box compared to the entire dataset.
 
 `coverage based on feature space`
 ```{r}
@@ -305,13 +316,23 @@ calculate_area <- function(data) {
 }
 ```
 
-Instead of calculating the coverage based on the perturbation distribution there is also the possibility of calculating the coverage based on the size of the bounding box compared to the entire dataset.
-
 ## Brute force approach on one dimensional data
 
-Now that we have a rough idea of what anchors are, we will begin by reproducing the concepts given in the paper. Instead of simply reproducing the final algorithm mentioned in the paper we will be emulating the thought process of constructing the final solution by developing the idea of anchors with the simplest case to more advanced complex scenarios. Throughout this tutorial we will be using random forest models as an example black box models for simplicity and ease of implementation.
+Now that we have a rough idea of what anchors are, we will begin by reproducing the concepts given in the paper. Instead of simply reproducing the final algorithm mentioned in the paper we will be emulating the thought process of constructing the final solution by developing the idea of anchors with the simplest case to more advanced complex scenarios. Throughout this report we will be using random forest models as an example black box models for simplicity and ease of implementation.
 
-Let's explore this idea with a simple one dimensional example. First we generate data in the range of $[0,1]$ and assign a binary class based on the following criteria. This dataset will be considered as the population from which we would collect a sample dataset to consider as the observed data. The observed data will then be segmented into training and testing data to develop black box models.
+Let's explore the idea of anchors with a simple one dimensional example. First we generate data in the range of $[0,1]$ and assign a binary class based on the following criteria. 
+
+$$
+\begin{equation}
+Y =
+    \begin{cases}
+        1 & \text{if } sin(15 \cdot x) > 0 \\
+        0 & \text{if } sin(15 \cdot x) < 0
+    \end{cases}
+\end{equation}
+$$
+
+This dataset will be considered as the population from which we would collect a sample dataset to consider as the observed data. The observed data will then be segmented into training and testing data to develop black box models.
 
 ### Generating data
 
@@ -356,10 +377,11 @@ rfmodel <- randomForest(class ~ x, data = train_df, ntree = 10)
 rfmodel
 ```
 
-Now how do we explain the decision process of this black box model using anchors. While it is possible to explain the decision process of a randomforest model with 10 trees fitted on a 1-dimensional data, we want to start explaining the process of anchors with a simpler case of one dimensional data.
+<!-- Now how do we explain the decision process of this black box model using anchors. While it is possible to explain the decision process of a randomforest model with 10 trees fitted on a 1-dimensional data, we want to start explaining the process of anchors with a simpler case of one dimensional data. -->
 
 ### Demonstration on a single point
-Let us first pick a data point in the dataset. Ideally a point in a border would be best to illustrate the idea. Hence we will pick the first observation as follows.
+
+Let us first pick a data point in the dataset. Ideally a point in a border would be best to illustrate the idea.
 
 ```{r}
 #| code-fold: true
@@ -391,8 +413,6 @@ x_grid <- expand.grid(
 ) |> rename(a = Var1, b = Var2)
 ```
 
-All possible cutpoints
-
 ```{r}
 #| echo: false
 #| eval: false
@@ -408,7 +428,7 @@ ggplot(
   geom_vline(data = x_grid, aes(xintercept = b), color = "gray", linetype = "dashed", alpha = 0.8)
 ```
 
-Let's visualize how a few bounding boxes should look like
+Let's visualize how a few bounding boxes should look like,
 
 ```{r}
 #| code-fold: true
@@ -429,7 +449,8 @@ ggplot(
     linetype = "dashed",
     fill = "transparent",
     inherit.aes = FALSE
-  )
+  ) + 
+  labs(title = "Sample bounding boxes")
 ```
 
 For a one dimensional example the simplest solution would be to apply a brute force approach and calculate the precision and coverage for all the possible bounding boxes. In order to calculate the precision and coverage we would need to define the model function $f$ and the pertubation distribution $D$. For this specific case, the perturbation distribution would be $[0.01,0.02, \dots, 0.99, 1.00]$
@@ -441,7 +462,6 @@ model_func <- function(data_samples) {
 
 dist_func <- function(n) data.frame(x = seq(0,1,by = 0.01))
 ```
-
 
 ### Brute force approach
 
@@ -461,6 +481,7 @@ res <- x_grid |> apply(1, function(row) {
 })
 ```
 
+Once the brute force approach is applied we have the precision and coverage for all the bounding boxes. If we inspect the relationship between the precision and coverage it would be easier for us to identify which bounding box to select
 
 ```{r}
 #| code-fold: true
@@ -540,7 +561,7 @@ max_prec_pop_plot <- ggplot(
 max_prec_pop_plot / max_prec_train_plot 
 ```
 
-The most optimal bounding box
+The most optimal bounding box would be the one that has high coverage while having precision above a threshold. The most optimal bounding box would look like the following.
 
 ```{r}
 optimal_bound <- bind_cols(x_grid, res_df) |>
@@ -621,7 +642,6 @@ ggplot(
 ```
 
 We will need to generate a new set of possible bounding boxes that surround the new instance of interest. After generating these bounding boxes we can calculate the precision and accuracy for each of these bounding boxes and obtain the bounding box with highest precision and the most optimal bounding box.
-
 
 ```{r}
 x_vals <- train_df[-local_instance,][["x"]] |> sort()
@@ -730,8 +750,6 @@ optimal_bound_pop_plot_alt <- ggplot(pop_data, aes(x = x,color = class, y = 0)) 
 
 We are going to use the previous brute force approach sequentially across dimensions, and as an example we are going to use an example two dimensional dataset.
 
-Now let's try to perform this for two dimensions.
-
 ```{r}
 w <- read_csv("wiggly.csv",
               col_select = -1,
@@ -758,7 +776,7 @@ train_2dim_plot <- w[train_indices, ] |>
   labs(title = "Training data") + 
   coord_equal()
 
-observed_2dim_plot | train_2dim_plot
+train_2dim_plot
 ```
 
 ```{r}
@@ -779,7 +797,6 @@ local_instance <- prob_matrix[prob_matrix$Negative == 0.4, "id"]
 local_instance <- local_instance[1]
 ```
 
-
 ```{r}
 train_df[-local_instance, ] |>
   ggplot(aes(x = x,y = y,color = class)) +
@@ -787,6 +804,8 @@ train_df[-local_instance, ] |>
   geom_point(data = train_df[local_instance, ], size = 5, color = "black") +
   geom_label(data = train_df[local_instance, ], label = "here", color = "black", nudge_y = 0.05)
 ```
+
+Similar to the brute force approach we would want to generate bounding boxes in the 2 dimensional space. A bounding box would consist of lower bound and an upper bound in both x and y dimensions.
 
 ```{r}
 # generate cutpoints
@@ -815,6 +834,8 @@ y_grid <- expand.grid(
   arrange(desc(L), U)
 ```
 
+Similar to the previous scenario we would be using a model function and perturbation distribution to evaulate the coverage and the precision. 
+
 ```{r}
 pertub_func <- function(n) {
   mulgar::rmvn(n = n, 
@@ -837,9 +858,9 @@ samples <- pertub_func(n = 10000)
 dist_func <- function(n) samples[1:n, ]
 ```
 
-We are going to brute force the two dimensional approach sequentially
+The sequentially greedy approach will first try to optimize the bounding box on one dimension. Once an ideal bounding region for one dimension has been found it will then fix the boundary in that dimension and optimize the bounding box for another dimension. In this scenario we will be optimizing for the higher precision as the coverage will be increased as the bounding box increases.
 
-```{r}
+```{r greed1}
 #| eval: true
 #| warning: false
 #| message: false
@@ -877,13 +898,15 @@ results <- imap(dimensions, function(bounds, var_name){
 })
 ```
 
+The coverage and precision plots for the x and y dimensions are visualized below. 
 
 ```{r}
-x_cov_prec_plot <- results$x$res |> ggplot(aes(x = precision_1, y = cover)) + geom_point()
-y_cov_prec_plot <- results$y$res |> ggplot(aes(x = precision_1, y = cover)) + geom_point()
+x_cov_prec_plot <- results$x$res |> ggplot(aes(x = precision_1, y = cover)) + geom_point(size = 1, alpha = 0.8)
+y_cov_prec_plot <- results$y$res |> ggplot(aes(x = precision_1, y = cover)) + geom_point(size = 1, alpha = 0.8)
 x_cov_prec_plot | y_cov_prec_plot
 ```
 
+The bounding box with the highest precision is as follows.
 
 ```{r}
 #| eval: false
@@ -904,17 +927,14 @@ train_df[-local_instance, ] |>
 ## Simple Multi Armed Bandits solution using Upper Confidence Bounds in two dimensions
 
 The sequential greedy method does seem to be generating good boundaries.
-Let us try modeling this as a multiarmed bandit problem.
-
-the actions are to increase the lower / upper bound of each dimension.
+Let us try modeling this as a multiarmed bandit problem. The possible choices are to increase the lower or upper bound of each dimension.
 
 ```{r}
-# TODO we can actually model the actions as changing the bounding box in a given direction
 envir <- list(
-  x_lb = x_grid$L |> unique(),
-  x_ub = x_grid$U |> unique(),
-  y_lb = y_grid$L |> unique(),
-  y_ub = y_grid$U |> unique()
+  x_lb = x_grid$L,
+  x_ub = x_grid$U,
+  y_lb = y_grid$L,
+  y_ub = y_grid$U
 )
 actions <- c("x_lb", "x_ub", "y_lb", "y_ub")
 ```
@@ -927,24 +947,21 @@ get_reward <- function(x_lb_ind, x_ub_ind, y_lb_ind, y_ub_ind, dist_func, model_
     predicate(feature = "y",operator = `>`,constant = envir$y_lb[y_lb_ind]),
     predicate(feature = "y",operator = `<`,constant = envir$y_ub[y_ub_ind])
   ))
-  # if(!satisfies(bound, train_df[local_instance, ])) {
-  #   print(c(x_lb_ind, x_ub_ind, y_lb_ind, y_ub_ind))
-  #   return(-9999) # penalty
-  # }
   cover <- coverage(bound, dist_func, n_samples = 10000)
   prec <- precision(bound, model_func, dist_func, n_samples = 10000)
   if(is.null(prec)) return(-9999) # penalty
   if(prec[class_ind] < 0.6) {
     return(-9999) # penalty for wrong direction
-  } 
-  # return(2 * prec[class_ind] + 0.5 * cover) # to put more weight on precision
-  return(prec[class_ind])
+  }
+  print(glue::glue("reward precision {round(prec[class_ind], 2)} and coverage {round(cover, 2)}"))
+  return(prec[class_ind] + (cover ^ 2))
 }
 
 select_action <- function(Q, N, n_game) {
   rewards <- map_dbl(actions, function(a){
-    Q[[a]] + sqrt((2 * log(n_game)) / N[[a]])
+    Q_star[[a]] + Q[[a]] + sqrt((2 * log(n_game)) / N[[a]])
   })
+  print(glue::glue("selection criteria {paste(round(rewards,2), collapse = ',')}"))
   if(sum(rewards == max(rewards)) > 1) {
     max_reward <- sample(which(rewards == max(rewards)), 1)
   } else {
@@ -955,29 +972,83 @@ select_action <- function(Q, N, n_game) {
 ```
 
 ```{r}
-n_games <- 10
+pertub_func <- function(n) {
+  mulgar::rmvn(n = n, 
+               p = 2,
+               mn = train_df[local_instance, c("x", "y")] |> 
+                 unlist(),
+               vc = cov(train_df[,c("x", "y")])
+  ) |>
+    as.data.frame() |>
+    rename(x = x1, y = x2)
+}
+
+model_func <- function(data_samples) {
+  suppressPackageStartupMessages(library(randomForest)) # for future package
+  return(predict(rfmodel, data_samples))
+}
+
+set.seed(123)
+samples <- pertub_func(n = 10000)
+dist_func <- function(n) samples[1:n, ]
+```
+
+
+We will be running the simulation for several games with each game containing several rounds.
+
+```{r}
+n_games <- 5
 n_epochs <- 100
 ```
 
-```{r}
-#| eval: false
+```{r mab1}
+#| eval: true
+#| echo: true
+#| output: false
 
+Q_star <- list(x_ub = 0, y_ub = 0, x_lb = 0, y_lb = 0)
 for(game in seq_len(n_games)) {
+  cli::cli_h1(glue::glue("Starting game {game}"))
   x_ub_ind <- 1
   x_lb_ind <- 1
   y_ub_ind <- 1
   y_lb_ind <- 1
-  N <- list(x_ub = 1, y_ub = 1, x_lb = 1, y_lb = 1)
+  N <- list(x_ub = 0, y_ub = 0, x_lb = 0, y_lb = 0)
   Q <- list(x_ub = 0, y_ub = 0, x_lb = 0, y_lb = 0)
+  
+  # initial round to explore all arms
+  while(all(Q |> map_lgl(~ .x <= 0))) {
+    for(action in actions) {
+      if(action == "x_ub") x_ub_ind <- ifelse(x_ub_ind == length(envir$x_ub), x_ub_ind, x_ub_ind + 1)
+      if(action == "y_ub") y_ub_ind <- ifelse(y_ub_ind == length(envir$y_ub), y_ub_ind, y_ub_ind + 1)
+      if(action == "x_lb") x_lb_ind <- ifelse(x_lb_ind == length(envir$x_lb), x_lb_ind, x_lb_ind + 1)
+      if(action == "y_lb") y_lb_ind <- ifelse(y_lb_ind == length(envir$y_lb), y_lb_ind, y_lb_ind + 1)
+      reward <- get_reward(x_lb_ind, x_ub_ind, y_lb_ind, y_ub_ind, dist_func, model_func)
+      
+      reward <- get_reward(x_lb_ind, x_ub_ind, y_lb_ind, y_ub_ind, dist_func, model_func)
+      N[[action]] <- N[[action]] + 1
+      if(Q[[action]] <= 0 && reward >= 0) {
+        Q[[action]] <- reward
+      } else {
+        Q[[action]] <- Q[[action]] + ((reward - Q[[action]]) / N[[action]])  
+      }
+      print(glue::glue("Q : {paste(Q, collapse = ',')} N: {paste(N, collapse = ',')}"))
+    }  
+  }
+  
   for(epoch in seq_len(n_epochs)) {
+    cli::cli_h2(glue::glue("Starting epoch {epoch}"))
     action <- select_action(Q, N, game)
+    
     if(action == "x_ub") x_ub_ind <- ifelse(x_ub_ind == length(envir$x_ub), x_ub_ind, x_ub_ind + 1)
     if(action == "y_ub") y_ub_ind <- ifelse(y_ub_ind == length(envir$y_ub), y_ub_ind, y_ub_ind + 1)
     if(action == "x_lb") x_lb_ind <- ifelse(x_lb_ind == length(envir$x_lb), x_lb_ind, x_lb_ind + 1)
     if(action == "y_lb") y_lb_ind <- ifelse(y_lb_ind == length(envir$y_lb), y_lb_ind, y_lb_ind + 1)
     reward <- get_reward(x_lb_ind, x_ub_ind, y_lb_ind, y_ub_ind, dist_func, model_func)
+    
     if(reward < 0) {
-      # if a penalty was received we undo the action and go on with the rest
+      # if a penalty was received 
+      # we undo the action and go on with the rest
       if(action == "x_ub") x_ub_ind <- ifelse(x_ub_ind == 1, x_ub_ind, x_ub_ind - 1)
       if(action == "y_ub") y_ub_ind <- ifelse(y_ub_ind == 1, y_ub_ind, y_ub_ind - 1)
       if(action == "x_lb") x_lb_ind <- ifelse(x_lb_ind == 1, x_lb_ind, x_lb_ind - 1)
@@ -986,6 +1057,7 @@ for(game in seq_len(n_games)) {
     }
     N[[action]] <- N[[action]] + 1
     Q[[action]] <- Q[[action]] + ((reward - Q[[action]]) / N[[action]])
+    print(glue::glue("Q : {paste(Q, collapse = ',')} N: {paste(N, collapse = ',')}"))
     if(epoch %% 10 == 0) {
       state_plot <- train_df[-local_instance, ] |>
         ggplot(aes(x = x,y = y,color = class)) +
@@ -1000,21 +1072,39 @@ for(game in seq_len(n_games)) {
                   aes(xmin = x_lb, xmax = x_ub, ymin = y_lb, ymax = y_ub), fill = "transparent", color = "black") +
         labs(title = glue::glue("Game: {game}, round: {epoch}, reward: {reward}"))
       ggsave(plot = state_plot,
-             filename = here::here("scratchpad/3_state_plot_dump/", glue::glue("{game}_{epoch}.png")),
+             filename = here::here("scratchpad/assignment_state_plot_dump_1/", glue::glue("{game}_{epoch}.png")),
              device = "png", bg = "white", width = 11, height = 8, units = "in")
     }
   }
+  Q_star <<- imap(Q, function(val, name) {(Q_star[[name]] + val) / n_games})
 }
 ```
 
+```{r}
+if(!file.exists(here::here("scratchpad/assignment_state_plot_1.gif"))){
+  gifski::gifski(
+    png_files = list.files(
+      here::here("scratchpad/assignment_state_plot_dump_1/"),
+      full.names = TRUE
+    ) |> gtools::mixedsort(),
+    gif_file = here::here("scratchpad/assignment_state_plot_1.gif"),
+    width = 640, height = 480,
+    delay = 0.5, loop = TRUE, progress = TRUE
+  )
+}
+```
 
-## Redemonstration of both approaches for robustness
+![Alt Text](assignment_state_plot_1.gif)
+
+## Redemonstration of approaches for robustness in two dimensions
+
+### Sequential greedy approach
 
 We will apply this instance to a second point to observe robustness using the sequential greedy approach.
 
 ```{r}
 # train_df |> mutate(id = row_number()) |> ggplot(aes(x = x,y = y, color = class)) + geom_point() + geom_label(aes(label = id), size =2)
-local_instance <- 139
+local_instance <- 154
 train_df[-local_instance, ] |>
   ggplot(aes(x = x,y = y,color = class)) +
   geom_point() +
@@ -1049,7 +1139,7 @@ y_grid <- expand.grid(
   arrange(desc(L), U)
 ```
 
-```{r}
+```{r greedy2}
 # define final anchor to be null
 final_anchor <- NULL
 dimensions <- list("x" = x_grid,"y" = y_grid) # variable names as names
@@ -1097,6 +1187,112 @@ train_df[-local_instance, ] |>
             aes(xmin = x_lb, xmax = x_ub, ymin = y_lb, ymax = y_ub), fill = "transparent", color = "black")
 ```
 
+### Multi-armed bandit approach
+
+```{r}
+envir <- list(
+  x_lb = x_grid$L,
+  x_ub = x_grid$U,
+  y_lb = y_grid$L,
+  y_ub = y_grid$U
+)
+```
+
+
+```{r mab2}
+#| eval: true
+#| echo: true
+#| output: false
+
+Q_star <- list(x_ub = 0, y_ub = 0, x_lb = 0, y_lb = 0)
+for(game in seq_len(n_games)) {
+  cli::cli_h1(glue::glue("Starting game {game}"))
+  x_ub_ind <- 1
+  x_lb_ind <- 1
+  y_ub_ind <- 1
+  y_lb_ind <- 1
+  N <- list(x_ub = 0, y_ub = 0, x_lb = 0, y_lb = 0)
+  Q <- list(x_ub = 0, y_ub = 0, x_lb = 0, y_lb = 0)
+  
+  # initial round to explore all arms
+  while(all(Q |> map_lgl(~ .x <= 0))) {
+    for(action in actions) {
+      if(action == "x_ub") x_ub_ind <- ifelse(x_ub_ind == length(envir$x_ub), x_ub_ind, x_ub_ind + 1)
+      if(action == "y_ub") y_ub_ind <- ifelse(y_ub_ind == length(envir$y_ub), y_ub_ind, y_ub_ind + 1)
+      if(action == "x_lb") x_lb_ind <- ifelse(x_lb_ind == length(envir$x_lb), x_lb_ind, x_lb_ind + 1)
+      if(action == "y_lb") y_lb_ind <- ifelse(y_lb_ind == length(envir$y_lb), y_lb_ind, y_lb_ind + 1)
+      reward <- get_reward(x_lb_ind, x_ub_ind, y_lb_ind, y_ub_ind, dist_func, model_func, class_ind = 2)
+      
+      reward <- get_reward(x_lb_ind, x_ub_ind, y_lb_ind, y_ub_ind, dist_func, model_func)
+      N[[action]] <- N[[action]] + 1
+      if(Q[[action]] <= 0 && reward >= 0) {
+        Q[[action]] <- reward
+      } else {
+        Q[[action]] <- Q[[action]] + ((reward - Q[[action]]) / N[[action]])  
+      }
+      print(glue::glue("Q : {paste(Q, collapse = ',')} N: {paste(N, collapse = ',')}"))
+    }  
+  }
+  
+  for(epoch in seq_len(n_epochs)) {
+    cli::cli_h2(glue::glue("Starting epoch {epoch}"))
+    action <- select_action(Q, N, game)
+    
+    if(action == "x_ub") x_ub_ind <- ifelse(x_ub_ind == length(envir$x_ub), x_ub_ind, x_ub_ind + 1)
+    if(action == "y_ub") y_ub_ind <- ifelse(y_ub_ind == length(envir$y_ub), y_ub_ind, y_ub_ind + 1)
+    if(action == "x_lb") x_lb_ind <- ifelse(x_lb_ind == length(envir$x_lb), x_lb_ind, x_lb_ind + 1)
+    if(action == "y_lb") y_lb_ind <- ifelse(y_lb_ind == length(envir$y_lb), y_lb_ind, y_lb_ind + 1)
+    reward <- get_reward(x_lb_ind, x_ub_ind, y_lb_ind, y_ub_ind, dist_func, model_func)
+    
+    if(reward < 0) {
+      # if a penalty was received 
+      # we undo the action and go on with the rest
+      if(action == "x_ub") x_ub_ind <- ifelse(x_ub_ind == 1, x_ub_ind, x_ub_ind - 1)
+      if(action == "y_ub") y_ub_ind <- ifelse(y_ub_ind == 1, y_ub_ind, y_ub_ind - 1)
+      if(action == "x_lb") x_lb_ind <- ifelse(x_lb_ind == 1, x_lb_ind, x_lb_ind - 1)
+      if(action == "y_lb") y_lb_ind <- ifelse(y_lb_ind == 1, y_lb_ind, y_lb_ind - 1)
+      next
+    }
+    N[[action]] <- N[[action]] + 1
+    Q[[action]] <- Q[[action]] + ((reward - Q[[action]]) / N[[action]])
+    print(glue::glue("Q : {paste(Q, collapse = ',')} N: {paste(N, collapse = ',')}"))
+    if(epoch %% 10 == 0) {
+      state_plot <- train_df[-local_instance, ] |>
+        ggplot(aes(x = x,y = y,color = class)) +
+        geom_point() +
+        geom_point(data = train_df[local_instance, ], size = 1, color = "black") +
+        geom_label(data = train_df[local_instance, ], label = "here", color = "black", nudge_y = 0.05) +
+        geom_rect(inherit.aes = F,
+                  data = tibble(x_lb = envir$x_lb[x_lb_ind],
+                                y_lb = envir$y_lb[y_lb_ind],
+                                x_ub = envir$x_ub[x_ub_ind],
+                                y_ub = envir$y_ub[y_ub_ind]),
+                  aes(xmin = x_lb, xmax = x_ub, ymin = y_lb, ymax = y_ub), fill = "transparent", color = "black") +
+        labs(title = glue::glue("Game: {game}, round: {epoch}, reward: {reward}"))
+      ggsave(plot = state_plot,
+             filename = here::here("scratchpad/assignment_state_plot_dump_2/", glue::glue("{game}_{epoch}.png")),
+             device = "png", bg = "white", width = 11, height = 8, units = "in")
+    }
+  }
+  Q_star <<- imap(Q, function(val, name) {(Q_star[[name]] + val) / n_games})
+}
+```
+
+```{r}
+if(!file.exists(here::here("scratchpad/assignment_state_plot_2.gif"))){
+  gifski::gifski(
+    png_files = list.files(
+      here::here("scratchpad/assignment_state_plot_dump_2/"),
+      full.names = TRUE
+    ),
+    gif_file = here::here("scratchpad/assignment_state_plot_2.gif"),
+    width = 72*6, height = 72*3,
+    delay = 0.1, loop = TRUE, progress = TRUE
+  )
+}
+```
+
+![Alt Text](assignment_state_plot_2.gif)
 # Discussion and Review {#sec-review}
 
 ## Remarks on the original paper

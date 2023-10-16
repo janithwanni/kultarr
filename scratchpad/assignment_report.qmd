@@ -8,8 +8,8 @@ format:
     code-fold: show
 number-sections: true
 execute:
-  eval: false
-  echo: false
+  eval: true
+  echo: true
 bibliography: report_bib.bib
 ---
 
@@ -684,7 +684,8 @@ res <- x_grid |> apply(1, function(row) {
     predicate(feature = "x",operator = `>`,constant = row["a"]),
     predicate(feature = "x",operator = `<`,constant = row["b"])
   ))
-  cover <- coverage(bound, dist_func, n_samples = 500)
+  # cover <- coverage(bound, dist_func, n_samples = 500)
+  cover <- coverage_area(bound, dataset = train_df |> select(x))
   prec <- precision(bound, model_func, dist_func, n_samples = 500)
   return(list(cover = cover, prec = prec))
 })
@@ -915,10 +916,11 @@ results <- imap(dimensions, function(bounds, var_name){
         extend(lower_bound_pred) |>
         extend(upper_bound_pred)
     }
-    cover <- coverage(bound, dist_func, n_samples = 10000)
+    # cover <- coverage(bound, dist_func, n_samples = 10000)
+    cover <- coverage_area(bound, train_df |> select(x, y))
     prec <- precision(bound, model_func, dist_func, n_samples = 10000)
     bind_cols(row, tibble(cover = cover, precision_1 = prec[1], precision_2 = prec[2]))
-  }, .options = furrr_options(globals = c("satisfies", "predicate", "anchors", "coverage", "precision", "extend", "final_anchor", "dist_func", "model_func", "dimensions", "samples", "rfmodel", "bind_cols")))
+  }, .options = furrr_options(globals = c("satisfies", "predicate", "anchors", "coverage_area", "precision", "extend", "final_anchor", "dist_func", "model_func", "dimensions", "samples", "rfmodel", "bind_cols", "train_df", "calculate_area")))
   max_prec <- dim_results |> slice_max(precision_1) |> head(1)
   best_lower_bound <- predicate(feature = var_name, operator = `>`, constant = max_prec[["L"]])
   best_upper_bound <- predicate(feature = var_name, operator = `<`, constant = max_prec[["U"]])
@@ -1035,7 +1037,8 @@ get_reward <- function(x_lb_ind, x_ub_ind, y_lb_ind, y_ub_ind, dist_func, model_
     predicate(feature = "y",operator = `>`,constant = envir$y_lb[y_lb_ind]),
     predicate(feature = "y",operator = `<`,constant = envir$y_ub[y_ub_ind])
   ))
-  cover <- coverage(bound, dist_func, n_samples = 10000)
+  # cover <- coverage(bound, dist_func, n_samples = 10000)
+  cover <- coverage_area(bound, train_df |> select(x, y))
   prec <- precision(bound, model_func, dist_func, n_samples = 10000)
   if(is.null(prec)) return(-9999) # penalty
   if(prec[class_ind] < 0.6) {

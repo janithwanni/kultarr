@@ -47,7 +47,7 @@ Machine learning has grown from being a niche curiosity in computer science to d
 
 Explainable AI is a research area that develops statistical and algorithmic techniques to approximate and communicate the decision process of black box models. There are many classifications of explainable AI methods, and the two most prominent classifications are centered around the model agnosticism and the scope of explanations. Explainable AI methods that are capable of explaining any black box models are called model agnostic methods where the internal parameters or gradients are not utilized to explain the model. On the other hand, there are model specific methods that utilize the structure of the black box model such as the weights and gradients of neural networks to provide explanations. In terms of the scope of explanations, an explaination can be capable of explaining the entire decision process of the entire training data instances or for a single data instance. The former would be called global explaination methods while the latter will be called local explaination methods. Examples for global explaination methods would include Partial Dependence Plots and Individual Conditional Effects while examples of local explaination methods would include LIME, SHAP and Counterfactuals [@molnar_interpretable_2022].
 
-This report will discuss and review the paper "Anchors: High precision model agnostic explanations" [@ribeiro_anchors:_2018]. The structure of this report will be as follows. @sec-what-are-anchors will define what anchors are and review the main arguments given by the authors of the paper, while @sec-anchors-from-scratch will implement the fundamental concept of anchors in incremental steps starting with one dimensional data and moving to higher dimensions. Finally, an overall review of the paper and the discussion on the process of reproducing the paper will be discussed in @sec-review.
+This report will discuss and review the paper "Anchors: High precision model agnostic explanations" [@ribeiro_anchors:_2018]. The structure of this report will be as follows. @sec-what-are-anchors will define what anchors are and review the main arguments given by the authors of the paper. As a contribution to the existing research work, I will be providing a tutorial on what anchors are, from a simple example to complex methods using different intuitive techniques and dicussing the applicability of each method. @sec-anchors-from-scratch will implement the fundamental concept of anchors in such incremental steps starting with one dimensional data and moving to higher dimensions. Finally, an overall review of the paper and the discussion on the process of reproducing the paper will be discussed in @sec-review.
 
 # What are Anchors? {#sec-what-are-anchors}
 
@@ -57,7 +57,7 @@ Anchors are a model agnostic method of explaining black box models which attempt
 
 The authors have defined anchors as a rule or a set of predicates that satisfy the given instance and is a sufficient condition for $f(x)$ (i.e. the model output) with high probability.
 
-A predicate is a logical condition that an observation may or may not satisfy. The simplest form of these predicates takes in the form of $\{x_1 > 2\}$. An instance with the $x_1$ feature greater than 2 would satisfy this predicate. Therefore a possible candidate for an anchor might take the form of $\mathcal{A} = \{x_1 > 2, x_1 < 3, x_2 > 10, x_3 < 5,x_4 == 1, \dots\}$. The authors have not defined exactly how a predicate should be structured due to the wide variety of data available in the wild. Since most of our applications are on tabular data, we can assume the simplest form of orthogonal boundaries.
+A predicate is a logical condition that an observation may or may not satisfy. The simplest form of these predicates takes in the form of $\{x_1 > 2\}$. An instance with the $x_1$ feature greater than 2 would satisfy this predicate. Therefore a possible candidate for an anchor might take the form of $\mathcal{A} = \{x_1 > 2, x_1 < 3, x_2 > 10, x_3 < 5,x_4 == 1, \dots\}$. The authors have not defined exactly how a predicate should be structured due to the wide variety of data available in the wild. Since most of our applications are on tabular data, I can assume the simplest form of orthogonal boundaries.
 
 For a list of predicates to be an anchor it should satisfy the given instance while also maximizing two criteria,
   1. Precision
@@ -91,7 +91,7 @@ The paper defines the coverage of an anchor $A$ as the probability that it appli
 
 Therefore, I would argue that picking a boundary that captures the most of the perturbation distribution is not ideal and instead, it would be best to compute the coverage based on the proportion of the feature space that is covered. This idea will be covered in detail in @sec-def-anchors.
 
-<!-- TODO: Explain the methodology that was used to build anchors. Including the construction of anchors using beam search, using multi armed bandits and the evaluation using user studies and simulation data -->
+<!-- TODO: Explain the methodology that was used to build anchors. Including the construction of anchors using beam search, using multi-arm bandits and the evaluation using user studies and simulation data -->
 
 ## Problem statement
 
@@ -105,11 +105,11 @@ The target would then be to maximize the coverage while ensuring that the precis
 
 ## Methodology
 
-The authors argue that while it is possible to generate a very large dataset and use methods such as Inductive Logic Programming to find these predicates, in high dimensional sparse datasets, the number of possible samples and predictions would be limited. Therefore they have decided to formulate the problem as a multi-armed bandit [@gittins_dynamic_1979] with the solution being a modified version of KL-LUCB combined with beam search to appropriately explore the possible candidates for anchors.
+The authors argue that while it is possible to generate a very large dataset and use methods such as Inductive Logic Programming to find these predicates, in high dimensional sparse datasets, the number of possible samples and predictions would be limited. Therefore they have decided to formulate the problem as a multi-arm bandit [@gittins_dynamic_1979] with the solution being a modified version of KL-LUCB combined with beam search to appropriately explore the possible candidates for anchors.
 
-### Multi-armed bandit problems
+### Multi-arm bandit problems
 
-Multi-armed bandit problems are a classic problem in reinforcement learning where $K$ number of choices ("arms of poker machines") are presented to an agent and each draw ("pull") from a choice gives a certain reward based on an unknown probability distribution. Some arms will give higher rewards than others. The objective is to design an agent that will maximize the average reward by the end of the sequence of draws. While trying to maximize the reward the agent will have to trade-off between either exploring the available choices or exploiting the known choices that give high rewards.
+Multi-arm bandit problems are a classic problem in reinforcement learning where $K$ number of choices ("arms of poker machines") are presented to an agent and each draw ("pull") from a choice gives a certain reward based on an unknown probability distribution. Some arms will give higher rewards than others. The objective is to design an agent that will maximize the average reward by the end of the sequence of draws. While trying to maximize the reward the agent will have to trade-off between either exploring the available choices or exploiting the known choices that give high rewards.
 
 There are different strategies used to solve these problems that attempt to balance the exploration-exploitation trade-off such as,
 
@@ -127,19 +127,19 @@ Beam search is a heuristic search algorithm similar to Best First Search and Bre
 
 The authors have demonstrated how they developed their idea by first showcasing a greedy KL-LUCB strategy [@kl_lucb_kaufmann] based method and then extending it to include a beam search approach. 
 
-In the paper anchors are constructed using a bottom up strategy where we start off with an empty anchor $\mathcal{A}$ that would cover the entire feature space initially. In each iteration, a set of possible predicates is generated ${a_i}, i = {1,2,\dots, k}$ and the current anchor is extended with these possible predicates to create a set of possible anchors. Picking the right predicate to extend the current anchor with will be decided by the multi armed bandit solution. In the formulated problem, the possible feature predicates were the choices while the reward from pulling a choice was the precision obtained with the pulled feature predicate in the final anchor. Once a predicate has been selected, if the current anchor combined with the new feature predicate satisfies the following criteria 
+In the paper anchors are constructed using a bottom up strategy where they start off with an empty anchor $\mathcal{A} = {}$ that would cover the entire feature space initially. In each iteration, a set of possible predicates is generated ${a_i}, i = {1,2,\dots, k}$ and the current anchor is extended with these possible predicates to create a set of possible anchors. Picking the right predicate to extend the current anchor with will be decided by the multi-arm bandit solution. In the formulated multi-arm bandit problem, the possible feature predicates were the choices while the reward from pulling a choice was the precision obtained with the pulled feature predicate in the final anchor. Once a predicate has been selected, if the current anchor combined with the new feature predicate satisfies the following criteria
 
 $$ 
 \text{Pr}(\text{Prec}(\mathcal{A}) \ge \tau) \ge 1 - \delta
 $$
 
-then the process terminates early to provide the derived anchor. Notice how we were not trying to maximize the coverage but were only trying to pick the candidate that gave the highest precision. Since we are starting with an empty anchor the coverage is high and with every new predicate attached the coverage reduces slowly. We assume that the anchors with a smaller number of predicates would generally have higher coverage.
+then the process terminates early to provide the derived anchor. Notice how they were not trying to maximize the coverage but were only trying to pick the candidate that gave the highest precision. Since they are starting with an empty anchor the coverage is high and with every new predicate attached the coverage reduces slowly. They assume that the anchors with a smaller number of predicates would generally have higher coverage.
 
-It is limiting to have only one anchor considered as the solution as we would not be exploring other possible solutions. Therefore a set of possible anchors is considered in a beam search approach. The KL LUCB approach is modified to select $B$ number of best candidates. From these candidates, the final output will give the one with the highest coverage.
+It is limiting to have only one anchor considered as the solution as they would not be exploring other possible solutions. Therefore a set of possible anchors is considered in a beam search approach. The KL LUCB approach is modified to select $B$ number of best candidates. From these candidates, the final output will give the one with the highest coverage.
 
 ## Evaluation
 
-Evaluating explainability methods quantitatively is a difficult and seemingly impossible task without utilizing a user study. Anchors is evaluated using simulated and actual users. 
+Evaluating explainability methods quantitatively is a difficult and seemingly impossible task without utilizing a user study. In this case, anchors is evaluated using both simulated and actual users. 
 
 <!-- We evaluate anchor explanations for complex models on a
 number of tasks, primarily focusing on how they facilitate
@@ -168,11 +168,19 @@ Therefore, in this section, we simulate different behaviours,
 and perform a study with real users in the following section. -->
 
 ### Simulated user study
-The concept of simulating users is a novel and interesting concept. In this paper, the authors have used several popular tabular datasets in the machine learning field that are focused on classification tasks (e.g. The `adult` dataset contains features of adults in America and the task is to predict if their annual salary would be above or below 50,000$). Each dataset would be split into three components: training, validation and testing. For each training dataset, a logistic regression model, a gradient boosted tree and a multilayer perceptron were trained to derive explanations. To compare the performance of anchors they have picked a similar method of generating model agnostic local explanations called LIME[@ribeiro_why_2016]. For each instance in validation datasets, explanations will be generated using both LIME and anchors. The evaluation metric was set to be coverage and precision, where coverage was calculated based on the fraction of the instances a simulated user predicted after seeing explanations while precision was calculated based on the fraction of the predictions taken by the simulated user were correct on the complete test set. While it is easy to calculate the coverage and precision based on the explanations of anchors since they are rule based methods, calculating how a user would apply LIME explanations was difficult as LIME explanations contained only the effect of the features on a given feature. Therefore they have simulated two user types where one group would apply the LIME explanations naively while the other group would apply the LIME explanation if it is above a certain threshold. 
+The concept of simulating users is a novel and interesting concept. In this paper, the authors have used several popular tabular datasets in the machine learning field that are focused on classification tasks (e.g. The `adult` dataset contains features of adults in America and the task is to predict if their annual salary would be above or below 50,000$). Each dataset would be split into three components: training, validation and testing. For each training dataset, a logistic regression model, a gradient boosted tree and a multilayer perceptron were trained to derive explanations. To compare the performance of anchors they have picked a similar method of generating model agnostic local explanations called LIME[@ribeiro_why_2016]. For each instance in validation datasets, explanations will be generated using both LIME and anchors. The evaluation metric was set to be coverage and precision, where coverage was calculated based on the fraction of the instances a simulated user would predict after seeing explanations while precision was calculated based on the fraction of the correct predictions taken on the complete test set. While it is easy to calculate the coverage and precision based on the explanations of anchors since they are rule based methods, calculating how a user would apply LIME explanations was difficult as LIME explanations contained only the effect of the features on a given local instance. Therefore they have simulated two user types where one group would apply the LIME explanations naively while the other group would apply the LIME explanation if it is above a certain threshold. 
 
 ### Real world user study
 
-The real world user study utilized 26 students following a machine learning course. The users were first told to predict the behaviour of the model without seeing any explanations and also after seeing one or two rounds of explanations from LIME or anchors. 
+The real world user study utilized 26 students following a machine learning course. The users were first told to predict the behaviour of the model without seeing any explanations and also after seeing one or two rounds of explanations from LIME or anchors. The procedure and evaluation criteria were roughly similar to the simulated user study. In the real world user study, the lending dataset used in the simulated dataset has not being used and instead several visual quastion answering dataset were used. Also in addition to the coverage and precision, the time to give predictions were also considered as an evaluation metric between lime and anchors.
+
+### Results
+
+![Average precision and coverage with simulated users on 3 tabular datasets and 3 classifiers.](imgs/sim_user_study.png){#fig-sim-user-study}
+
+![Average precision, coverage and time to provide predictions based on real world user study using 2 tabular datasets and 2 visual question answering set](imgs/real_user_study.png){#fig-real-user-study}
+
+The results of both the simulated and real world user study shows that anchors has outperformed lime in roughly all of the evaluation metrics. In both case studies, the users were able to predict the behavior of models on unseen instances precisely and in the case of the real world user study, with less effort as well (indicated by the less time it took to give predictions).
 
 ## Existing Statistical Software
 
@@ -182,7 +190,7 @@ Currently, the anchors package has been implemented in a Java package and an R p
 
 ## Implementing the foundation of anchors {#sec-def-anchors}
 
-Below I have defined anchors as a set or list of predicates, while a predicate is defined as the combination of a feature name, a logical operator and a constant value to compare with. 
+Below I have defined anchors as a set or list of predicates, while a predicate is defined as the combination of a feature name, a logical operator and a constant value to compare with. The implementation uses `S7` classes in R which is a severely new and experimental method of defining data structures in R.
 
 ### `anchors and predicate`
 ```{r}
@@ -214,8 +222,7 @@ anchors <- new_class("anchors",
 )
 ```
 
-In addition, there are several other functions that I have defined that work on top of anchors to be used when generating anchors.
-
+In addition, there are several other functions that I have defined that work on top of anchors to be used when generating anchors as utility functions.
 
 ### `extend`
 
@@ -306,9 +313,9 @@ S7::method(coverage, anchors) <- function(x, dist, n_samples = 100) {
 }
 ```
 
-### Proposal for a new coverage method
+### Proposal for a new coverage method {#sec-prop-cover-area}
 
-However, it would be more sensible to have the coverage be defined by the area of the feature space that the anchor covers in comparison to the entire feature space. Therefore in this function we will be calculating the coverage based on the size of the bounding box compared to the entire dataset.
+However, it would be more sensible to have the coverage be defined by the area of the feature space that the anchor covers in comparison to the entire feature space. Therefore in this function I will be calculating the coverage based on the size of the bounding box compared to the entire dataset.
 
 `coverage based on feature space`
 ```{r}
@@ -328,11 +335,11 @@ calculate_area <- function(data) {
 }
 ```
 
-## Brute force approach on one dimensional data
+## Brute force approach on one dimensional data {#sec-brute-force-oned}
 
-Now that we have a rough idea of what anchors are, we will begin by reproducing the concepts given in the paper. Instead of simply reproducing the final algorithm mentioned in the paper we will be emulating the thought process of constructing the final solution by developing the idea of anchors with the simplest case to more advanced complex scenarios. Throughout this report we will be using random forest models as an example black box models for simplicity and ease of implementation.
+Now that we have a rough idea of what anchors are, I will begin by reproducing the concepts given in the paper. Instead of simply reproducing the final algorithm mentioned in the paper I will be emulating the thought process of constructing the final solution by developing the idea of anchors with the simplest case to more advanced complex scenarios. Throughout this report I will be using random forest models as an example black box models for simplicity and ease of implementation.
 
-Let's explore the idea of anchors with a simple one dimensional example. First we generate data in the range of $[0,1]$ and assign a binary class based on the following criteria. 
+Let's explore the idea of anchors with a simple one dimensional example. First I generate data in the range of $[0,1]$ and assign a binary class based on the following criteria. 
 
 $$
 \begin{equation}
@@ -344,7 +351,7 @@ Y =
 \end{equation}
 $$
 
-This dataset will be considered as the population from which we would collect a sample dataset to consider as the observed data. The observed data will then be segmented into training and testing data to develop black box models.
+This dataset will be considered as the population from which I would collect a sample dataset to consider as the observed data. The observed data will then be segmented into training and testing data to develop black box models. For demonstration purposes I would be using only the training dataset to generate and test anchors on.
 
 ### Generating data
 
@@ -360,24 +367,26 @@ pop_data <- tibble(x = pop_x, class = factor(outcome))
 # visualize population
 pop_plot <- ggplot(pop_data, aes(x = x,color = class, y =0)) +
   geom_point() +
-  labs(title = "Population data for 1 dimension", y = "")
+  labs(subtitle = "Population data for 1 dimension", y = "")
 
 # sample half of it
 set.seed(100)
 sample_data <- pop_data |> slice_sample(prop = 0.5, by = class)
 obs_plot <- ggplot(sample_data, aes(x = x,color = class, y =0)) +
   geom_point() +
-  labs(title = "Observed sample data", y = "")
+  labs(subtitle = "Observed sample data", y = "")
 
 # create a training and testing set
 set.seed(200)
 train_df <- sample_data |> slice_sample(prop = 0.7, by = class)
 train_plot <- ggplot(train_df, aes(x = x,color = class, y =0)) +
   geom_point() +
-  labs(title = "Training data", y = "")
+  labs(subtitle = "Training data", y = "")
 
 pop_plot / obs_plot / train_plot
 ```
+
+Afterwards I will be fitting a simple random forest model with 10 trees.
 
 ```{r}
 #| code-fold: true
@@ -390,7 +399,7 @@ rfmodel
 
 <!-- Now how do we explain the decision process of this black box model using anchors. While it is possible to explain the decision process of a randomforest model with 10 trees fitted on a 1-dimensional data, we want to start explaining the process of anchors with a simpler case of one dimensional data. -->
 
-### Demonstration on a single point
+### Demonstration on a single point {#sec-demo-single-inst}
 
 Let us first pick a data point in the dataset. Ideally a point in a border would be best to illustrate the idea.
 
@@ -404,11 +413,11 @@ ggplot(
 ) +
   geom_point() +
   geom_point(data = train_df[local_instance, ], color = "black", size = 2.5) +
-  geom_label(data = train_df[local_instance,], label = "here", color = "black", nudge_y = 0.005) +
+  geom_label(data = train_df[local_instance,], label = "Here", color = "black", nudge_y = 0.005) +
   lims(y = c(-0.05, 0.05))
 ```
 
-For a one dimensional example, a boundary region would be defined by two values, a value left to the given value and a value right to the given value.
+For a one dimensional example, a boundary region would be defined by two values, a value left to the given value and a value right to the given value. The values for these bounding boxes will be generated based on the midpoints between observed data points. This would ensure that I will not be generating bounding boxes in areas that are not plausible for the original dataset. 
 
 ```{r}
 #| code-fold: true
@@ -433,7 +442,7 @@ ggplot(
 ) +
   geom_point() +
   geom_point(data = train_df[local_instance, ], color = "black", size = 2.5) +
-  geom_label(data = train_df[local_instance,], label = "here", color = "black", nudge_y = 0.005) +
+  geom_label(data = train_df[local_instance,], label = "Here", color = "black", nudge_y = 0.005) +
   lims(y = c(-0.05, 0.05)) +
   geom_vline(data = x_grid, aes(xintercept = a), color = "purple", linetype = "dashed", alpha = 0.4) +
   geom_vline(data = x_grid, aes(xintercept = b), color = "gray", linetype = "dashed", alpha = 0.8)
@@ -450,7 +459,7 @@ ggplot(
 ) +
   geom_point() +
   geom_point(data = train_df[local_instance, ], color = "black", size = 2.5) +
-  geom_label(data = train_df[local_instance,], label = "here", color = "black", nudge_y = 0.005) +
+  geom_label(data = train_df[local_instance,], label = "Here", color = "black", nudge_y = 0.005) +
   lims(y = c(-0.05, 0.05)) +
   geom_rect(
     data = x_grid |>
@@ -464,7 +473,7 @@ ggplot(
   labs(title = "Sample bounding boxes")
 ```
 
-For a one dimensional example the simplest solution would be to apply a brute force approach and calculate the precision and coverage for all the possible bounding boxes. In order to calculate the precision and coverage we would need to define the model function $f$ and the perturbation distribution $D$. For this specific case, the perturbation distribution would be $[0.01,0.02, \dots, 0.99, 1.00]$
+For a one dimensional example the simplest solution would be to apply a brute force approach and calculate the precision and coverage for all the possible bounding boxes. Notice that since I am starting off with boundaries that already contain the point and extending forward **I am changing the algorithm from the bottom up approach as mentioned in the paper to a top down approach in the upcoming sections**. In order to calculate the precision and coverage I would need to define the model function $f$ and the perturbation distribution $D$. For this specific case, the perturbation distribution would be giving out all the possible values for the one dimension which would be the same set of values used in the population data i.e. $[0.01,0.02, \dots, 0.99, 1.00]$.
 
 ```{r}
 model_func <- function(data_samples) {
@@ -492,7 +501,9 @@ res <- x_grid |> apply(1, function(row) {
 })
 ```
 
-Once the brute force approach is applied we have the precision and coverage for all the bounding boxes. If we inspect the relationship between the precision and coverage it would be easier for us to identify which bounding box to select
+There is an interesting pattern of the coverage and precision in the above plot. The coverage of high precision bounding boxes would be quite low which relates well to the real world scenario where smaller boundary boxes would be quite precise while larger boundary boxes would be having moderate precision.
+
+Once the brute force approach is applied I have the precision and coverage for all the bounding boxes. If I inspect the relationship between the precision and coverage it would be easier for us to identify which bounding box to select.
 
 ```{r}
 #| code-fold: true
@@ -509,10 +520,14 @@ res_df |>
   ggplot(aes(x = prec_1, y = cover_area)) +
   geom_point() +
   geom_vline(xintercept = 0.8) +
-  labs(title = "Precision vs Coverage for all possible bounding boxes in 1 dimension")
+  labs(
+    title = "Precision vs Coverage for all possible bounding boxes in 1 dimension",
+    x = "Precision",
+    y = "Coverage"
+  )
 ```
 
-Let us visualize the bounding box with the highest precision.
+Let us visualize the bounding box with the highest precision on both the population data and the training data.
 
 ```{r}
 max_prec_bound <- bind_cols(x_grid, res_df) |>
@@ -524,7 +539,7 @@ max_prec_train_plot <- ggplot(
 ) +
   geom_point() +
   geom_point(data = train_df[local_instance, ], color = "black", size = 2.5) +
-  geom_label(data = train_df[local_instance,], label = "here", color = "black", nudge_y = 0.005) +
+  geom_label(data = train_df[local_instance,], label = "Here", color = "black", nudge_y = 0.005) +
   lims(y = c(-0.05, 0.05)) +
   geom_rect(
     data = max_prec_bound,
@@ -551,7 +566,7 @@ max_prec_pop_plot <- ggplot(
 ) +
   geom_point() +
   geom_point(data = train_df[local_instance, ], color = "black", size = 2.5) +
-  geom_label(data = train_df[local_instance,], label = "here", color = "black", nudge_y = 0.005) +
+  geom_label(data = train_df[local_instance,], label = "Here", color = "black", nudge_y = 0.005) +
   lims(y = c(-0.05, 0.05)) +
   geom_rect(
     data = max_prec_bound,
@@ -572,7 +587,7 @@ max_prec_pop_plot <- ggplot(
 max_prec_pop_plot / max_prec_train_plot 
 ```
 
-The most optimal bounding box would be the one that has high coverage while having precision above a threshold. The most optimal bounding box would look like the following.
+The most optimal bounding box would be the one that has high coverage while having precision above a threshold (in this case 0.8). The most optimal bounding box would look like the following.
 
 ```{r}
 optimal_bound <- bind_cols(x_grid, res_df) |>
@@ -586,7 +601,7 @@ optimal_bound_train_plot <- ggplot(
 ) +
   geom_point() +
   geom_point(data = train_df[local_instance, ], color = "black", size = 2.5) +
-  geom_label(data = train_df[local_instance,], label = "here", color = "black", nudge_y = 0.005) +
+  geom_label(data = train_df[local_instance,], label = "Here", color = "black", nudge_y = 0.005) +
   lims(y = c(-0.05, 0.05)) +
   geom_rect(
     data = optimal_bound,
@@ -613,7 +628,7 @@ optimal_bound_pop_plot <- ggplot(
 ) + 
   geom_point() +
   geom_point(data = train_df[local_instance, ], color = "black", size = 2.5) +
-  geom_label(data = train_df[local_instance,], label = "here", color = "black", nudge_y = 0.005) +
+  geom_label(data = train_df[local_instance,], label = "Here", color = "black", nudge_y = 0.005) +
   lims(y = c(-0.05, 0.05)) +
   geom_rect(
     data = optimal_bound,
@@ -648,11 +663,11 @@ ggplot(
 ) +
   geom_point() +
   geom_point(data = train_df[local_instance, ], color = "black", size = 2.5) +
-  geom_label(data = train_df[local_instance,], label = "here", color = "black", nudge_y = 0.005) +
+  geom_label(data = train_df[local_instance,], label = "Here", color = "black", nudge_y = 0.005) +
   lims(y = c(-0.05, 0.05))
 ```
 
-We will need to generate a new set of possible bounding boxes that surround the new instance of interest. After generating these bounding boxes we can calculate the precision and accuracy for each of these bounding boxes and obtain the bounding box with the highest precision and the most optimal bounding box.
+I will need to generate a new set of possible bounding boxes that surround the new instance of interest. After generating these bounding boxes I can calculate the precision and accuracy for each of these bounding boxes and obtain the bounding box with the highest precision and the most optimal bounding box.
 
 ```{r}
 x_vals <- train_df[-local_instance,][["x"]] |> sort()
@@ -685,7 +700,11 @@ res_df |>
   ggplot(aes(x = prec_1, y = cover)) +
   geom_point() +
   geom_vline(xintercept = 0.8) +
-  labs(title = "Precision vs Coverage for all possible bounding boxes in 1 dimension")
+  labs(
+    title = "Precision vs Coverage for all possible bounding boxes in 1 dimension",
+    x = "Precision",
+    y = "Coverage"
+  )
 ```
 
 
@@ -695,7 +714,7 @@ max_prec_bound <- bind_cols(x_grid, res_df) |>
   # since there are more than one box with highest precision we will be selecting the bounding box we will be selecting a bounding box at random
   slice_sample(n = 1)
 max_prec_train_plot_alt <- ggplot(train_df[-local_instance, ], aes(x = x,color = class, y = 0)) + geom_point() + geom_point(data = train_df[local_instance, ], color = "black", size = 2.5) +
-  geom_label(data = train_df[local_instance,], label = "here", color = "black", nudge_y = 0.005) +
+  geom_label(data = train_df[local_instance,], label = "Here", color = "black", nudge_y = 0.005) +
   lims(y = c(-0.05, 0.05)) +
   geom_rect(
     data = max_prec_bound,
@@ -708,7 +727,7 @@ max_prec_train_plot_alt <- ggplot(train_df[-local_instance, ], aes(x = x,color =
   ) + labs(title = glue::glue("Precision: {round(max_prec_bound$prec_1,2)}", " Coverage = {round(max_prec_bound$cover,2)}"), subtitle = glue::glue("IF x > {max_prec_bound$a} AND x < {max_prec_bound$b}"), caption = "Plotted points are training data")
 
 max_prec_pop_plot_alt <- ggplot(pop_data, aes(x = x,color = class, y = 0)) + geom_point() + geom_point(data = train_df[local_instance, ], color = "black", size = 2.5) +
-  geom_label(data = train_df[local_instance,], label = "here", color = "black", nudge_y = 0.005) +
+  geom_label(data = train_df[local_instance,], label = "Here", color = "black", nudge_y = 0.005) +
   lims(y = c(-0.05, 0.05)) +
   geom_rect(
     data = max_prec_bound,
@@ -727,7 +746,7 @@ optimal_bound <- bind_cols(x_grid, res_df) |>
   slice(1)
 
 optimal_bound_train_plot_alt <- ggplot(train_df[-local_instance, ], aes(x = x,color = class, y = 0)) + geom_point() + geom_point(data = train_df[local_instance, ], color = "black", size = 2.5) +
-  geom_label(data = train_df[local_instance,], label = "here", color = "black", nudge_y = 0.005) +
+  geom_label(data = train_df[local_instance,], label = "Here", color = "black", nudge_y = 0.005) +
   lims(y = c(-0.05, 0.05)) +
   geom_rect(
     data = optimal_bound,
@@ -741,7 +760,7 @@ optimal_bound_train_plot_alt <- ggplot(train_df[-local_instance, ], aes(x = x,co
   labs(title = glue::glue("Precision: {round(optimal_bound$prec_1,2)}", " Coverage = {round(optimal_bound$cover,2)}"), subtitle = glue::glue("IF x > {optimal_bound$a} AND x < {optimal_bound$b}"), caption = "Plotted points are training data points")
 
 optimal_bound_pop_plot_alt <- ggplot(pop_data, aes(x = x,color = class, y = 0)) + geom_point() + geom_point(data = train_df[local_instance, ], color = "black", size = 2.5) +
-  geom_label(data = train_df[local_instance,], label = "here", color = "black", nudge_y = 0.005) +
+  geom_label(data = train_df[local_instance,], label = "Here", color = "black", nudge_y = 0.005) +
   lims(y = c(-0.05, 0.05)) +
   geom_rect(
     data = optimal_bound,
@@ -757,9 +776,13 @@ optimal_bound_pop_plot_alt <- ggplot(pop_data, aes(x = x,color = class, y = 0)) 
 (max_prec_train_plot / optimal_bound_train_plot) | (max_prec_train_plot_alt / optimal_bound_train_plot_alt)
 ```
 
-## Sequential Greedy Approach in two dimensions
+## Remarks on brute force approach
 
-We are going to use the previous brute force approach sequentially across dimensions, and as an example we are going to use an example two dimensional dataset.
+The brute force approach is the simplest solution to get the exact solution for all of the possible bounding boxes. While it is practically rare to meet models with one variable which can not be explained through interpretable models this approach can be extended to two or higher dimensions to explore all the possible bounding boxes in a greedy manner.
+
+## Sequential Greedy Approach in two dimensions {#sec-seq-greedy}
+
+I am going to use the previous brute force approach sequentially across dimensions using the following two dimensional dataset.
 
 ```{r}
 w <- read_csv("wiggly.csv",
@@ -776,6 +799,8 @@ observed_2dim_plot <- w |>
   labs(title = "Observed data for 2 dimensions") +
   coord_equal()
 ```
+
+Similar to the previous case I would be sampling a set fraction of data points to build the training dataset and fit a random forest model on top of it.
 
 ```{r}
 # sample train data
@@ -797,7 +822,7 @@ rfmodel <- randomForest(class ~ x + y, data = train_df, ntree = 5)
 rfmodel
 ```
 
-When selecting instances we will select instances that the model is having difficulty predicting. These points are most likely situated in the boundary area and therefore would be ideal candidates for exploring how anchors work.
+When selecting instances I will be selecting instances that the model is having difficulty predicting. These points are most likely situated in the boundary area and therefore would be ideal candidates for exploring how anchors work.
 
 ```{r}
 # select instance
@@ -813,10 +838,10 @@ train_df[-local_instance, ] |>
   ggplot(aes(x = x,y = y,color = class)) +
   geom_point() +
   geom_point(data = train_df[local_instance, ], size = 5, color = "black") +
-  geom_label(data = train_df[local_instance, ], label = "here", color = "black", nudge_y = 0.05)
+  geom_label(data = train_df[local_instance, ], label = "Here", color = "black", nudge_y = 0.05)
 ```
 
-Similar to the brute force approach we would want to generate bounding boxes in the 2 dimensional space. A bounding box would consist of lower bound and an upper bound in both x and y dimensions.
+Similar to the brute force approach I would want to generate bounding boxes in the 2 dimensional space. A bounding box would consist of lower bound and an upper bound in both x and y dimensions.
 
 ```{r}
 # generate cutpoints
@@ -845,7 +870,7 @@ y_grid <- expand.grid(
   arrange(desc(L), U)
 ```
 
-Similar to the previous scenario we would be using a model function and perturbation distribution to evaluate the coverage and the precision. 
+ A model function and perturbation distribution would need to be defined to evaluate the coverage and the precision of this task. In this case, the perturbation distribution would be giving out the first $n$ realization from $X_1, X_2, \dots, X_{10000}$ where $X_i \sim \mathcal{N}_2(\underline{\mathbf{0}}, \mathbf{I})$
 
 ```{r}
 pertub_func <- function(n) {
@@ -869,7 +894,7 @@ samples <- pertub_func(n = 10000)
 dist_func <- function(n) samples[1:n, ]
 ```
 
-The sequentially greedy approach will first try to optimize the bounding box on one dimension. Once an ideal bounding region for one dimension has been found it will then fix the boundary in that dimension and optimize the bounding box for another dimension. In this scenario we will be optimizing for the higher precision as the coverage will be increased as the bounding box increases.
+The sequentially greedy approach will first try to optimize the bounding box on one dimension in this case the $x$ dimension. Once an ideal bounding region for one dimension has been found it will then fix the boundary in that dimension and optimize the bounding box for another dimension. In this scenario, I will be optimizing for higher precision as the coverage will be increased as the bounding box increases.
 
 ```{r greed1}
 #| warning: false
@@ -911,10 +936,27 @@ results <- imap(dimensions, function(bounds, var_name){
 The coverage and precision plots for the x and y dimensions are visualized below. 
 
 ```{r}
-x_cov_prec_plot <- results$x$res |> ggplot(aes(x = precision_1, y = cover)) + geom_point(size = 1, alpha = 0.8)
-y_cov_prec_plot <- results$y$res |> ggplot(aes(x = precision_1, y = cover)) + geom_point(size = 1, alpha = 0.8)
+x_cov_prec_plot <- results$x$res |>
+  ggplot(aes(x = precision_1, y = cover)) + 
+  geom_point(size = 0.5, alpha = 0.75) +
+  labs(
+    title = "Precision vs Coverage for the x axis",
+    x = "Precision",
+    y = "Coverage"
+  )
+y_cov_prec_plot <- results$y$res |>
+  ggplot(aes(x = precision_1, y = cover)) +
+  geom_point(size = 0.5, alpha = 0.75) +
+  geom_vline(xintercept = 0.8) +
+  labs(
+    title = "Precision vs Coverage for the y axis",
+    x = "Precision",
+    y = "Coverage"
+  )
 x_cov_prec_plot | y_cov_prec_plot
 ```
+
+In the above plot there is a similar pattern to the one dimensional example of cascading points. Interestingly, precision are coverage have a non linear positive relationship in the bounding boxes in the $x$ axis. After fixing the $x$ axis, changing the $y$ axis bounding box creates a non linear negative relationship between precision and coverage. This can also provide insights into how the model boundary is defined around the local instance.
 
 The bounding box with the highest precision is as follows.
 
@@ -925,7 +967,7 @@ train_df[-local_instance, ] |>
   ggplot(aes(x = x,y = y,color = class)) +
   geom_point() +
   geom_point(data = train_df[local_instance, ], size = 1, color = "black") +
-  geom_label(data = train_df[local_instance, ], label = "here", color = "black", nudge_y = 0.05) +
+  geom_label(data = train_df[local_instance, ], label = "Here", color = "black", nudge_y = 0.05) +
   geom_rect(inherit.aes = F, 
             data = tibble(x_lb = results$x$lb@constant,
                           y_lb = results$y$lb@constant,
@@ -934,10 +976,17 @@ train_df[-local_instance, ] |>
             aes(xmin = x_lb, xmax = x_ub, ymin = y_lb, ymax = y_ub), fill = "transparent", color = "black")
 ```
 
-## Simple Multi Armed Bandits solution using Upper Confidence Bounds in two dimensions
+## Remarks on sequential brute force approach
 
-The sequential greedy method does seem to be generating good boundaries.
-Let us try modelling this as a multiarmed bandit problem. The possible choices are to increase the lower or upper bound of each dimension. In this scenario we will be using a modified Upper Confidence Bound algorithm [@timmiller_introduction_rl] to find solutions to the multiarmed bandit problem.
+The sequential brute force approach has proven to be effective in deriving an ideal bounding box. However, it is quite time consuming and might not generalize well for higher dimensions. An alternate approach would be to sample bounding boxes along each dimension and sequentially plot the precision and coverage for select points to glean insights into the model boundary around the given instance.
+
+## Simple Multi-arm Bandits solution using Upper Confidence Bounds in two dimensions {#sec-mab-twod}
+
+The sequential greedy method does seem to be generating good boundaries. However, to be faithful to the original paper, and to explore the benefits of using a multi-arm bandit solution, let us try modelling this as a multi-arm bandit problem. I will define the possible choices as increasing the lower or upper bound of each dimension, resulting in four arms that can be pulled. The reward in this case would be a combination of the precision and the coverage with penalties associated for taking a wrong direction.
+
+To put it simply imagine you are the local point and you are trying to find similar friends like yourself by pushing a wall around you. Your options are to either push the north, east, west, or south walls to find new friends. When you increase the walls you get rewarded and when you find like minded friends you get rewarded as well.
+
+We will be simulating several games and each game will have several rounds within them. The idea is to by the end of the simulation have a strategy on which actions to prioritize when generating the ideal boundary.
 
 ```{r}
 envir <- list(
@@ -948,6 +997,35 @@ envir <- list(
 )
 actions <- c("x_lb", "x_ub", "y_lb", "y_ub")
 ```
+
+In this scenario we will be using a modified Upper Confidence Bound algorithm [@timmiller_introduction_rl] to find solutions to the multi-arm bandit problem
+
+### Modified Upper Confidence Bound algorithm {#sec-ucb-algo}
+
+The reward can be defined as follows,
+
+$$
+\begin{equation}
+R(\mathcal{A}) =  =
+    \begin{cases}
+        \text{Prec}(\mathcal{A}) + \text{cov}(\mathcal{A})^2 & \text{if } \text{Prec}(\mathcal{A}) \in \mathbb{R} \\
+        -9999 & \text{if } \text{Prec}(\mathcal{A}) \notin \mathbb{R} \\
+        -9999 & \text{if } \text{Prec}(\mathcal{A}) < 0.6 
+    \end{cases}
+\end{equation}
+$$
+
+The reasoning for the large negative numbers is to induce a heavy penalty if the precision is not a real number (or null in this case) as there might be boundaries that would be explored which might not contain enough samples from the perturbation distribution to explore, or if the precision is a low number indicating that the model is uncertain of the results. 
+
+Meanwhile the next action $a$ that we select for each iteration is based on the following statement
+
+$$
+a = \underset{a}{\mathrm{argmax }} Q^*(a) + Q(a) + \sqrt{\frac{2 \cdot ln(g)}{N(a)}}
+$$
+
+Here $N(a)$ is the number of times $a$ has been selected as the next action in the course of a given game, $Q(a)$ is the cumulative average reward gain for each action in the given round, while $Q^*(a)$ is the average of $Q(a)$ across games. The terms in the square root encourages exploration by being high for actions that have been explored less – that is, when $N(a)$ is low relative to other actions while the terms with $Q(\cdot)$ encourages exploitation of known rewards. Notice that in the beginning of each round $N(a) = 0$ for all actions and therefore we would first running a few warmup rounds until we have enough values in $N(a)$ to have atleast one positive value for $Q(a)$. 
+
+Also note the UCB algorithm offers a balance between exploration and exploitation which is contrastingly different from the KL-LUCB algorithm which is a pure exploration strategy. In a lower dimensional setting a pure exploration method would be no different from a brute force approach and therefore I believe for this explanation to be more intuitive we should be incorporating knowledge between games and exploiting known successful solutions.
 
 ```{r}
 get_reward <- function(x_lb_ind, x_ub_ind, y_lb_ind, y_ub_ind, dist_func, model_func, class_ind = 1) {
@@ -981,6 +1059,8 @@ select_action <- function(Q, N, n_game) {
 }
 ```
 
+Similar to the sequential greedy approach, I will be defining a model function and perturbation distribution.
+
 ```{r}
 pertub_func <- function(n) {
   mulgar::rmvn(n = n, 
@@ -1003,8 +1083,7 @@ samples <- pertub_func(n = 10000)
 dist_func <- function(n) samples[1:n, ]
 ```
 
-
-We will be simulating several games with each game containing several rounds.
+I will be simulating 5 games with each game containing 100 rounds. An interesting component to the following algorithm is that if I draw an action that gives me a penalty after the warmup period I would undo that action and move on to the next round. This would further ensure that the model does not explore actions that are not beneficial for the reward.
 
 ```{r}
 n_games <- 5
@@ -1072,7 +1151,7 @@ for(game in seq_len(n_games)) {
         ggplot(aes(x = x,y = y,color = class)) +
         geom_point() +
         geom_point(data = train_df[local_instance, ], size = 1, color = "black") +
-        geom_label(data = train_df[local_instance, ], label = "here", color = "black", nudge_y = 0.05) +
+        geom_label(data = train_df[local_instance, ], label = "Here", color = "black", nudge_y = 0.05) +
         geom_rect(inherit.aes = F,
                   data = tibble(x_lb = envir$x_lb[x_lb_ind],
                                 y_lb = envir$y_lb[y_lb_ind],
@@ -1088,6 +1167,8 @@ for(game in seq_len(n_games)) {
   Q_star <<- imap(Q, function(val, name) {(Q_star[[name]] + val) / n_games})
 }
 ```
+
+The results of the simulations are given in the following animation. Notice that after a certain rounds of games the algorithm begins to follow the same pattern many times indicating that it has settled to a local optima and therefore would be following that procedure.
 
 ```{r}
 if(!file.exists(here::here("scratchpad/assignment_state_plot_1.gif"))){
@@ -1105,6 +1186,10 @@ if(!file.exists(here::here("scratchpad/assignment_state_plot_1.gif"))){
 
 ![](assignment_state_plot_1.gif)
 
+## Remarks on the Multi-arm bandit approach
+
+Compared to the sequentially greedy approach, the multi-arm bandit approach can be computationally less expensive but there is a higher risk of settling in a local optima. However as the number of dimensions $d$ increases the number of actions grows to $d^2$ meaning that there will be large search space for the multi-arm bandit solution to explore and exploit. This is where I believe a pure exploration method combined with a beam search would be beneficial to ensure that a local optima is reached.
+
 # Discussion and Review{#sec-review}
 
 ## Remarks on the original paper
@@ -1115,7 +1200,20 @@ However, the approach taken to achieve this task seems to be, in my personal opi
 
 ## Discussion on reproducing approach
 
-In terms of the attempt to simplify the implementation of anchors, the usage of a sequentially greedy approach has proven to be quite useful while trying to use UCB as a balance between exploitation and exploration has proven to be detrimental. One drawback of the approach given in this document compared to the approach given in the paper is that for a dataset of $p$ variables, there will be $2 \cdot p$ decision rules which is both restrictive and hard for people to comprehend.
+In terms of the attempt to simplify the implementation of anchors, this report provides an intuition behind the thinking process of the existing paper. 
+
+In addition to demystifying anchors, I have also brought in the following propositions / changes to the existing approach in this report
+
+1. Using the area covered within the feature space to compute the coverage instead of using a perturbation distribution. (see @sec-prop-cover-area)
+2. Using a top down approach instead of a bottom up approach to building anchors. (see Section @sec-demo-single-inst)
+3. Using the UCB algorithm instead of the KL-LUCB algorithm to demonstrate the need for a pure exploration approach as the multi-arm bandit solution. (see @sec-ucb-algo)
+4. Providing the intuition of anchors in the following scenarios.
+  1. A brute force approach in one dimension (see @sec-brute-force-oned)
+  2. A sequentially greedy approach in two dimensions (see @sec-seq-greedy)
+  3. A multi-arm bandit approach in two dimensions (see @sec-mab-twod)
+5. Implementing a pure R solution using novel data structures to ease debugging and encourage understanding of how anchors work. (see @sec-def-anchors)
+
+Based on the results of the report, the usage of a sequentially greedy approach has proven to be quite useful while trying to use the UCB algorithm as a balance between exploitation and exploration has proven to be detrimental. One drawback of the approach given in this document compared to the approach given in the paper is that for a dataset of $p$ variables, there will be $2 \cdot p$ decision rules which is both restrictive and hard for people to comprehend. In addition, this report is limited to tabular examples only and while it is possible to extend a similar idea to images, it would be beneficial to have decision rules built for tabular rather than images and text where the data itself requires visual explanations.
 
 ### Software packages used to implement anchors
 

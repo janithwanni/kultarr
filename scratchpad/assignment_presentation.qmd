@@ -8,41 +8,54 @@ format:
     slide-number: true
 ---
 
-## Let's be honest here..
-
-<div> Building models is hard </div>
-
+## Let's be honest here {.center}
 
 . . . 
 
-
-<div> Explaining how models work is even harder </div>
-
-. . .
-
-<div> What if you could poke around and find out how this model works
-
-<img src="imgs/black_box_model-2.png" />
+Building a good model is *hard*
 
 . . . 
 
-Introducing 
+Explaining how a good model work is even **harder**
+
+##  {.center .what-if}
 
 . . . 
 
-Explainable AI (XAI) methods!
+<img src="imgs/black_box_model-2.png" style = "width: 20%"/>
+<br/>
+<span style = "font-style: italic; font-size: 1.2rem"> Exhibit A: The good model </span>
+
+. . . 
+
+<div> **What if** you could <br/> poke around and find out <br/> how this model works
+
+. . . 
+
+**Introducing**
+
+<div class = "accent-color"> **Explainable AI (XAI) methods!** </div>
 
 
-## What are Anchors?
+## What is an <span class = "what-is-a-obj"> anchor </span>?
 
-Anchors are 
-- Formally 
+*Formally*
 
-> as a rule or a set of predicates that satisfy the given instance and is a sufficient condition for $f(x)$ (i.e. the model output) with high probability
+:::{.in-serif}
 
-- Simply put we are going to find a big enough boundary box in the feature space containing other points that would have the same model prediction as the anchoring point.
+a rule or a set of predicates that satisfy the given instance and is a sufficient condition for $f(x)$ (i.e. the model output) with high probability
 
-## What are predicates?
+:::
+
+<hr/>
+
+:::{.callout-important}
+## Simply put
+
+We are going to find a big enough boundary box in the feature space containing other points that would have the same model prediction as the anchoring point.
+:::
+
+## What is a <span class = "what-is-a-obj"> predicate </span>?
 
 Predicates are simple logical statements. In this context a predicate is made up of
 
@@ -61,21 +74,32 @@ Age
 A logical operator
 <br/>
 
-$\gt$
+:::{.in-serif}
+\>
+:::
+
 :::
 
 ::: {.column width="40%"}
 A constant value
 <br/>
 
-$42$
+:::{.in-serif}
+42
+:::
+
 :::
 
 ::::
 
-In other words, a predicate is a boundary line that divides a feature into two subsets.
+:::{.callout-important}
+## Simply put
 
-## What is coverage
+A predicate is a boundary line that divides a feature into two subsets.
+
+:::
+
+## What is a <span class = "what-is-a-obj"> coverage </span>?
 
 *Formally,*
 
@@ -83,53 +107,61 @@ $$
 \text{cov}(\mathcal{A}) = \mathbb{E}_{\mathcal{D}(z)}[\mathcal{A}(z)]
 $$
 
-Simply put the coverage of an anchor is
+:::{.callout-important}
+## Simply put
 
-> How much of the total number of samples from the perturbation distribution does the anchor cover?
+The coverage of an anchor tells us how much of the total number of samples from the perturbation distribution does the anchor cover?
 
-## But what exactly is a perturbation distribution?
+:::
 
-> A method of generating varied versions of the data (kind of like alternate realities of the same data). 
+## What is a <span class = "what-is-a-obj"> perturbation distribution </span>?
 
-The simplest form of a perturbation distribution would be
+:::{.callout-important}
+## Simply put
 
-$$
-\mathcal{N}_p(\underline{\mathbb{x}}, \Sigma)
-$$
+A method of generating varied versions of the data (kind of like alternate realities of the same data). 
+
+:::
+
+The simplest form of a perturbation distribution would be $\mathcal{N}_p(\underline{\mathbb{x}}, \Sigma)$
 
 where $\underline{\mathbb{x}}$ is the local instance, and $\Sigma$ is the covariance matrix of the dataset.
 
-## What is precision
+## What is a <span class = "what-is-a-obj"> precision </span>?
 
-*The formal definition*
+*Formally*
 
 $$
 \text{Prec}(\mathcal{A}) = \mathbb{E}_{\mathcal{D}(z|\mathcal{A})}[\mathbb{1}_{f(x) = f(z)}]
 $$
 
-Simply put the precision of an anchor is basically 
+:::{.callout-important}
+## Simply put
+The precision of an anchor tells us how much of the samples from the perturbation distribution are in the same class as the given instance when applied to the model.
+:::
 
-> How much of the samples from the perturbation distribution are in the same class as the given instance when applied to the model.
+## What is a <span class = "what-is-a-obj"> Multi-arm bandit problem </span>?
 
-## Some preliminaries
+::: {.callout-important}
+## Simply put
+Multi-arm bandit problems are like playing different slot machines. You want to design a strategy to get the most rewards by choosing the best machines, even when you don't know how likely they are to pay out.
+:::
 
-#### Multi-arm bandit
+## What is a <span class = "what-is-a-obj"> KL LUCB strategy </span>?
 
-> Multi-arm bandit problems are like playing different slot machines. You want to design a strategy to get the most rewards by choosing the best machines, even when you don't know how likely they are to pay out.
+::: {.callout-important}
+## Simply put
+While trying to maximize the reward the agent will have to trade-off between either exploring the available choices or exploiting the known choices that give high rewards. KL LUCB is such a strategy that will purely explore the arms without exploiting.
+:::
 
-## Some preliminaries
+## What is a <span class = "what-is-a-obj"> Beam Search algorithm </span>?
 
-#### KL LUCB strategy
+::: {.callout-important}
+## Simply put
+Beam search is a search algorithm that looks at a few closest options at a time, picks the best based on a rule, and only keeps a certain number of them and throws away the rest.
+:::
 
-> While trying to maximize the reward the agent will have to trade-off between either exploring the available choices or exploiting the known choices that give high rewards. KL LUCB is such a strategy that will purely explore the arms without exploiting.
-
-## Some preliminaries
-
-#### Beam Search
-
-> Beam search is a search algorithm that looks at a few closest options at a time, picks the best based on a rule, and only keeps a certain number of them and throws away the rest.
-
-# How are anchors made?
+## <span style="text-decoration: line-through;color: lightgray;font-size: 3rem;"> What is a </span> How is an anchor?
 
 The problem of finding the best anchors can be summarized in the following simple steps
 
@@ -157,35 +189,80 @@ while(TRUE) {
 
 # Homemade DIY anchors
 
-That was confusing
+That previous slide was confusing 😵‍💫
 
 . . . 
 
 How about we try to make this by ourselves?
 
-## Some minor changes
+## But why?
 
-* We are not going to calculate the coverage using perturbation distribution
-  * We are going to calculate coverage based on the fraction of the feature space that the anchor covers
-* We are not going to start with an empty anchor
-  * We are going to start with an anchor containing the point
-* We are going to use a simpler algorithm for multi-arm bandit solution like UCB
+### The motivation to provide this extension 
+
+:::{.incremental}
+* Deconstruncting and explaining tools in simpler terms encourages adoption of the tool.
+* There is a gap on the material available to explain how XAI tools work internally in simple terms
+* This could be one of the reasons that the adoption of XAI methods is becoming slower.
+* Let's fix that! 🧑🏻‍🔧 👨🏻‍🔧
+:::
+
+## Some minor changes {.smaller}
+
+We are
+
+::::{.columns}
+
+:::{.column width="50%"}
+
+:::{.fragment .semi-fade-out fragment-index=1}
+* **NOT** going to calculate the coverage using perturbation distribution
+:::
+
+:::{.fragment .semi-fade-out fragment-index=3}
+* **NOT** going to start with an empty anchor
+:::
+
+:::{.fragment .semi-fade-out fragment-index=7}
+* **NOT** going to use the KL-LUCB algorithm
+:::
+
+:::
+
+:::{.column width="50%"}
+
+:::{.fragment .fade-in fragment-index=2}
+* going to calculate coverage based on the fraction of the feature space that the anchor covers
+:::
+
+:::{.fragment .fade-in fragment-index=4}
+* going to start with an anchor containing the point
+:::
+
+:::{.fragment .fade-in fragment-index=6}
+* going to use a simpler algorithm for multi-arm bandit solution like UCB
+:::
+
+:::
+
+::::
 
 ## Let's start with One Dimension
 
-Given a dataset of one dimension and a model trained on top of it, we want to find anchors.
+Given the following dataset of one dimension and a model trained on top of it, we want to find anchors.
 
-![](imgs/1dim_here_plot.png)
+<p style = "text-align:center"><img src = "imgs/1dim_here_plot.png" style = "width:60%"/></p>
+
+## 
 
 We can generate some bounding boxes around the given point
 
-![](imgs/1dim_sample_bounds.png)
+<p style = "text-align:center"><img src="imgs/1dim_sample_bounds.png" style="width:60%"/> </p>
 
 ## The brute force approach
 
-The idea is simple, we try every single possible bounding box since there is a finite amount of bounding boxes that can be assessed in $O(M)$ time where $M$ is the number of the bounding boxes.
+*Simply put,* we try every single possible bounding box since there is a finite amount of bounding boxes.
 
-![](imgs/1dim_brute_results.png)
+<p style = "text-align:center"><img src="imgs/1dim_brute_results.png" style="width:60%"/></p>
 
 # Let's get high  er dimensions into the story
 
@@ -199,6 +276,18 @@ What about two?
 
 ## Sequential Greedy Method
 
+Let's take one thing at a time.
+
+. . . 
+
+Let's first find the best bounding boxes by changing the boundaries along one dimension only.
+
+Then we fix the boundary along that dimension and then we move the boundary box along the other dimension.
+
+. . . 
+
+Until we run out of dimensions...
+
 ## Results
 
 ![](imgs/2dim_seq_greed_results.png)
@@ -209,7 +298,7 @@ The reward can be defined as follows,
 
 $$
 \begin{equation}
-R(\mathcal{A}) =  =
+R(\mathcal{A}) =
     \begin{cases}
         \text{Prec}(\mathcal{A}) + \text{cov}(\mathcal{A})^2 & \text{if } \text{Prec}(\mathcal{A}) \in \mathbb{R} \\
         -9999 & \text{if } \text{Prec}(\mathcal{A}) \notin \mathbb{R} \\

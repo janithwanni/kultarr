@@ -470,7 +470,7 @@ ggplot(
     fill = "transparent",
     inherit.aes = FALSE
   ) + 
-  labs(title = "Sample bounding boxes")
+  labs(title = "Sample bounding boxes", color = "Bounding box ID")
 ```
 
 For a one dimensional example the simplest solution would be to apply a brute force approach and calculate the precision and coverage for all the possible bounding boxes. Notice that since I am starting off with boundaries that already contain the point and extending forward **I am changing the algorithm from the bottom up approach as mentioned in the paper to a top down approach in the upcoming sections**. In order to calculate the precision and coverage I would need to define the model function $f$ and the perturbation distribution $D$. For this specific case, the perturbation distribution would be giving out all the possible values for the one dimension which would be the same set of values used in the population data i.e. $[0.01,0.02, \dots, 0.99, 1.00]$.
@@ -963,7 +963,7 @@ In the above plot there is a similar pattern to the one dimensional example of c
 The bounding box with the highest precision is as follows.
 
 ```{r}
-#| eval: false
+#| eval: true
 
 train_df[-local_instance, ] |>
   ggplot(aes(x = x,y = y,color = class)) +
@@ -1008,7 +1008,7 @@ The reward can be defined as follows,
 
 $$
 \begin{equation}
-R(\mathcal{A}) =  =
+R(\mathcal{A}) =
     \begin{cases}
         \text{Prec}(\mathcal{A}) + \text{cov}(\mathcal{A})^2 & \text{if } \text{Prec}(\mathcal{A}) \in \mathbb{R} \\
         -9999 & \text{if } \text{Prec}(\mathcal{A}) \notin \mathbb{R} \\
@@ -1208,7 +1208,7 @@ In terms of the attempt to simplify the implementation of anchors, this report p
 In addition to demystifying anchors, I have also brought in the following propositions / changes to the existing approach in this report
 
 1. Using the area covered within the feature space to compute the coverage instead of using a perturbation distribution. (see @sec-prop-cover-area)
-2. Using a top down approach instead of a bottom up approach to building anchors. (see Section @sec-demo-single-inst)
+2. Using a top down approach instead of a bottom up approach to building anchors. (see @sec-demo-single-inst)
 3. Using the UCB algorithm instead of the KL-LUCB algorithm to demonstrate the need for a pure exploration approach as the multi-arm bandit solution. (see @sec-ucb-algo)
 4. Providing the intuition of anchors in the following scenarios.
   1. A brute force approach in one dimension (see @sec-brute-force-oned)

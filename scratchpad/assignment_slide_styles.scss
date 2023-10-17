@@ -1,0 +1,94 @@
+/*-- scss:defaults --*/
+/* Font families */
+@import url('https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital@0;1&display=swap');
+
+$barlow: 'Barlow', sans-serif;
+$poppins: 'Poppins', sans-serif;
+$lora: 'Lora', serif;
+
+/* SCSS HEX */
+/* Muted color palette */
+$silver: #bab9b9ff;
+$bistre: #3f3121ff;
+$linen: #eee7dfff;
+$seasalt: #f8fbfcff;
+$charcoal: #204256ff;
+$baby-powder: #fcfcf7ff;
+
+/* Sea color palette */
+$alice-blue: #d5dde8ff;
+$light-blue: #a9cfdcff;
+$blue-green: #5d9bb2ff;
+$lapis-lazuli: #305c77ff;
+$onyx: #393d3cff;
+$hookers-green: #5a7473ff;
+$white: #ffffff;
+
+$body-bg: $white;
+$body-color: $lapis-lazuli;
+$font-family-sans-serif: $poppins;
+$presentation-heading-font: $barlow;
+
+.reveal blockquote {
+  font-family: $lora;
+}
+
+.in-serif {
+  font-family: $lora;
+}
+/*-- scss:rules --*/
+
+// Colors
+// $body-bg 	#fff
+// $body-color 	#222
+// $text-muted 	lighten($body-color, 50%)
+// $link-color 	#2a76dd
+// $link-color-hover 	lighten($link-color, 15%)
+// $selection-bg 	lighten($link-color, 25%)
+// $selection-color 	$body-bg
+// $light-bg-text-color 	#222
+// $light-bg-link-color 	#2a76dd
+// $light-bg-code-color 	#4758ab
+// $dark-bg-text-color 	#fff
+// $dark-bg-link-color 	#42affa
+// $dark-bg-code-color 	#ffa07a
+// Fonts
+// $font-family-sans-serif 	“Source Sans Pro”, Helvetica, sans-serif
+// $font-family-monospace 	monospace
+// $presentation-font-size-root 	40px
+// $presentation-font-smaller 	0.7
+// $presentation-line-height 	1.3
+// Headings
+// $presentation-h1-font-size 	2.5em
+// $presentation-h2-font-size 	1.6em
+// $presentation-h3-font-size 	1.3em
+// $presentation-h4-font-size 	1em
+// $presentation-heading-font 	$font-family-sans-serif
+// $presentation-heading-color 	$body-color
+// $presentation-heading-line-height 	1.2
+// $presentation-heading-letter-spacing 	normal
+// $presentation-heading-text-transform 	none
+// $presentation-heading-text-shadow 	none
+// $presentation-heading-font-weight 	600
+// $presentation-h1-text-shadow 	none
+// Code Blocks
+// Variable 	Default
+// $code-block-bg 	$body-bg
+// $code-block-border-color 	lighten($body-color, 60%)
+// $code-block-font-size 	0.55em
+// Inline Code
+// Variable 	Default
+// $code-color 	var(–quarto-hl-fu-color)
+// $code-bg 	transparent
+// Tabsets
+// $tabset-border-color 	$code-block-border-color
+// Layout
+// $border-color 	lighten($body-color, 30%)
+// $border-width 	1px
+// $border-radius 	3px
+// $presentation-block-margin 	12px
+// $presentation-slide-text-align 	left
+// $presentation-title-slide-text-align 	center
+

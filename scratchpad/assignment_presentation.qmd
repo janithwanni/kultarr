@@ -1,9 +1,242 @@
 ---
-title: "BEX6510 Foundations of Econometrics"
+title: "Sailing the feature space with anchors"
+subtitle: "BEX6510 Foundations of Econometrics"
 author: "Janith Wanniarachchi"
-format: revealjs
+format:
+  revealjs:
+    theme: [default, assignment_slide_styles.scss]
+    slide-number: true
 ---
 
-# What is Explainable AI
-# What are Anchors?
-# DIY anchors
+## Let's be honest here..
+
+<div> Building models is hard </div>
+
+
+. . . 
+
+
+<div> Explaining how models work is even harder </div>
+
+. . .
+
+<div> What if you could poke around and find out how this model works
+
+<img src="imgs/black_box_model-2.png" />
+
+. . . 
+
+Introducing 
+
+. . . 
+
+Explainable AI (XAI) methods!
+
+
+## What are Anchors?
+
+Anchors are 
+- Formally 
+
+> as a rule or a set of predicates that satisfy the given instance and is a sufficient condition for $f(x)$ (i.e. the model output) with high probability
+
+- Simply put we are going to find a big enough boundary box in the feature space containing other points that would have the same model prediction as the anchoring point.
+
+## What are predicates?
+
+Predicates are simple logical statements. In this context a predicate is made up of
+
+:::: {.columns}
+::: {.column width="20%"}
+A feature 
+<br/>
+
+:::{.in-serif}
+Age
+:::
+
+:::
+
+::: {.column width="40%"}
+A logical operator
+<br/>
+
+$\gt$
+:::
+
+::: {.column width="40%"}
+A constant value
+<br/>
+
+$42$
+:::
+
+::::
+
+In other words, a predicate is a boundary line that divides a feature into two subsets.
+
+## What is coverage
+
+*Formally,*
+
+$$
+\text{cov}(\mathcal{A}) = \mathbb{E}_{\mathcal{D}(z)}[\mathcal{A}(z)]
+$$
+
+Simply put the coverage of an anchor is
+
+> How much of the total number of samples from the perturbation distribution does the anchor cover?
+
+## But what exactly is a perturbation distribution?
+
+> A method of generating varied versions of the data (kind of like alternate realities of the same data). 
+
+The simplest form of a perturbation distribution would be
+
+$$
+\mathcal{N}_p(\underline{\mathbb{x}}, \Sigma)
+$$
+
+where $\underline{\mathbb{x}}$ is the local instance, and $\Sigma$ is the covariance matrix of the dataset.
+
+## What is precision
+
+*The formal definition*
+
+$$
+\text{Prec}(\mathcal{A}) = \mathbb{E}_{\mathcal{D}(z|\mathcal{A})}[\mathbb{1}_{f(x) = f(z)}]
+$$
+
+Simply put the precision of an anchor is basically 
+
+> How much of the samples from the perturbation distribution are in the same class as the given instance when applied to the model.
+
+## Some preliminaries
+
+#### Multi-arm bandit
+
+> Multi-arm bandit problems are like playing different slot machines. You want to design a strategy to get the most rewards by choosing the best machines, even when you don't know how likely they are to pay out.
+
+## Some preliminaries
+
+#### KL LUCB strategy
+
+> While trying to maximize the reward the agent will have to trade-off between either exploring the available choices or exploiting the known choices that give high rewards. KL LUCB is such a strategy that will purely explore the arms without exploiting.
+
+## Some preliminaries
+
+#### Beam Search
+
+> Beam search is a search algorithm that looks at a few closest options at a time, picks the best based on a rule, and only keeps a certain number of them and throws away the rest.
+
+# How are anchors made?
+
+The problem of finding the best anchors can be summarized in the following simple steps
+
+```{r}
+#| echo: true
+#| eval: false
+#| code-line-numbers: "|1|2|5|6|7-9|10-14"
+
+A_0 <- anchor() # empty anchor
+A_final <- NULL # initialize final anchor
+A_t_1 <- A_0 # starting with t = 1
+while(TRUE) {
+  A_t <- GetAnchors(A_t_1, coverage(A_final))
+  A_t <- BeamSearch_KL_LUCB(A_t, hyperparams) # hyper parameters of beam search
+  if(is_empty(A_t)) { # beam search could not find any good anchors
+    break # end loop and A_final is the final anchor
+  }
+  for(anchor in A_t) {
+    if(precision(anchor) > threshold and coverage(anchor) > coverage(A_final)) {
+      A_final <- anchor
+    }
+  }
+}
+``` 
+
+# Homemade DIY anchors
+
+That was confusing
+
+. . . 
+
+How about we try to make this by ourselves?
+
+## Some minor changes
+
+* We are not going to calculate the coverage using perturbation distribution
+  * We are going to calculate coverage based on the fraction of the feature space that the anchor covers
+* We are not going to start with an empty anchor
+  * We are going to start with an anchor containing the point
+* We are going to use a simpler algorithm for multi-arm bandit solution like UCB
+
+## Let's start with One Dimension
+
+Given a dataset of one dimension and a model trained on top of it, we want to find anchors.
+
+![](imgs/1dim_here_plot.png)
+
+We can generate some bounding boxes around the given point
+
+![](imgs/1dim_sample_bounds.png)
+
+## The brute force approach
+
+The idea is simple, we try every single possible bounding box since there is a finite amount of bounding boxes that can be assessed in $O(M)$ time where $M$ is the number of the bounding boxes.
+
+![](imgs/1dim_brute_results.png)
+
+# Let's get high  er dimensions into the story
+
+One dimension? Easy peasy 🍋 squeezy
+
+What about two?
+
+## Two dimensional data
+
+![](imgs/2dim_here_plot.png)
+
+## Sequential Greedy Method
+
+## Results
+
+![](imgs/2dim_seq_greed_results.png)
+
+## Multi Armed Bandit with UCB
+
+The reward can be defined as follows,
+
+$$
+\begin{equation}
+R(\mathcal{A}) =  =
+    \begin{cases}
+        \text{Prec}(\mathcal{A}) + \text{cov}(\mathcal{A})^2 & \text{if } \text{Prec}(\mathcal{A}) \in \mathbb{R} \\
+        -9999 & \text{if } \text{Prec}(\mathcal{A}) \notin \mathbb{R} \\
+        -9999 & \text{if } \text{Prec}(\mathcal{A}) < 0.6 
+    \end{cases}
+\end{equation}
+$$
+
+
+$$
+a = \underset{a}{\mathrm{argmax }} Q^*(a) + Q(a) + \sqrt{\frac{2 \cdot ln(g)}{N(a)}}
+$$
+
+
+## Final Results
+
+![](assignment_state_plot_1.gif)
+
+## Contributions
+
+1.  Using the area covered within the feature space to compute the coverage instead of using a perturbation distribution. 
+2. Using a top down approach instead of a bottom up approach to building anchors.
+3. Using the UCB algorithm instead of the KL-LUCB algorithm to demonstrate the need for a pure exploration approach as the multi-arm bandit solution.
+4. Providing the intuition of anchors in the following scenarios.
+  1. A brute force approach in one dimension. 
+  2. A sequentially greedy approach in two dimensions.
+  3. A multi-arm bandit approach in two dimensions.
+5. Implementing a pure R solution using novel data structures to ease debugging and encourage understanding of how anchors work.
+
+# Questions?

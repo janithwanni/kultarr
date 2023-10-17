@@ -272,7 +272,15 @@ What about two?
 
 ## Two dimensional data
 
-![](imgs/2dim_here_plot.png)
+*The story is the same as before,*
+
+<p style = "text-align:center"><img src="imgs/2dim_here_plot.png" style = "width:60%"/></p>
+
+# Can we brute force this?
+
+. . . 
+
+Yes, but we will be waiting here for a long time
 
 ## Sequential Greedy Method
 
@@ -280,21 +288,36 @@ Let's take one thing at a time.
 
 . . . 
 
-Let's first find the best bounding boxes by changing the boundaries along one dimension only.
+Let's first find the best bounding box by changing the boundaries along one dimension only.
+
+. . . 
 
 Then we fix the boundary along that dimension and then we move the boundary box along the other dimension.
 
 . . . 
 
-Until we run out of dimensions...
+Until we run out of dimensions... 🤷🏻‍♂️
 
 ## Results
 
-![](imgs/2dim_seq_greed_results.png)
+<p style = "text-align:center"><img src="imgs/2dim_seq_greed_results.png" style="width:60%"/></p>
 
-## Multi Armed Bandit with UCB
+. . . 
 
-The reward can be defined as follows,
+Not bad. But this took several minutes. Can we seach faster with a multi-arm bandit approach?
+
+## Formulating the Multi-arm Bandit problem
+
+:::{.callout-important}
+## Simply put
+
+To put it simply imagine you are the local point and you are trying to find similar friends like yourself by pushing a wall around you. Your options are to either push the north, east, west, or south walls to find new friends. When you increase the walls you get rewarded and when you find like minded friends you get rewarded as well.
+
+:::
+
+## What is our reward
+
+*Formally* the reward can be defined as follows,
 
 $$
 \begin{equation}
@@ -307,17 +330,31 @@ R(\mathcal{A}) =
 \end{equation}
 $$
 
+:::{.callout-important}
+## Simply put,
+We are going to be rewarded more for covering more ground while also being precise, and we are going to punished if we push the walls into areas with weird precision values
+:::
+
+## Decisions, Decisions, Decisions
+
+*Formally* based on the Upper Confidence Bound algorithm we select the action as follows,
 
 $$
 a = \underset{a}{\mathrm{argmax }} Q^*(a) + Q(a) + \sqrt{\frac{2 \cdot ln(g)}{N(a)}}
 $$
 
+:::{.callout-important}
+## Simply put,
+WHen thinking about a specific action We are going to consider the rewards we have received in previous games and the rewards we have received so far and also whether we have explored this action enough.
+:::
 
 ## Final Results
 
 ![](assignment_state_plot_1.gif)
 
-## Contributions
+Looks cool. But it can definitely be more improved.
+
+## Contributions {.smaller}
 
 1.  Using the area covered within the feature space to compute the coverage instead of using a perturbation distribution. 
 2. Using a top down approach instead of a bottom up approach to building anchors.

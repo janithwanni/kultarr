@@ -25,6 +25,7 @@ $lapis-lazuli: #305c77ff;
 $onyx: #393d3cff;
 $hookers-green: #5a7473ff;
 $white: #ffffff;
+$accent-lapis-lazuli: #FF6E6E;
 
 $body-bg: $white;
 $body-color: $lapis-lazuli;
@@ -32,11 +33,32 @@ $font-family-sans-serif: $poppins;
 $presentation-heading-font: $barlow;
 
 .reveal blockquote {
-  font-family: $lora;
+  color: $accent-lapis-lazuli !important;
 }
 
 .in-serif {
   font-family: $lora;
+}
+
+.what-if {
+  text-align: center;
+}
+
+#lets-be-honest-here {
+  text-align: center;
+}
+
+.accent-color {
+  color: $accent-lapis-lazuli;
+}
+
+#what-is-a-predicate .column{
+  text-align: center;
+}
+
+.what-is-a-obj {
+  color: $accent-lapis-lazuli;
+  font-style: italic;
 }
 /*-- scss:rules --*/
 

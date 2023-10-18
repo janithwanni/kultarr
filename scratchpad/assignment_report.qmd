@@ -539,7 +539,7 @@ max_prec_train_plot <- ggplot(
 ) +
   geom_point() +
   geom_point(data = train_df[local_instance, ], color = "black", size = 2.5) +
-  geom_label(data = train_df[local_instance,], label = "Here", color = "black", nudge_y = 0.005) +
+  geom_label(data = train_df[local_instance,], label = "Here", color = "black", nudge_y = 0.007) +
   lims(y = c(-0.05, 0.05)) +
   geom_rect(
     data = max_prec_bound,
@@ -566,7 +566,7 @@ max_prec_pop_plot <- ggplot(
 ) +
   geom_point() +
   geom_point(data = train_df[local_instance, ], color = "black", size = 2.5) +
-  geom_label(data = train_df[local_instance,], label = "Here", color = "black", nudge_y = 0.005) +
+  geom_label(data = train_df[local_instance,], label = "Here", color = "black", nudge_y = 0.007) +
   lims(y = c(-0.05, 0.05)) +
   geom_rect(
     data = max_prec_bound,
@@ -601,7 +601,7 @@ optimal_bound_train_plot <- ggplot(
 ) +
   geom_point() +
   geom_point(data = train_df[local_instance, ], color = "black", size = 2.5) +
-  geom_label(data = train_df[local_instance,], label = "Here", color = "black", nudge_y = 0.005) +
+  geom_label(data = train_df[local_instance,], label = "Here", color = "black", nudge_y = 0.007) +
   lims(y = c(-0.05, 0.05)) +
   geom_rect(
     data = optimal_bound,
@@ -628,7 +628,7 @@ optimal_bound_pop_plot <- ggplot(
 ) + 
   geom_point() +
   geom_point(data = train_df[local_instance, ], color = "black", size = 2.5) +
-  geom_label(data = train_df[local_instance,], label = "Here", color = "black", nudge_y = 0.005) +
+  geom_label(data = train_df[local_instance,], label = "Here", color = "black", nudge_y = 0.007) +
   lims(y = c(-0.05, 0.05)) +
   geom_rect(
     data = optimal_bound,
@@ -776,6 +776,8 @@ optimal_bound_pop_plot_alt <- ggplot(pop_data, aes(x = x,color = class, y = 0)) 
 
 (max_prec_train_plot / optimal_bound_train_plot) | (max_prec_train_plot_alt / optimal_bound_train_plot_alt)
 ```
+
+In the above plot, the left hand side is the previous point while the right hand side is the alternative point. Optimizing for coverage has been proven to be slightly useful in giving a broader scope of the model boundary. Based on both these points and their decision rules, a user should be able to identify what the model boundary would look like through anchors. In this example, the user would know that most of the Minus points are to the left of the given point (left plot) while most of the Plus points are to the right of the given point (right plot).
 
 ## Remarks on brute force approach
 

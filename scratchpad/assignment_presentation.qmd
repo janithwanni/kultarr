@@ -200,9 +200,9 @@ How about we try to make this by ourselves?
 ### The motivation to provide this extension 
 
 :::{.incremental}
-* Deconstruncting and explaining tools in simpler terms encourages adoption of the tool.
+* Deconstructing and explaining tools in simpler terms encourages adoption of the tool.
 * There is a gap on the material available to explain how XAI tools work internally in simple terms
-* This could be one of the reasons that the adoption of XAI methods is becoming slower.
+* Simpler explanations of complex processes makes the methods more accessible to a wider user base.
 * Let's fix that! 🧑🏻‍🔧 👨🏻‍🔧
 :::
 
@@ -218,12 +218,16 @@ We are
 * **NOT** going to calculate the coverage using perturbation distribution
 :::
 
-:::{.fragment .semi-fade-out fragment-index=3}
+:::{.fragment .fade-in fragment-index=3}
+:::{.fragment .semi-fade-out fragment-index=4}
 * **NOT** going to start with an empty anchor
 :::
+:::
 
+:::{.fragment .fade-in fragment-index=6}
 :::{.fragment .semi-fade-out fragment-index=7}
 * **NOT** going to use the KL-LUCB algorithm
+:::
 :::
 
 :::
@@ -234,11 +238,11 @@ We are
 * going to calculate coverage based on the fraction of the feature space that the anchor covers
 :::
 
-:::{.fragment .fade-in fragment-index=4}
+:::{.fragment .fade-in fragment-index=5}
 * going to start with an anchor containing the point
 :::
 
-:::{.fragment .fade-in fragment-index=6}
+:::{.fragment .fade-in fragment-index=8}
 * going to use a simpler algorithm for multi-arm bandit solution like UCB
 :::
 
@@ -258,11 +262,29 @@ We can generate some bounding boxes around the given point
 
 <p style = "text-align:center"><img src="imgs/1dim_sample_bounds.png" style="width:60%"/> </p>
 
-## The brute force approach
+## The brute force approach {.smaller}
 
 *Simply put,* we try every single possible bounding box since there is a finite amount of bounding boxes.
 
-<p style = "text-align:center"><img src="imgs/1dim_brute_results.png" style="width:60%"/></p>
+<p style = "text-align:center"><img src = "imgs/1dim_prec_cov.png" style="width:60%" /></p>
+
+## Results for the maximum precision
+
+<p style = "text-align:center"><img src="imgs/1dim_brute_results_2.png" style="width:80%"/></p>
+
+## Results for the optimal bound
+
+<p style = "text-align:center"><img src="imgs/1dim_brute_results_optim_2.png" style = "width:80%"/></p>
+
+## Let's consider a different point
+
+<p style = "text-align:center"><img src="imgs/1dim_alt_here_plot.png" style = "width:80%"/></p>
+
+## Results for two criterias {.smaller}
+
+Left side is the previous point, right side is the alternative point
+
+<p style = "text-align:center"><img src="imgs/1dim_alt_results.png" style = "width:60%"/></p>
 
 # Let's get high  er dimensions into the story
 
@@ -345,24 +367,27 @@ $$
 
 :::{.callout-important}
 ## Simply put,
-WHen thinking about a specific action We are going to consider the rewards we have received in previous games and the rewards we have received so far and also whether we have explored this action enough.
+When thinking about a specific action We are going to consider the rewards we have received in previous games and the rewards we have received so far and also whether we have explored this action enough.
 :::
 
-## Final Results
+## Final Results {.smaller}
 
-![](assignment_state_plot_1.gif)
+<p style="text-align:center"><img src="assignment_state_plot_1.gif" style="width:60%"/></p>
 
-Looks cool. But it can definitely be more improved.
+The agent is maximizing coverage but in the process is capturing the unnecessary points as well thereby reducing the precision. However the reward will be high since more weight is put on the coverage.
 
 ## Contributions {.smaller}
 
 1.  Using the area covered within the feature space to compute the coverage instead of using a perturbation distribution. 
 2. Using a top down approach instead of a bottom up approach to building anchors.
 3. Using the UCB algorithm instead of the KL-LUCB algorithm to demonstrate the need for a pure exploration approach as the multi-arm bandit solution.
-4. Providing the intuition of anchors in the following scenarios.
-  1. A brute force approach in one dimension. 
-  2. A sequentially greedy approach in two dimensions.
-  3. A multi-arm bandit approach in two dimensions.
-5. Implementing a pure R solution using novel data structures to ease debugging and encourage understanding of how anchors work.
+4. Providing the intuition of anchors in the different scenarios.
+
+## Next steps
+
+1. Provide explanations in three dimensions and higher
+2. Implement a pure exploration method for the multi arm bandit problem
+3. Explore other alternatives for generating the ideal boundary region in the model space.
+
 
 # Questions?

@@ -164,25 +164,21 @@ x_vals <- train_df[-local_instance,][["x"]] |> sort()
 x_cutpoints <- purrr::map2_dbl(x_vals[-length(x_vals)], x_vals[-1], function(x, x_1) {
   return(mean(c(x, x_1)))
 })
-x_grid <- expand.grid(
+x_l <- sort(
   x_cutpoints[x_cutpoints < train_df[local_instance,]$x],
-  x_cutpoints[x_cutpoints > train_df[local_instance,]$x]
-) |> 
-  rename(L = Var1, U = Var2)|> 
-  as_tibble() |>
-  arrange(desc(L), U)
+  decreasing = TRUE
+)
+x_u <- x_cutpoints[x_cutpoints > train_df[local_instance,]$x]
 
 y_vals <- train_df[-local_instance,][["y"]] |> sort()
 y_cutpoints <- purrr::map2_dbl(y_vals[-length(y_vals)], y_vals[-1], function(x, x_1) {
   return(mean(c(x, x_1)))
 })
-y_grid <- expand.grid(
+y_l <- sort(
   y_cutpoints[y_cutpoints < train_df[local_instance,]$y],
-  y_cutpoints[y_cutpoints > train_df[local_instance,]$y]
-) |> 
-  rename(L = Var1, U = Var2) |> 
-  as_tibble() |>
-  arrange(desc(L), U)
+  decreasing = TRUE
+)
+y_u <- y_cutpoints[y_cutpoints > train_df[local_instance,]$y]
 ```
 
 
@@ -208,7 +204,33 @@ samples <- pertub_func(n = 10000)
 dist_func <- function(n) samples[1:n, ]
 ```
 
+Going to try Thompson sampling in the end
+
 ```{r}
+set.seed(123)
+# actions <- c("NW", "NE", "SW", "SE")
+actions <- list(c(1,0,0,1), c(0,1,0,1), c(1,0,1,0), c(0,1,1,0))
+n_actions <- length(actions)
+envir <- list(
+  x_l, x_u, y_l, y_u
+)
+update_bounds <- function(current_envir, selected_action) {
+  new_bound <- current_envir + actions[[selected_action]]
+  for(i in seq_along(new_bound)) {
+    if(is.na(envir[[i]][new_bound[i]])) {
+      new_bound[i] <- current_envir[i]
+    }
+  }
+  return(new_bound)
+}
+
+envir_to_bounds <- function(current_envir) {
+  bounds <- tibble(X_L = NA, X_U = NA, Y_L = NA, Y_U = NA)
+  for(i in seq_along(current_envir)) {
+    bounds[1,i] <- envir[[i]][current_envir[i]]
+  }
+  return(bounds)
+}
 create_anchor_inst <- function(bounds) {
   pred_vec <- c()
   feat_vec <- rep(c("x", "y"), each = 2)
@@ -220,186 +242,94 @@ create_anchor_inst <- function(bounds) {
   anchor_box <- anchors(pred_vec)
   return(anchor_box)
 }
-```
 
-
-we are going to try a top down approach
-
-```{r}
-fgrid <- expand_grid(
-            x_grid |> rename(X_L = L, X_U = U),
-            y_grid |> rename(Y_L = L, Y_U = U)
-        ) |>
-  arrange(X_L, desc(X_U), Y_L, desc(Y_U))
-sgrid <- fgrid |> slice(seq(1,nrow(fgrid),by = 1000))
-plan(multisession, workers = 4)
-find_prec_cover <- function(bounds, index, progress_bar) {
-  progress_bar()
-  anchor_box <- create_anchor_inst(bounds)
-  cover <- coverage_area(anchor_box, train_df |> select(x, y))
-  prec <- precision(anchor_box, model_func, dist_func, n_samples = 1000)
-  return(tibble(id = index, cover = cover,prec = prec, class = c("1", "2")))
-}
-with_progress({
-  p <- progressor(steps = nrow(sgrid))
-  sgrid_vals <- split(sgrid,seq(1,nrow(sgrid))) |> 
-    imap_dfr(find_prec_cover, progress_bar = p #,
-      # .options = furrr_options(
-      #   globals = c("satisfies", "predicate", "anchors", "coverage_area", "precision", "extend", "dist_func", "model_func", "rfmodel", "train_df", "calculate_area", "samples", "create_anchor_inst", "select")
-      # )
-    )  
-})
-```
-
-sgrid contains the possible states to go to from the current state.
-
-```{r}
-envir <- sgrid |> 
-  mutate(
-    X_L_r = rank(X_L, ties.method = "first"),
-    X_U_r = rank(-X_U, ties.method = "first"),
-    Y_L_r = rank(Y_L, ties.method = "first"),
-    Y_U_r = rank(-Y_U, ties.method = "first"),
-    id = row_number()
-  ) |>
-  arrange(X_L_r,X_U_r,Y_L_r,Y_U_r) |>
-  left_join(
-    sgrid_vals |>
-      mutate(class = paste0("class_", class), id = as.numeric(id)) |> 
-      pivot_wider(names_from = "class", values_from = "prec"),
-    by = "id") # kinda unnecessary
-actions <- colnames(sgrid)
-```
-
-```{r}
-PENALTY_VALUE = -9999
-get_reward <- function(inst_row, class_ind = 1) {
-  prec <- envir |> filter(id == inst_row$id) |> pull(paste0("class_", class_ind))
-  cover <- envir |> filter(id == inst_row$id) |> pull("cover")
-  if (is.null(prec)) return(PENALTY_VALUE) # penalty
-  if (prec < 0.5) return(PENALTY_VALUE) # penalty for wrong direction
-  # if (cover == 0) return(PENALTY_VALUE)
-  print(glue::glue("reward precision {round(prec, 2)} and coverage {round(cover, 2)}"))
-  return(sqrt(cover) + (prec - 0.6))
+get_reward <- function(new_anchor, class_ind = 1) {
+  cover <- coverage_area(new_anchor, train_df |> select(x, y))
+  prec <- precision(new_anchor, model_func, dist_func, n_samples = 10000)
+  prec <- prec[class_ind]
+  if(is.null(prec)) prec <- 0
+  if(is.infinite(cover)) cover <- 0
+  print(glue::glue("==== {cover} | {prec} | {mean(c(cover, prec), na.rm = TRUE) }====="))
+  return(list(
+    reward = mean(c(cover, prec), na.rm = TRUE),
+    prec = prec, cover = cover
+    ))
 }
 
-select_action <- function(Q, N, n_game, possible_actions = actions) {
-  rewards <- map_dbl(possible_actions, function(a){
-    Q_star[[a]] + Q[[a]] + sqrt((2 * log(n_game)) / N[[a]])
-  })
-  print(glue::glue("selection criteria {paste(round(rewards,2), collapse = ',')}"))
-  if(sum(rewards == max(rewards)) > 1) {
-    max_reward <- sample(which(rewards == max(rewards)), 1)
-  } else {
-    max_reward <- which.max(rewards)  
-  }
-  # return(sample(possible_actions, 1))
-  return(actions[max_reward])
-}
-```
-
-```{r}
+A <- rep(1, n_actions)
+B <- rep(1, n_actions)
 n_games <- 5
 n_epochs <- 100
-id_list <- lapply(seq(n_games), \(x) vector(mode = "numeric", length = n_epochs))
 plot_list <- lapply(seq(n_games), \(x) lapply(seq(n_epochs), \(x) return(ggplot())))
-```
-
-```{r}
-Q_star <- lapply(actions, \(x) return(0)) |> setNames(actions)
+prec_cover_hist <- tibble(game = numeric(), round = numeric(), prec = numeric(), cover = numeric())
 for(game in seq_len(n_games)) {
-  cli::cli_h1(glue::glue("Starting game {game}"))
-  current_bound <- envir[1, ]
-  N <- lapply(actions, \(x) return(0)) |> setNames(actions)
-  Q <- lapply(actions, \(x) return(0)) |> setNames(actions)
-  
-  # initial round to explore all arms
-  for(action in actions) {
-    temp_bound <- envir[ envir[[paste0(action, "_r")]] == (current_bound[[paste0(action, "_r")]] + 1), ]
-    if(nrow(temp_bound) == 0) {
-      reward <- PENALTY_VALUE
+  current_envir <- rep(1, n_actions)
+  for(round in seq_len(n_epochs)) {
+    r <- vector(mode = "numeric", length = n_actions)
+    for(i_action in seq_len(n_actions)) {
+      r[i_action] <- rbeta(1, shape1 = A[i_action], B[i_action])
+    }
+    selected_action <- which.max(r)
+    current_envir <- update_bounds(current_envir, selected_action)
+    new_anchor <- envir_to_bounds(current_envir) |> create_anchor_inst()
+    reward <- get_reward(new_anchor)
+    outcome <- rbinom(1, size = 1, prob = reward$reward)
+    if(outcome == 1) {
+      A[selected_action] <- A[selected_action] + 1 
     } else {
-      reward <- get_reward(temp_bound)  
+      B[selected_action] <- B[selected_action] + 1
     }
-    
-    N[[action]] <- N[[action]] + 1
-    Q[[action]] <- reward
-    print(glue::glue("Q : {paste(Q, collapse = ',')} N: {paste(N, collapse = ',')}"))
-  }
-  
-  for(epoch in seq_len(n_epochs)) {
-    cli::cli_h2(glue::glue("Starting epoch {epoch}"))
-    action <- select_action(Q, N, game)
-    temp_bound <- envir[ envir[[paste0(action, "_r")]] == (current_bound[[paste0(action, "_r")]] + 1), ]
-    while(nrow(temp_bound) == 0) {
-      action <- select_action(Q, N, game)
-      temp_bound <- envir[ envir[[paste0(action, "_r")]] == (current_bound[[paste0(action, "_r")]] + 1), ]     
-    }
-    reward <- get_reward(temp_bound)
-    current_bound <- temp_bound  
-    id_list[[game]][epoch] <- current_bound$id
-    N[[action]] <- N[[action]] + 1
-    if(Q[[action]] <= 0) {
-      Q[[action]] <- reward
-    } else {
-      Q[[action]] <- Q[[action]] + ((reward - Q[[action]]) / N[[action]])
-    }
-    print(glue::glue("Q : {paste(Q, collapse = ',')} N: {paste(N, collapse = ',')}"))
-    
+    print(glue::glue("Game {game}: Round {round}\n selected : {selected_action}\n prec: {round(reward$prec, 4)}  | cover: {round(reward$cover, 4)} | reward: {round(reward$reward,4)} \n outcome: {outcome}"))
+    prec_cover_hist <- rbind(prec_cover_hist, tibble(game = game, round = round, prec = reward$prec, cover = reward$cover))
     state_plot <- train_df[-local_instance, ] |>
-        ggplot(aes(x = x,y = y,color = class)) +
-          geom_point() +
-          geom_point(data = train_df[local_instance, ], 
-                     size = 1, color = "black") +
-          geom_label(data = train_df[local_instance, ], 
-                     label = "Here", color = "black", nudge_y = 0.05) +
-          geom_rect(inherit.aes = F,
-                    data = current_bound |> select(X_L, X_U, Y_L, Y_U),
-            aes(xmin = X_L, xmax = X_U, ymin = Y_L, ymax = Y_U),
-            fill = "transparent", color = "black") +
-          labs(title = glue::glue("Game: {game}, round: {epoch}, reward: {round(reward,2)}")) +
-          theme(legend.position = "bottom")
-      # ggsave(
-      #   plot = state_plot,
-      #   filename = here::here(
-      #     "scratchpad/n_dim_state_plot_dump_1/",
-      #     glue::glue("{game}_{epoch}.png")
-      #   ),
-      #   device = "png", bg = "white", width = 11, height = 8, units = "in"
-      # )
-      plot_list[[game]][[epoch]] <- state_plot
+      ggplot(aes(x = x,y = y,color = class)) +
+        geom_point() +
+        geom_point(data = train_df[local_instance, ], 
+                    size = 1) +
+        geom_label(data = train_df[local_instance, ], 
+                    label = "Here", color = "black", nudge_y = 0.05) +
+        geom_rect(inherit.aes = F,
+                  data = envir_to_bounds(current_envir) |> select(X_L, X_U, Y_L, Y_U),
+          aes(xmin = X_L, xmax = X_U, ymin = Y_L, ymax = Y_U),
+          fill = "transparent", color = "black") +
+        labs(title = glue::glue("Game: {game}, round: {round}, reward: {round(reward$reward,2)}")) +
+        theme(legend.position = "bottom")
+    plot_list[[game]][[round]] <- state_plot
   }
-  Q_star <<- imap(Q, function(val, name) {(Q_star[[name]] + val) / n_games})
 }
 ```
 
-
-```{r}
-uniq_ids <- unlist(id_list) |> unique()
-id_plots <- imap(uniq_ids, function(id, index) {
-  id_plot <- ggplot() +
-    geom_point(data = envir[envir$id != id, ], aes(x = class_1, y = cover), alpha = 0.001) +
-    geom_point(data = envir[envir$id == id, ], aes(x = class_1, y = cover), color = "red", size = 2)
-  if(index > 2) {
-    id_plot <- id_plot + 
-      geom_point(data = envir[envir$id %in% uniq_ids[seq(1, index)], ], aes(x = class_1, y = cover), color = "red", alpha = 0.1)
-  }
-  id_plot + labs(title = "Precision coverage plot")
-})
-names(id_plots) <- paste0("id_plot_", uniq_ids)
-```
 
 ```{r}
 library(patchwork)
-sidebside <- map2(unlist(id_list), list_flatten(plot_list), function(visit_id, state_plot_){
-  id_plots[[paste0("id_plot_", visit_id)]] + state_plot_
-}) 
+prec_cover_hist <- prec_cover_hist |> mutate(ith = row_number())
+sidebside <- prec_cover_hist |> split(seq(1,nrow(prec_cover_hist))) |> 
+  map(function(r) {
+    ith_place <- r$ith
+    path_plot <- ggplot() +
+      geom_point(
+        data = prec_cover_hist |> filter(ith < ith_place),
+        aes(x = prec, y = cover),
+        color = "red", alpha = 0.1
+      ) +
+      geom_point(
+        data = r,
+        aes(x = prec, y = cover),
+        color = "red", size = 2
+      ) + 
+      lims(x = c(0,1), y = c(0,1)) +
+      labs(
+        x = "Precision", y = "Coverage",
+        title = glue::glue("Game: {r$game}, round: {r$round}")
+      )
+    path_plot + plot_list[[r$game]][[r$round]]
+  })
 ```
 
 ```{r}
 iwalk(sidebside, function(p, i){
-  ggsave(p, filename = here::here("scratchpad/n_dim_state_plot_dump_1/",paste0(i,".png")),
-       device = "png", bg = "white", dpi = 72, height = 4, width = 6, units = "in")
+  ggsave(p, filename = here::here("scratchpad/n_dim_state_plot_dump_2/",paste0(i,".png")),
+       device = "png", bg = "white", dpi = 72, height = 600, width = 1200, units = "px")
 })
 ```
 
@@ -407,13 +337,11 @@ iwalk(sidebside, function(p, i){
 library(gifski)
 gifski(
   png_files = list.files(
-    here::here("scratchpad/n_dim_state_plot_dump_1/"),
+    here::here("scratchpad/n_dim_state_plot_dump_2/"),
     pattern = "*.png",
-    full.names = TRUE),
-  gif_file = here::here("scratchpad/n_dim_state_plot_1.gif"),
-  width = 1280, height = 720,
-  delay = 0.5, loop = TRUE, progress = TRUE
+    full.names = TRUE) |> gtools::mixedsort(),
+  gif_file = here::here("scratchpad/n_dim_state_plot_2.gif"),
+  delay = 0.25,
+  width = 1200, height = 600, loop = TRUE, progress = TRUE
 )
 ```
-
-

@@ -7,4 +7,5 @@
 .vscode
 scratchpad/3_state_plot_dump
 scratchpad/*_files/
-scratchpad/*_plot_dump_*/
+scratchpad/*_plot_dump*/
+scratchpad/*.gif

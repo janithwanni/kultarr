@@ -1,5 +1,5 @@
 ---
-title: "N dimensional anchors"
+title: "Anchors using thompson sampling"
 format: html
 ---
 
@@ -155,8 +155,25 @@ rfmodel <- randomForest(class ~ x + y, data = train_df, ntree = 5)
 prob_matrix <- predict(rfmodel, newdata = train_df, type = "prob") |> 
   as.data.frame() |>
   mutate(id = row_number())
-local_instance <- prob_matrix[prob_matrix$Negative == 0.4, "id"]
-local_instance <- local_instance[1]
+# local_instance <- prob_matrix[prob_matrix$Negative == 0.4, "id"]
+# local_instance <- local_instance[1]
+local_instance <- prob_matrix[prob_matrix$Positive == 0.4, "id"]
+local_instance <- local_instance[2]
+# doing for local_instance 33 and 38
+```
+
+```{r}
+neg_cls_col <- "#FFB200"
+pos_cls_col <- "#5A31C1"
+```
+
+```{r}
+train_df[-local_instance, ] |>
+  ggplot(aes(x = x,y = y,color = class)) +
+  geom_point() +
+  geom_point(data = train_df[local_instance, ], size = 5, color = "black") +
+  geom_label(data = train_df[local_instance, ], label = "Here", color = "black", nudge_y = 0.05) +
+  scale_color_manual(values = c(neg_cls_col, pos_cls_col))
 ```
 
 ```{r}
@@ -202,6 +219,17 @@ model_func <- function(data_samples) {
 set.seed(123)
 samples <- pertub_func(n = 10000)
 dist_func <- function(n) samples[1:n, ]
+```
+
+```{r}
+common_ggtheme <- function() {
+  theme(
+    plot.title = element_text(size = 28),
+    axis.title = element_text(size = 28),
+    legend.text = element_text(size = 20),
+    legend.title = element_text(size = 20)
+  )
+}
 ```
 
 Going to try Thompson sampling in the end
@@ -293,7 +321,9 @@ for(game in seq_len(n_games)) {
           aes(xmin = X_L, xmax = X_U, ymin = Y_L, ymax = Y_U),
           fill = "transparent", color = "black") +
         labs(title = glue::glue("Game: {game}, round: {round}, reward: {round(reward$reward,2)}")) +
-        theme(legend.position = "bottom")
+        scale_color_manual(values = c(neg_cls_col, pos_cls_col)) +
+        theme(legend.position = "bottom") +
+        common_ggtheme()
     plot_list[[game]][[round]] <- state_plot
   }
 }
@@ -315,20 +345,21 @@ sidebside <- prec_cover_hist |> split(seq(1,nrow(prec_cover_hist))) |>
       geom_point(
         data = r,
         aes(x = prec, y = cover),
-        color = "red", size = 2
+        color = "red", size = 3
       ) + 
-      lims(x = c(0,1), y = c(0,1)) +
+      lims(x = c(0,1), y = c(0,0.3)) +
       labs(
         x = "Precision", y = "Coverage",
         title = glue::glue("Game: {r$game}, round: {r$round}")
-      )
+      ) +
+      common_ggtheme()
     path_plot + plot_list[[r$game]][[r$round]]
   })
 ```
 
 ```{r}
 iwalk(sidebside, function(p, i){
-  ggsave(p, filename = here::here("scratchpad/n_dim_state_plot_dump_2/",paste0(i,".png")),
+  ggsave(p, filename = here::here("scratchpad/n_dim_state_plot_dump_2_2/",paste0(i,".png")),
        device = "png", bg = "white", dpi = 72, height = 600, width = 1200, units = "px")
 })
 ```
@@ -337,10 +368,10 @@ iwalk(sidebside, function(p, i){
 library(gifski)
 gifski(
   png_files = list.files(
-    here::here("scratchpad/n_dim_state_plot_dump_2/"),
+    here::here("scratchpad/n_dim_state_plot_dump_2_2/"),
     pattern = "*.png",
     full.names = TRUE) |> gtools::mixedsort(),
-  gif_file = here::here("scratchpad/n_dim_state_plot_2.gif"),
+  gif_file = here::here("scratchpad/n_dim_state_plot_2_2.gif"),
   delay = 0.25,
   width = 1200, height = 600, loop = TRUE, progress = TRUE
 )

@@ -1,0 +1,488 @@
+---
+title: "Anchors generalized for real world data"
+format: html
+---
+
+```{r}
+library(S7)
+library(tidyverse) # getting a sword to cut a sandwich
+library(patchwork)
+library(randomForest)
+library(furrr)
+library(progressr)
+library(palmerpenguins)
+library(tourr)
+theme_set(theme_minimal())
+```
+
+```{r}
+predicate <- new_class("predicate", 
+  properties = list(
+    feature = class_character,
+    operator = class_function,
+    constant = new_union(
+      class_integer, class_double, class_character
+    )
+  ),
+  validator = function(self) {
+  }
+)
+
+#| code-fold: true
+anchors <- new_class("anchors",
+  properties = list(
+    predicates = class_vector # a vector of predicate class
+  ),
+  validator = function(self) {
+    if(!all(sapply(self@predicates, \(x) S7_inherits(x, predicate)))) {
+      return("The list of predicates should all inherit from the predicate class ")
+    }
+  }
+)
+```
+
+
+```{r}
+extend <- S7::new_generic("extend", "x")
+#' @param pred The predicate to extend x with
+#' @return Extended anchor
+S7::method(extend, anchors) <- function(x, pred) {
+  x@predicates <- c(x@predicates, pred)
+  return(x)
+}
+```
+
+```{r}
+satisfies <- S7::new_generic("satisfies", "x")
+#' @param data The dataframe to apply anchors on. Can be one instance or an entire dataset.
+#' @return A logical vector indicating whether the anchors satisfies `data`
+S7::method(satisfies, anchors) <- function(x, data) {
+  predicate_cols <- sapply(x@predicates, \(x) x@feature)
+  if (!all(predicate_cols %in% colnames(data))) {
+    stop(glue::glue(
+      "Predicates contain the following columns \n {predicate_cols}\n",
+      "that might not be in the dataset with the following columns \n {colnames(data)}"
+    ))
+  }
+  satis_list <- rep(TRUE, nrow(data))
+  for (predicate in x@predicates) {
+    result_list <- predicate@operator(data[[predicate@feature]], predicate@constant)
+    satis_list <- satis_list & result_list
+  }
+  return(satis_list)
+}
+```
+
+
+```{r}
+precision <- S7::new_generic("precision", "x")
+#' @param model a predict function that will provide the predicted labels given a dataset
+#' @param dist the function that can be used to generate samples by providing an argument n. Should return a dataframe with proper column names.
+#' @param n_samples the number of samples to generate from `dist` (the perturbation distribution)
+#' @return named vector of proportions
+S7::method(precision, anchors) <- function(x, model, dist, n_samples = 100) {
+  samples <- dist(n = n_samples)
+  satisfying_rows <- which(satisfies(x, samples), arr.ind = TRUE)
+  if(length(satisfying_rows) == 0) {
+    message("No satisfying rows found in samples")
+    return(NULL)
+  }
+  samples <- samples |>
+    dplyr::slice(satisfying_rows)
+  preds <- model(samples)
+  return(prop = as.vector(table(preds) / sum(table(preds))))
+}
+```
+
+
+```{r}
+coverage <- S7::new_generic("coverage", "x")
+#' @param dist the function that can be used to generate samples by providing an argument n. Should return a dataframe with proper column names.
+#' @param n_samples the number of samples to generate from `dist` (the perturbation distribution)
+S7::method(coverage, anchors) <- function(x, dist, n_samples = 100) {
+  samples <- dist(n = n_samples)
+  return(mean(satisfies(x, samples)))
+}
+```
+
+
+```{r}
+coverage_area <- S7::new_generic("coverage_area", "x")
+#' @param dataset the dataset used to calculate the area upon
+S7::method(coverage_area, anchors) <- function(x, dataset) {
+  print(x)
+  little_box <- dataset[satisfies(x, dataset), ]
+  print(glue::glue("little_box_area: {calculate_area(little_box)}, dataset_area: {calculate_area(dataset)}"))
+  return(calculate_area(little_box) / calculate_area(dataset))
+}
+
+#' @description Calculates the area of the rectangular shape that encompasses the dataset by getting the range (max - min) of each column and multiplying the value across columns
+calculate_area <- function(data) {
+  data |> map_dbl(~max(.x, na.rm = T) - min(.x, na.rm = T)) |> prod()
+}
+```
+
+```{r}
+w <- readRDS(here::here("scratchpad/test_tour_data.rds"))[["model_data"]] |>
+  filter(new_cause %in% c("lightning", "accidental_human")) |>
+  mutate(new_cause = factor(new_cause))
+set.seed(69420)
+train_indices <- sample(nrow(w), round(nrow(w) * 0.9))
+train_df <- w[train_indices, ] |> mutate(id = row_number())
+test_df <- w[-train_indices, ] |> mutate(id = row_number())
+```
+
+```{r}
+interest_cols <- c("air_tmin", "air_tmax", "radiation", "rainfall")
+animate_xy(
+  test_df |> select(all_of(interest_cols)) |> tourr::rescale(),
+  axes = "bottomleft",
+  col = train_df$new_cause
+)
+```
+
+```{r}
+library(randomForest)
+rfmodel <- randomForest(
+  new_cause ~ air_tmin + air_tmax + radiation + rainfall,
+  data = train_df
+)
+```
+
+```{r}
+prob_matrix <- predict(rfmodel, newdata = test_df, type = "prob") |> 
+  as.data.frame() |>
+  mutate(id = row_number())
+local_instance <- prob_matrix[prob_matrix$lightning < 0.95 & prob_matrix$lightning > 0.85 , "id"]
+local_instance <- local_instance[2]
+preds <- predict(rfmodel, newdata = test_df)
+```
+
+```{r}
+light_col <- "#FFB200"
+nlight_col <- "#5A31C1"
+local_inst_colors <- ifelse(
+  test_df$new_cause == "lightning", 
+  light_col, nlight_col
+)
+local_inst_colors[local_instance] <- "#0FA6B3"
+
+animate_xy(
+  test_df |> select(all_of(interest_cols)) |> tourr::rescale(),
+  grand_tour(),
+  col = local_inst_colors,
+  cex = 0.8,
+  axes = "bottomleft"
+)
+# train_df[-local_instance, ] |>
+#   ggplot(aes(x = x,y = y,color = class)) +
+#   geom_point() +
+#   geom_point(data = train_df[local_instance, ], size = 5, color = "black") +
+#   geom_label(data = train_df[local_instance, ], label = "Here", color = "black", nudge_y = 0.05)
+```
+
+```{r}
+envir <- map(interest_cols, function(cname) {
+  vals <- test_df[-local_instance,][[cname]] |> sort()
+  cutpoints <- map2_dbl(vals[-length(vals)], vals[-1], function(x, x_1) {
+    return(mean(c(x, x_1)))
+  })
+  v_l <- sort(
+    cutpoints[cutpoints < test_df[local_instance,][[cname]]],
+    decreasing = TRUE
+  )
+  if(length(v_l) == 0) {
+    v_l <- c(test_df[local_instance,][[cname]])
+  }
+  v_u <- cutpoints[cutpoints > test_df[local_instance,][[cname]]]
+  if(length(v_u) == 0) {
+    v_u <- c(test_df[local_instance,][[cname]])
+  }
+  list(v_l, v_u)
+}) |> list_flatten() |>
+  setNames(paste0(rep(interest_cols, each = 2), rep(c("_l", "_u"), times = length(interest_cols))))
+```
+
+
+```{r}
+pertub_func <- function(n) {
+  out <- mulgar::rmvn(n = n, 
+               p = length(interest_cols),
+               mn = test_df[local_instance, interest_cols] |> 
+                 unlist(),
+               vc = cov(test_df[,interest_cols])
+  ) |>
+    as.data.frame()
+  colnames(out) <- interest_cols
+  return(as_tibble(out))
+}
+
+model_func <- function(data_samples) {
+  suppressPackageStartupMessages(library(randomForest)) # for future package
+  return(predict(rfmodel, data_samples))
+}
+
+set.seed(123)
+samples <- pertub_func(n = 10000)
+dist_func <- function(n) samples[1:n, ]
+```
+
+```{r}
+prj_matrix <- function(high_d, prj) {
+  as_tibble(as.data.frame(as.matrix(high_d) %*% prj))
+}
+
+set.seed(123)
+PRJ <- basis_random(ncol(test_df |> select(all_of(interest_cols))), d = 2)
+
+prj_2d <- function(data) {
+  # prj <- basis_random(ncol(w |> select(bill_length_mm:body_mass_g)), d = 2)
+# x_data <- w |> select(bill_length_mm:body_mass_g) |> tourr::rescale()
+# prj_x_data <- as.data.frame(as.matrix(x_data) %*% prj)
+  numeric_data <- data |> select_if(is.numeric)
+  non_numeric_data <- data |> select_if(~ !is.numeric(.x))
+  numeric_data |> tourr::rescale() |> prj_matrix(PRJ) |> bind_cols(non_numeric_data)
+}
+```
+
+Going to try Thompson sampling in the end
+
+```{r}
+set.seed(123)
+# actions <- c("NW", "NE", "SW", "SE")
+all_possible_actions <- map(seq_len(2*length(interest_cols)), ~ return(c(0,1))) |> expand.grid()
+actions <- all_possible_actions[rowSums(all_possible_actions) == length(interest_cols), ]
+actions <- actions |> split(seq(nrow(actions))) |> map(~ unlist(.x) |> unname())
+n_actions <- length(actions)
+
+update_bounds <- function(current_envir, selected_action) {
+  new_bound <- current_envir + actions[[selected_action]]
+  for(i in seq_along(new_bound)) {
+    if(is.na(envir[[i]][new_bound[i]])) {
+      new_bound[i] <- current_envir[i]
+    }
+  }
+  return(new_bound)
+}
+
+envir_to_bounds <- function(current_envir) {
+  bounds <- matrix(rep(NA, 2 * length(interest_cols))) |> t() |> as_tibble()
+  for(i in seq_along(current_envir)) {
+    bounds[1,i] <- envir[[i]][current_envir[i]]
+  }
+  colnames(bounds) <- names(envir)
+  return(bounds)
+}
+create_anchor_inst <- function(bounds) {
+  pred_vec <- c()
+  feat_vec <- rep(interest_cols, each = 2)
+  op_vec <- rep(c(`>`, `<`), times = length(interest_cols))
+  bound_var <- colnames(bounds)
+  for(i in seq(1,length(feat_vec))) {
+    pred_vec <- c(pred_vec, predicate(feat_vec[i], op_vec[i][[1]], constant = bounds[[bound_var[i]]]))
+  }
+  anchor_box <- anchors(pred_vec)
+  return(anchor_box)
+}
+
+get_reward <- function(new_anchor, round, class_ind = 2) {
+  # cover <- coverage_area(new_anchor, train_df |> select(all_of(interest_cols)))
+  cover <- coverage(new_anchor, dist_func, n_samples = 10000)
+  prec <- precision(new_anchor, model_func, dist_func, n_samples = 10000)
+  prec <- prec[class_ind]
+  if(is.null(prec)) prec <- 0
+  if(is.infinite(cover)) cover <- 0
+  print(glue::glue("==== {cover} | {prec} | {as.numeric(satisfies(new_anchor, test_df[local_instance, ])) * 
+      mean(c(cover / round, prec), na.rm = TRUE) }====="))
+  return(list(
+    reward = as.numeric(satisfies(new_anchor, test_df[local_instance, ])) * 
+      mean(c(cover / round, prec), na.rm = TRUE),
+      # prec,
+    prec = prec, cover = cover
+    ))
+}
+
+A <- rep(1, n_actions)
+B <- rep(1, n_actions)
+n_games <- 20
+n_epochs <- 100
+prec_cover_hist <- tibble(game = numeric(), round = numeric(), prec = numeric(), cover = numeric())
+final_bounds <- NULL
+
+for(game in seq_len(n_games)) {
+  current_envir <- rep(1, 2*length(interest_cols))
+  for(round in seq_len(n_epochs)) {
+    r <- vector(mode = "numeric", length = n_actions)
+    for(i_action in seq_len(n_actions)) {
+      r[i_action] <- rbeta(1, shape1 = A[i_action], B[i_action])
+    }
+    selected_action <- which.max(r)
+    current_envir <- update_bounds(current_envir, selected_action)
+    new_anchor <- envir_to_bounds(current_envir) |> create_anchor_inst()
+    reward <- get_reward(new_anchor, round)
+    outcome <- rbinom(1, size = 1, prob = reward$reward)
+    if(outcome == 1) {
+      A[selected_action] <- A[selected_action] + 1 
+    } else {
+      B[selected_action] <- B[selected_action] + 1
+    }
+    print(glue::glue("Game {game}: Round {round}\n selected : {selected_action}\n prec: {round(reward$prec, 4)}  | cover: {round(reward$cover, 4)} | reward: {round(reward$reward,4)} \n outcome: {outcome}"))
+    prec_cover_hist <- rbind(prec_cover_hist, tibble(game = game, round = round, prec = reward$prec, cover = reward$cover))
+  }
+  bounds <- rbind(
+    envir_to_bounds(current_envir) |>
+          select(ends_with("_l")) |>
+          setNames(interest_cols),
+    envir_to_bounds(current_envir) |> 
+          select(ends_with("_u")) |> 
+          setNames(interest_cols)
+  )
+
+  box_points <- expand.grid(bounds)
+  gcube <- geozoo::cube.iterate(p = ncol(bounds))
+
+  gcube$points <- box_points
+
+  sample_data <- rbind(
+    gcube$points,
+    test_df |> select(all_of(interest_cols))
+  ) |> tourr::rescale()
+  
+  local_inst_colors <- ifelse(preds == "lightning", light_col, nlight_col)
+  local_inst_colors[local_instance] <- "#159FB1"
+
+  render_gif(
+    sample_data,
+    grand_tour(),
+    display_xy(
+      edges = gcube$edges,
+      cex = 0.3,
+      col = local_inst_colors,
+      edges.col = "#DDDDDD",
+      axes = "bottomleft",
+      edges.width = 0.8
+    ),
+    gif_file= here::here("scratchpad/bushfire_state_plot_dump/",glue::glue("{game}.gif")),
+    frames=500,
+    width=600,
+    height=600,
+    loop=TRUE
+  )
+  final_bounds <<- envir_to_bounds(current_envir)
+}
+```
+
+```{r}
+library(patchwork)
+prec_cover_hist <- prec_cover_hist |> mutate(ith = row_number())
+sidebside <- prec_cover_hist |> split(seq(1,nrow(prec_cover_hist))) |> 
+  map(function(r) {
+    ith_place <- r$ith
+    path_plot <- ggplot() +
+      geom_point(
+        data = prec_cover_hist |> filter(ith < ith_place),
+        aes(x = prec, y = cover),
+        color = "red", alpha = 0.1
+      ) +
+      geom_point(
+        data = r,
+        aes(x = prec, y = cover),
+        color = "red", size = 2
+      ) + 
+      lims(x = c(0,1), y = c(0,0.8)) +
+      labs(
+        x = "Precision", y = "Coverage",
+        title = glue::glue("Game: {r$game}, round: {r$round}")
+      )
+    path_plot
+  })
+```
+
+```{r}
+bounds <- rbind(
+  final_bounds |>
+    select(ends_with("_l")) |>
+    setNames(interest_cols),
+  final_bounds |> 
+    select(ends_with("_u")) |> 
+    setNames(interest_cols)
+)
+  
+box_points <- expand.grid(bounds)
+gcube <- geozoo::cube.iterate(p = ncol(bounds))
+
+gcube$points <- box_points
+
+sample_data <- rbind(
+  gcube$points,
+  train_df |> select(all_of(interest_cols))
+) |> tourr::rescale()
+
+local_inst_colors <- ifelse(train_df$species == "Adelie", adelie_col, chinstrap_col)
+local_inst_colors[local_instance] <- "#159FB1"
+
+inside_box <- train_df
+for(icol in interest_cols) {
+  inside_box <- inside_box[between(inside_box[[icol]], bounds[[icol]][1], bounds[[icol]][2]), ]
+}
+
+inside_box_col_pal <- c(
+  rep("#FFFFFF", nrow(gcube$points)),
+  ifelse(inside_box$species == "Adelie", adelie_col, chinstrap_col)
+)
+
+render_gif(
+  rbind(
+    gcube$points,
+    inside_box |> dplyr::select(all_of(interest_cols))
+  ) |> tourr::rescale(),
+  grand_tour(),
+  display_xy(
+    edges = gcube$edges,
+    cex = 2,
+    col = inside_box_col_pal,
+    edges.col = "black",
+    edges.width = 0.1,
+    axes = "bottomleft"
+  ),
+  gif_file = here::here("scratchpad/bushfire_state_plot_dump/inside_box_model.gif"),
+  frames = 500,
+  width=600,
+  height=600,
+  loop=TRUE
+)
+
+render_gif(
+  rbind(
+    gcube$points,
+    inside_box |> dplyr::select(all_of(interest_cols))
+  ) |> tourr::rescale(),
+  grand_tour(length(interest_cols)),
+  display_scatmat(),
+  gif_file=here::here("scratchpad/bushfire_state_plot_dump/box_scatmat.gif"),
+  frames=500,
+  width=600,
+  height=600,
+  loop=TRUE
+)
+```
+
+```{r}
+# iwalk(sidebside, function(p, i){
+#   ggsave(p, filename = here::here("scratchpad/gen_dim_state_plot_dump/",paste0(i,".png")),
+#        device = "png", bg = "white", dpi = 72, height = 600, width = 1200, units = "px")
+# })
+```
+
+```{r}
+# library(gifski)
+# gifski(
+#   png_files = list.files(
+#     here::here("scratchpad/gen_dim_state_plot_dump/"),
+#     pattern = "*.png",
+#     full.names = TRUE) |> gtools::mixedsort(),
+#   gif_file = here::here("scratchpad/gen_dim_state_plot.gif"),
+#   delay = 0.25,
+#   width = 1200, height = 600, loop = TRUE, progress = TRUE
+# )
+```

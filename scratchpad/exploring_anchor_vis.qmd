@@ -1,0 +1,125 @@
+---
+title: "Visualizing anchors"
+---
+
+```{r}
+devtools::load_all()
+library(tidyverse)
+library(palmerpenguins)
+library(tourr)
+# get dataset
+main_data <- penguins |> 
+  select(bill_length_mm:body_mass_g, species) |> 
+  drop_na() |>
+  mutate(id = row_number())
+
+# visualize entire dataset
+# render_gif(
+#   main_data |> select(bill_length_mm:body_mass_g) |> tourr::rescale(),
+#   grand_tour(),
+#   display_xy(
+#     axes = "bottomleft",
+#     col = main_data$species
+#   ),
+#   gif_file = here::here("scratchpad/exploring_anchor_vis_plot_dump/1.gif"),
+#   frames = 500,
+#   width=600,
+#   height=600,
+#   loop=TRUE
+# )
+```
+
+
+```{r}
+# build training testing dataset
+set.seed(1234)
+train_indices <- sample(nrow(main_data), round(nrow(main_data) * 0.6))
+train_df <- main_data[train_indices, ]
+test_df <- main_data[-train_indices, ]
+
+# visualize randomization
+main_data$split <- "test"
+main_data$split[train_indices] <- "train"
+main_data  <- main_data |> mutate(split = factor(split))
+
+# animate_xy(
+#   w |> select(bill_length_mm:body_mass_g) |> tourr::rescale(),
+#   grand_tour(),
+#   axes = "bottomleft",
+#   col = w$split
+# )
+```
+
+```{r}
+# build model
+library(randomForest)
+rfmodel <- randomForest(
+  species ~ bill_length_mm + bill_depth_mm + flipper_length_mm + body_mass_g,
+  data = train_df
+)
+
+library(MLmetrics)
+test_preds <- predict(
+  rfmodel,
+  newdata = test_df |> select(bill_length_mm:body_mass_g)
+)
+ConfusionMatrix(test_preds, test_df$species)
+# variable importance
+
+# visualize
+```
+
+We are going to select a range of points with probability 
+```{r}
+# do all points
+instance_id <- 1
+class_ind <- train_df$species[instance_id] |> as.numeric()
+# get anchors
+
+## Decide on interested columns
+interest_cols <- colnames(main_data |> select(bill_length_mm:body_mass_g))
+
+## Generate cut points for a given point
+environment <- generate_cutpoints(train_data, instance_id, interest_cols)
+
+## Write model function
+model_func <- function(data_samples) {
+  suppressPackageStartupMessages(library(randomForest)) # for future package
+  return(predict(rfmodel, data_samples))
+}
+
+## Make perturbation function
+distn_partial <- function(n, interest_cols, dataset, instance_id) {
+  pertub_func <- function(n, interest_cols, dataset, instance_id) { 
+    out <- mulgar::rmvn(n = n, 
+                p = length(interest_cols),
+                mn = dataset[instance_id, interest_cols] |> 
+                  unlist(),
+                vc = cov(dataset[,interest_cols])
+    ) |>
+      as.data.frame()
+    colnames(out) <- interest_cols
+    return(as_tibble(out))
+  }
+  set.seed(123)
+  samples <- pertub_func(n = (n * 10), interest_cols, dataset, instance_id)
+  samples[1:n, ]
+}
+
+dist_func <- purrr::partial(distn_partial, interest_cols = interest_cols, dataset = train_df, instance_id = instance_id)
+
+n_games <- 20
+n_epochs <- 100
+
+final_anchor <- run_mab(
+  n_games,
+  n_epochs,
+  environment,
+  interest_cols,
+  dist_func,
+  model_func,
+  class_ind
+)
+
+## Save boundary
+```

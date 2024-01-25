@@ -3,7 +3,8 @@ title: "Visualizing anchors"
 ---
 
 ```{r}
-devtools::load_all()
+# devtools::load_all()
+library(anchorsRevisited)
 library(tidyverse)
 library(palmerpenguins)
 library(tourr)
@@ -71,55 +72,65 @@ ConfusionMatrix(test_preds, test_df$species)
 
 We are going to select a range of points with probability 
 ```{r}
-# do all points
-instance_id <- 1
-class_ind <- train_df$species[instance_id] |> as.numeric()
-# get anchors
-
 ## Decide on interested columns
 interest_cols <- colnames(main_data |> select(bill_length_mm:body_mass_g))
 
-## Generate cut points for a given point
-environment <- generate_cutpoints(train_data, instance_id, interest_cols)
-
 ## Write model function
 model_func <- function(data_samples) {
-  suppressPackageStartupMessages(library(randomForest)) # for future package
   return(predict(rfmodel, data_samples))
 }
-
-## Make perturbation function
-distn_partial <- function(n, interest_cols, dataset, instance_id) {
-  pertub_func <- function(n, interest_cols, dataset, instance_id) { 
-    out <- mulgar::rmvn(n = n, 
-                p = length(interest_cols),
-                mn = dataset[instance_id, interest_cols] |> 
-                  unlist(),
-                vc = cov(dataset[,interest_cols])
-    ) |>
-      as.data.frame()
-    colnames(out) <- interest_cols
-    return(as_tibble(out))
-  }
-  set.seed(123)
-  samples <- pertub_func(n = (n * 10), interest_cols, dataset, instance_id)
-  samples[1:n, ]
-}
-
-dist_func <- purrr::partial(distn_partial, interest_cols = interest_cols, dataset = train_df, instance_id = instance_id)
 
 n_games <- 20
 n_epochs <- 100
 
-final_anchor <- run_mab(
-  n_games,
-  n_epochs,
-  environment,
-  interest_cols,
-  dist_func,
-  model_func,
-  class_ind
-)
+library(furrr)
+plan(multisession, workers = 6)
+
+selected_df <- train_df |> filter(species == "Chinstrap")
+
+anchor_results <- future_map_dfr(seq(1, nrow(selected_df)), function(i) {
+  # do all points
+  instance_id <- i
+  class_ind <- selected_df$species[instance_id] |> as.numeric()
+  # get anchors
+
+  ## Generate cut points for a given point
+  environment <- generate_cutpoints(selected_df, instance_id, interest_cols)
+
+  ## Make perturbation function
+  distn_partial <- function(n, interest_cols, dataset, instance_id) {
+    pertub_func <- function(n, interest_cols, dataset, instance_id) { 
+      out <- mulgar::rmvn(n = n, 
+                  p = length(interest_cols),
+                  mn = dataset[instance_id, interest_cols] |> 
+                    unlist(),
+                  vc = cov(dataset[,interest_cols])
+      ) |>
+        as.data.frame()
+      colnames(out) <- interest_cols
+      return(as_tibble(out))
+    }
+    set.seed(123)
+    samples <- pertub_func(n = (n * 10), interest_cols, dataset, instance_id)
+    samples[1:n, ]
+  }
+
+  dist_func <- purrr::partial(distn_partial, interest_cols = interest_cols, dataset = selected_df, instance_id = instance_id)
+
+  final_bounds <- run_mab(
+    n_games,
+    n_epochs,
+    selected_df,
+    instance_id,
+    environment,
+    interest_cols,
+    dist_func,
+    model_func,
+    class_ind
+  )
+  final_bounds |> dplyr::mutate(id = i)
+}, .options = furrr_options(packages = c("randomForest", "anchorsRevisited")))
 
 ## Save boundary
+saveRDS(anchor_results, here::here("scratchpad/exploring_anchor_vis_plot_dump/anchor_results.rds"))
 ```

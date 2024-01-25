@@ -1,3 +1,12 @@
+#' Reward function for Multi Armed Bandit
+#' @param new_anchor
+#' @param round
+#' @param dist_func
+#' @param model_func
+#' @param dataset
+#' @param instance_id
+#' @param class_ind
+#' @export
 get_reward <- function(
     new_anchor,
     round,
@@ -23,6 +32,10 @@ get_reward <- function(
   ))
 }
 
+#' @param n_actions
+#' @param success_probs
+#' @param failure_probs
+#' @export 
 select_action <- function(n_actions, success_probs, failure_probs) {
   r <- vector(mode = "numeric", length = n_actions)
   for (i_action in seq_len(n_actions)) {
@@ -32,7 +45,17 @@ select_action <- function(n_actions, success_probs, failure_probs) {
   return(selected_action)
 }
 
-run_mab <- function(n_games, n_epochs, environment, interest_cols, dist_func, model_func, class_ind) {
+#' @param n_games
+#' @param n_epochs
+#' @param dataset
+#' @param instance_id
+#' @param environment
+#' @param interest_cols
+#' @param dist_func
+#' @param model_func
+#' @param class_ind
+#' @export
+run_mab <- function(n_games, n_epochs, dataset, instance_id, environment, interest_cols, dist_func, model_func, class_ind) {
   ## Define environment and actions
   all_possible_actions <- purrr::map(seq_len(2 * length(interest_cols)), ~ return(c(0, 1))) |> expand.grid()
   actions <- all_possible_actions[rowSums(all_possible_actions) == length(interest_cols), ]
@@ -69,7 +92,7 @@ run_mab <- function(n_games, n_epochs, environment, interest_cols, dist_func, mo
       )
       outcome <- rbinom(1, size = 1, prob = reward$reward)
 
-      if (outcome == 1) {
+      if (!is.na(outcome) && outcome == 1) {
         success_probs[selected_action] <- success_probs[selected_action] + 1
       } else {
         failure_probs[selected_action] <- failure_probs[selected_action] + 1

@@ -2,6 +2,7 @@
 #' 
 #' The current state of the multi armed bandit is marked based on the indices
 #' in the list of each combination of column and lower and upper bound type.
+#' @export
 envir_to_bounds <- function(current_envir, envir, interest_cols) {
   bounds <- matrix(
     rep(NA, 2 * length(interest_cols))
@@ -21,6 +22,7 @@ envir_to_bounds <- function(current_envir, envir, interest_cols) {
 #' @param selected_action The index of selected action from the actions list
 #' 
 #' @return New bounds
+#' @export
 update_bounds <- function(current_envir, envir, actions, selected_action) {
   new_bound <- current_envir + actions[[selected_action]]
   for(i in seq_along(new_bound)) {
@@ -37,6 +39,7 @@ update_bounds <- function(current_envir, envir, actions, selected_action) {
 #' @param interest_cols the columns of interest
 #' 
 #' @return an instance of the anchor class
+#' @export
 create_anchor_inst <- function(bounds, interest_cols) {
   pred_vec <- c()
   feat_vec <- rep(interest_cols, each = 2)
@@ -56,6 +59,7 @@ create_anchor_inst <- function(bounds, interest_cols) {
 #' @param interest_coluns The columns of `dataset` to consider when creating lower and upper bounds
 #'
 #' @returns A list. Contains lower and upper bounds for each specific column of interest.
+#' @export
 generate_cutpoints <- function(dataset, instance_id, interest_columns) {
   envir <- map(interest_cols, function(cname) {
     vals <- dataset[-instance_id, ][[cname]] |> sort()

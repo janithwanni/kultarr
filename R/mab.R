@@ -61,7 +61,7 @@ run_mab <- function(n_games, n_epochs, dataset, instance_id, environment, intere
   actions <- all_possible_actions[rowSums(all_possible_actions) == length(interest_cols), ]
   actions <- actions |>
     split(seq(nrow(actions))) |>
-    map(~ unlist(.x) |> unname())
+    purrr::map(~ unlist(.x) |> unname())
   n_actions <- length(actions)
 
   ## Run games
@@ -117,3 +117,52 @@ run_mab <- function(n_games, n_epochs, dataset, instance_id, environment, intere
   }
   return(final_bounds)
 }
+
+#' Make anchors
+#' 
+#' @param model The model to be interrogated
+#' @param dataset Dataset to use containing predictors and response variables.
+#' @param cols Columns of interest
+#' @param instance Id of the instance of interest in the training dataset
+#' @param model_func Function that gives takes in any data and the model to give predictions
+#' @param class_col Name of factor column containing class of interest
+#' @param n_perturb_samples number of samples to be taken from the pertubation distribution
+#' @param n_games
+#' @param n_epochs
+#' 
+#' @export 
+make_anchors <- function(
+  model,
+  dataset,
+  cols,
+  instance,
+  model_func,
+  class_col,
+  n_perturb_samples = 10000,
+  n_games = 20,
+  n_epochs = 100
+) {
+  class_ind <- dataset[[class_col]][instance] |> as.numeric()
+  environment <- generate_cutpoints(dataset, instance, cols)
+  dist_func <- make_perturb_distn(n_perturb_samples, cols, dataset, instance)
+  model_func <- purrr::partial(model_func, model = model)
+  final_bounds <- run_mab(
+    n_games,
+    n_epochs,
+    dataset,
+    instance,
+    environment,
+    cols,
+    dist_func,
+    model_func,
+    class_ind
+  )
+  lower_bound <- final_bounds |> select(ends_with("_l"))
+  colnames(lower_bound) <- gsub("_l$", "", colnames(lower_bound))
+  upper_bound <- final_bounds |> select(ends_with("_u"))
+  colnames(upper_bound) <- gsub("_u$", "", colnames(upper_bound))
+  return(rbind(
+    lower_bound |> mutate(bound = "lower"),
+    upper_bound |> mutate(bound = "upper")
+  ))
+} 

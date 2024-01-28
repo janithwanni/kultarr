@@ -17,8 +17,8 @@ describe("anchors", {
     A_ex <- extend(A, extend_pred)
     B_ex <- extend(B, extend_pred)
     # Assert
-    expect_true(S7_inherits(A_ex, anchors))
-    expect_true(S7_inherits(B_ex, anchors))
+    expect_true(S7::S7_inherits(A_ex, anchors))
+    expect_true(S7::S7_inherits(B_ex, anchors))
     expect_true(length(A_ex@predicates) == 1)
     expect_true(length(B_ex@predicates) == 2)
   })

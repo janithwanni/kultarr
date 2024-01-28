@@ -61,9 +61,9 @@ create_anchor_inst <- function(bounds, interest_cols) {
 #' @returns A list. Contains lower and upper bounds for each specific column of interest.
 #' @export
 generate_cutpoints <- function(dataset, instance_id, interest_columns) {
-  envir <- map(interest_cols, function(cname) {
+  envir <- purrr::map(interest_columns, function(cname) {
     vals <- dataset[-instance_id, ][[cname]] |> sort()
-    cutpoints <- map2_dbl(vals[-length(vals)], vals[-1], function(x, x_1) {
+    cutpoints <- purrr::map2_dbl(vals[-length(vals)], vals[-1], function(x, x_1) {
       return(mean(c(x, x_1)))
     })
     v_l <- sort(
@@ -73,11 +73,46 @@ generate_cutpoints <- function(dataset, instance_id, interest_columns) {
     v_u <- cutpoints[cutpoints > dataset[instance_id, ][[cname]]]
     list(v_l, v_u)
   }) |>
-    list_flatten() |>
+    purrr::list_flatten() |>
     setNames(
       paste0(
-        rep(interest_cols, each = 2),
-        rep(c("_l", "_u"), times = length(interest_cols))
+        rep(interest_columns, each = 2),
+        rep(c("_l", "_u"), times = length(interest_columns))
       )
     )
+}
+
+#' Make perturbation distribution function
+#' 
+#' @param n 
+#' @param interest_cols
+#' @param dataset
+#' @param instance_id
+#' 
+#' @return A purrr partial function that takes in N and returns N number of sample points around the instance
+#' @export
+make_perturb_distn <- function(n, interest_cols, dataset, instance_id) {
+  distn_partial <- function(n, interest_cols, dataset, instance_id) {
+    pertub_func <- function(n, interest_cols, dataset, instance_id) { 
+      out <- mulgar::rmvn(n = n, 
+                  p = length(interest_cols),
+                  mn = dataset[instance_id, interest_cols] |> 
+                    unlist(),
+                  vc = cov(dataset[,interest_cols])
+      ) |>
+        as.data.frame()
+      colnames(out) <- interest_cols
+      return(as_tibble(out))
+    }
+    set.seed(123)
+    samples <- pertub_func(n = (n * 10), interest_cols, dataset, instance_id)
+    samples[1:n, ]
+  }
+  dist_func <- purrr::partial(
+    distn_partial,
+    interest_cols = interest_cols,
+    dataset = dataset,
+    instance_id = instance_id
+  )
+  return(dist_func)
 }

@@ -132,6 +132,7 @@ run_mab <- function(n_games, n_epochs, dataset, instance_id, environment, intere
 #' @param n_perturb_samples number of samples to be taken from the pertubation distribution
 #' @param n_games
 #' @param n_epochs
+#' @param seed
 #' 
 #' @export 
 make_anchors <- function(
@@ -143,7 +144,8 @@ make_anchors <- function(
   class_col,
   n_perturb_samples = 10000,
   n_games = 20,
-  n_epochs = 100
+  n_epochs = 100,
+  seed = 145
 ) {
   class_ind <- dataset[[class_col]][instance] |> as.numeric()
   environment <- generate_cutpoints(dataset, instance, cols)
@@ -158,7 +160,8 @@ make_anchors <- function(
     cols,
     dist_func,
     model_func,
-    class_ind
+    class_ind,
+    seed = seed
   )
   lower_bound <- final_bounds |> select(ends_with("_l"))
   colnames(lower_bound) <- gsub("_l$", "", colnames(lower_bound))

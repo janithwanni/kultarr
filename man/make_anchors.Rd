@@ -13,7 +13,8 @@ make_anchors(
   class_col,
   n_perturb_samples = 10000,
   n_games = 20,
-  n_epochs = 100
+  n_epochs = 100,
+  seed = 145
 )
 }
 \arguments{
@@ -31,7 +32,7 @@ make_anchors(
 
 \item{n_perturb_samples}{number of samples to be taken from the pertubation distribution}
 
-\item{n_epochs}{}
+\item{seed}{}
 }
 \description{
 Make anchors

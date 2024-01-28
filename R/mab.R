@@ -54,8 +54,10 @@ select_action <- function(n_actions, success_probs, failure_probs) {
 #' @param dist_func
 #' @param model_func
 #' @param class_ind
+#' @param seed
+#' 
 #' @export
-run_mab <- function(n_games, n_epochs, dataset, instance_id, environment, interest_cols, dist_func, model_func, class_ind) {
+run_mab <- function(n_games, n_epochs, dataset, instance_id, environment, interest_cols, dist_func, model_func, class_ind, seed = 145) {
   ## Define environment and actions
   all_possible_actions <- purrr::map(seq_len(2 * length(interest_cols)), ~ return(c(0, 1))) |> expand.grid()
   actions <- all_possible_actions[rowSums(all_possible_actions) == length(interest_cols), ]
@@ -68,6 +70,7 @@ run_mab <- function(n_games, n_epochs, dataset, instance_id, environment, intere
   success_probs <- rep(1, n_actions)
   failure_probs <- rep(1, n_actions)
 
+  set.seed(145)
   for (game in seq_len(n_games)) {
     current_envir <- rep(1, 2 * length(interest_cols))
 

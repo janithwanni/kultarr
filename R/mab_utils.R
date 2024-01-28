@@ -88,10 +88,11 @@ generate_cutpoints <- function(dataset, instance_id, interest_columns) {
 #' @param interest_cols
 #' @param dataset
 #' @param instance_id
+#' @param seed
 #' 
 #' @return A purrr partial function that takes in N and returns N number of sample points around the instance
 #' @export
-make_perturb_distn <- function(n, interest_cols, dataset, instance_id) {
+make_perturb_distn <- function(n, interest_cols, dataset, instance_id, seed = 123) {
   distn_partial <- function(n, interest_cols, dataset, instance_id) {
     pertub_func <- function(n, interest_cols, dataset, instance_id) { 
       out <- mulgar::rmvn(n = n, 
@@ -104,7 +105,7 @@ make_perturb_distn <- function(n, interest_cols, dataset, instance_id) {
       colnames(out) <- interest_cols
       return(as_tibble(out))
     }
-    set.seed(123)
+    set.seed(seed)
     samples <- pertub_func(n = (n * 10), interest_cols, dataset, instance_id)
     samples[1:n, ]
   }

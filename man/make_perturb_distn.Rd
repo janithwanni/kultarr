@@ -4,12 +4,12 @@
 \alias{make_perturb_distn}
 \title{Make perturbation distribution function}
 \usage{
-make_perturb_distn(n, interest_cols, dataset, instance_id)
+make_perturb_distn(n, interest_cols, dataset, instance_id, seed = 123)
 }
 \arguments{
 \item{n}{}
 
-\item{instance_id}{}
+\item{seed}{}
 }
 \value{
 A purrr partial function that takes in N and returns N number of sample points around the instance

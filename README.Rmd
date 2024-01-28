@@ -20,14 +20,15 @@ knitr::opts_chunk$set(
 [![CRAN status](https://www.r-pkg.org/badges/version/anchorsRevisited)](https://CRAN.R-project.org/package=anchorsRevisited)
 <!-- badges: end -->
 
-The goal of anchorsRevisited is to ...
+The goal of `anchorsRevisited` is to generate and understand how anchors are generated in a simpler intuitive approach.
+
 
 ## Installation
 
 You can install the development version of anchorsRevisited like so:
 
 ``` r
-# FILL THIS IN! HOW CAN PEOPLE INSTALL YOUR DEV PACKAGE?
+remotes::install_github("janithwanni/anchorsRevisited")
 ```
 
 ## Example
@@ -37,20 +38,34 @@ This is a basic example which shows you how to solve a common problem:
 ```{r example}
 library(anchorsRevisited)
 ## basic example code
+
+library(randomForest)
+library(palmerpenguins)
+library(dplyr)
+library(tidyr)
+
+set.seed(145)
+train_data <- penguins |> 
+  drop_na() |>
+  select(bill_length_mm: body_mass_g, species) |>
+  slice_sample(prop = 0.8)
+
+rf_model <- randomForest(species ~ ., data = train_data)
+
+model_func <- function(model, data) {
+  return(predict(model, data))
+}
+
+final_bounds <- make_anchors(
+  rf_model,
+  dataset = train_data,
+  cols = train_data |> select(bill_length_mm:body_mass_g) |> colnames(),
+  instance = 1,
+  model_func = model_func,
+  class_col = "species",
+  n_games = 5,
+  n_epochs = 50
+)
+
+final_bounds
 ```
-
-What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so:
-
-```{r cars}
-summary(cars)
-```
-
-You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date. `devtools::build_readme()` is handy for this.
-
-You can also embed plots, for example:
-
-```{r pressure, echo = FALSE}
-plot(pressure)
-```
-
-In that case, don't forget to commit and push the resulting figure files, so they display on GitHub and CRAN.

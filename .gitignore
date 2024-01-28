@@ -5,7 +5,3 @@
 .DS_Store
 .quarto
 .vscode
-scratchpad/3_state_plot_dump
-scratchpad/*_files/
-scratchpad/*_plot_dump*/
-scratchpad/*.gif

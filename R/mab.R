@@ -1,4 +1,5 @@
 #' Reward function for Multi Armed Bandit
+#' 
 #' @param new_anchor
 #' @param round
 #' @param dist_func
@@ -6,6 +7,8 @@
 #' @param dataset
 #' @param instance_id
 #' @param class_ind
+#' @param verbose
+#' 
 #' @export
 get_reward <- function(
     new_anchor,
@@ -14,16 +17,20 @@ get_reward <- function(
     model_func,
     dataset,
     instance_id,
-    class_ind = 1) {
+    class_ind = 1,
+    verbose) {
   # cover <- coverage_area(new_anchor, train_df |> select(all_of(interest_cols)))
   cover <- coverage(new_anchor, dist_func, n_samples = 10000)
   prec <- precision(new_anchor, model_func, dist_func, n_samples = 10000)
-  print(prec)
   prec <- prec[class_ind]
   if (is.null(prec) | is.na(prec)) prec <- 0
   if (prec < 0.5) prec <- 0
   if (is.infinite(cover)) cover <- 0
-  print(glue::glue("==== {cover} | {prec} | {mean(c(cover, prec), na.rm = TRUE) }====="))
+  if(verbose) {
+    print(glue::glue(
+      "==== {cover} | {prec} | {mean(c(cover, prec), na.rm = TRUE) }====="
+    ))
+  }
   return(list(
     reward = as.numeric(satisfies(new_anchor, dataset[instance_id, ])) *
       mean(c(cover / round, prec), na.rm = TRUE),
@@ -55,9 +62,22 @@ select_action <- function(n_actions, success_probs, failure_probs) {
 #' @param model_func
 #' @param class_ind
 #' @param seed
+#' @param verbose Logical. Whether to print out diagnostics of the Multi-Armed Bandit Algorithm
 #' 
 #' @export
-run_mab <- function(n_games, n_epochs, dataset, instance_id, environment, interest_cols, dist_func, model_func, class_ind, seed = 145) {
+run_mab <- function(
+  n_games,
+  n_epochs,
+  dataset,
+  instance_id,
+  environment,
+  interest_cols,
+  dist_func,
+  model_func,
+  class_ind,
+  seed = 145,
+  verbose
+) {
   ## Define environment and actions
   all_possible_actions <- purrr::map(seq_len(2 * length(interest_cols)), ~ return(c(0, 1))) |> expand.grid()
   actions <- all_possible_actions[rowSums(all_possible_actions) == length(interest_cols), ]
@@ -91,7 +111,8 @@ run_mab <- function(n_games, n_epochs, dataset, instance_id, environment, intere
         model_func,
         dataset,
         instance_id,
-        class_ind
+        class_ind,
+        verbose
       )
       outcome <- rbinom(1, size = 1, prob = reward$reward)
 
@@ -101,7 +122,8 @@ run_mab <- function(n_games, n_epochs, dataset, instance_id, environment, intere
         failure_probs[selected_action] <- failure_probs[selected_action] + 1
       }
 
-      print(
+      if(verbose) {
+        print(
         glue::glue(
           "Game {game}: Round {round} \n
             selected : {selected_action}
@@ -111,6 +133,7 @@ run_mab <- function(n_games, n_epochs, dataset, instance_id, environment, intere
             outcome: {outcome}"
         )
       )
+      }
     }
     final_bounds <<- envir_to_bounds(
       current_envir,
@@ -133,6 +156,7 @@ run_mab <- function(n_games, n_epochs, dataset, instance_id, environment, intere
 #' @param n_games
 #' @param n_epochs
 #' @param seed
+#' @param verbose Logical. Whether to print out diagnostics of the Multi-Armed Bandit Algorithm
 #' 
 #' @export 
 make_anchors <- function(
@@ -145,7 +169,8 @@ make_anchors <- function(
   n_perturb_samples = 10000,
   n_games = 20,
   n_epochs = 100,
-  seed = 145
+  seed = 145,
+  verbose = FALSE
 ) {
   class_ind <- dataset[[class_col]][instance] |> as.numeric()
   environment <- generate_cutpoints(dataset, instance, cols)
@@ -161,7 +186,8 @@ make_anchors <- function(
     dist_func,
     model_func,
     class_ind,
-    seed = seed
+    seed = seed,
+    verbose = verbose
   )
   lower_bound <- final_bounds |> select(ends_with("_l"))
   colnames(lower_bound) <- gsub("_l$", "", colnames(lower_bound))

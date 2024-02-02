@@ -11,8 +11,12 @@ get_reward(
   model_func,
   dataset,
   instance_id,
-  class_ind = 1
+  class_ind = 1,
+  verbose
 )
+}
+\arguments{
+\item{verbose}{}
 }
 \description{
 Reward function for Multi Armed Bandit

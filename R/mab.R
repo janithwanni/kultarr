@@ -61,7 +61,8 @@ select_action <- function(n_actions, success_probs, failure_probs) {
 #' @param dist_func
 #' @param model_func
 #' @param class_ind
-#' @param seed
+#' @param seed Numeric. Seed to be used for the Multi-Armed Bandit algorithm.
+#' This ensures that the results stay consistent
 #' @param verbose Logical. Whether to print out diagnostics of the Multi-Armed Bandit Algorithm
 #' 
 #' @export
@@ -90,7 +91,7 @@ run_mab <- function(
   success_probs <- rep(1, n_actions)
   failure_probs <- rep(1, n_actions)
 
-  set.seed(145)
+  set.seed(seed)
   for (game in seq_len(n_games)) {
     current_envir <- rep(1, 2 * length(interest_cols))
 
@@ -155,7 +156,8 @@ run_mab <- function(
 #' @param n_perturb_samples number of samples to be taken from the pertubation distribution
 #' @param n_games
 #' @param n_epochs
-#' @param seed
+#' @param seed Numeric. Seed to be used for the Multi-Armed Bandit algorithm.
+#' This ensures that the results stay consistent
 #' @param verbose Logical. Whether to print out diagnostics of the Multi-Armed Bandit Algorithm
 #' 
 #' @export 
@@ -174,7 +176,7 @@ make_anchors <- function(
 ) {
   class_ind <- dataset[[class_col]][instance] |> as.numeric()
   environment <- generate_cutpoints(dataset, instance, cols)
-  dist_func <- make_perturb_distn(n_perturb_samples, cols, dataset, instance)
+  dist_func <- make_perturb_distn(n_perturb_samples, cols, dataset, instance, seed)
   model_func <- purrr::partial(model_func, model = model)
   final_bounds <- run_mab(
     n_games,

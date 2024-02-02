@@ -64,7 +64,8 @@ final_bounds <- make_anchors(
   model_func = model_func,
   class_col = "species",
   n_games = 5,
-  n_epochs = 50
+  n_epochs = 50,
+  verbose = FALSE
 )
 
 final_bounds

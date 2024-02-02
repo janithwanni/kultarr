@@ -14,7 +14,8 @@ make_anchors(
   n_perturb_samples = 10000,
   n_games = 20,
   n_epochs = 100,
-  seed = 145
+  seed = 145,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -32,7 +33,7 @@ make_anchors(
 
 \item{n_perturb_samples}{number of samples to be taken from the pertubation distribution}
 
-\item{seed}{}
+\item{verbose}{Logical. Whether to print out diagnostics of the Multi-Armed Bandit Algorithm}
 }
 \description{
 Make anchors

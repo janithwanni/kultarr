@@ -88,7 +88,7 @@ generate_cutpoints <- function(dataset, instance_id, interest_columns) {
 #' @param interest_cols
 #' @param dataset
 #' @param instance_id
-#' @param seed
+#' @param seed Numerical. Seed to ensure that the perturbation distribution remains consistent.
 #' 
 #' @return A purrr partial function that takes in N and returns N number of sample points around the instance
 #' @export

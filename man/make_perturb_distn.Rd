@@ -9,7 +9,7 @@ make_perturb_distn(n, interest_cols, dataset, instance_id, seed = 123)
 \arguments{
 \item{n}{}
 
-\item{seed}{}
+\item{seed}{Numerical. Seed to ensure that the perturbation distribution remains consistent.}
 }
 \value{
 A purrr partial function that takes in N and returns N number of sample points around the instance

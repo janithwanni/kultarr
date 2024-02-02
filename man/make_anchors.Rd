@@ -33,6 +33,9 @@ make_anchors(
 
 \item{n_perturb_samples}{number of samples to be taken from the pertubation distribution}
 
+\item{seed}{Numeric. Seed to be used for the Multi-Armed Bandit algorithm.
+This ensures that the results stay consistent}
+
 \item{verbose}{Logical. Whether to print out diagnostics of the Multi-Armed Bandit Algorithm}
 }
 \description{

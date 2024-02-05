@@ -1,5 +1,5 @@
 #' Lookup function to get value of upper and lower bounds for the current state
-#' 
+#'
 #' The current state of the multi armed bandit is marked based on the indices
 #' in the list of each combination of column and lower and upper bound type.
 #' @export
@@ -17,10 +17,10 @@ envir_to_bounds <- function(current_envir, envir, interest_cols) {
 }
 
 #' Advance the current environment
-#' 
+#'
 #' @param current_envir List of indexes, the current state
 #' @param selected_action The index of selected action from the actions list
-#' 
+#'
 #' @return New bounds
 #' @export
 update_bounds <- function(current_envir, envir, actions, selected_action) {
@@ -34,10 +34,10 @@ update_bounds <- function(current_envir, envir, actions, selected_action) {
 }
 
 #' Creates an instance of the anchor class
-#' 
+#'
 #' @param bounds The upper and lower bounds of each column of interest
 #' @param interest_cols the columns of interest
-#' 
+#'
 #' @return an instance of the anchor class
 #' @export
 create_anchor_inst <- function(bounds, interest_cols) {
@@ -83,37 +83,25 @@ generate_cutpoints <- function(dataset, instance_id, interest_columns) {
 }
 
 #' Make perturbation distribution function
-#' 
-#' @param n 
+#'
+#' @param n
 #' @param interest_cols
 #' @param dataset
 #' @param instance_id
 #' @param seed Numerical. Seed to ensure that the perturbation distribution remains consistent.
-#' 
+#'
 #' @return A purrr partial function that takes in N and returns N number of sample points around the instance
 #' @export
 make_perturb_distn <- function(n, interest_cols, dataset, instance_id, seed = 123) {
-  distn_partial <- function(n, interest_cols, dataset, instance_id) {
-    pertub_func <- function(n, interest_cols, dataset, instance_id) { 
-      out <- mulgar::rmvn(n = n, 
-                  p = length(interest_cols),
-                  mn = dataset[instance_id, interest_cols] |> 
-                    unlist(),
-                  vc = cov(dataset[,interest_cols])
-      ) |>
-        as.data.frame()
-      colnames(out) <- interest_cols
-      return(as_tibble(out))
-    }
-    set.seed(seed)
-    samples <- pertub_func(n = (n * 10), interest_cols, dataset, instance_id)
-    samples[1:n, ]
-  }
-  dist_func <- purrr::partial(
-    distn_partial,
-    interest_cols = interest_cols,
-    dataset = dataset,
-    instance_id = instance_id
-  )
-  return(dist_func)
+  set.seed(seed)
+  out <- mulgar::rmvn(n = n,
+                      p = length(interest_cols),
+                      mn = dataset[instance_id, interest_cols] |>
+                        unlist(),
+                      vc = cov(dataset[,interest_cols])
+  ) |>
+    as.data.frame()
+  colnames(out) <- interest_cols
+  samples <- as_tibble(out)
+  return(samples)
 }

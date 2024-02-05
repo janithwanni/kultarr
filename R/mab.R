@@ -1,5 +1,5 @@
 #' Reward function for Multi Armed Bandit
-#' 
+#'
 #' @param new_anchor
 #' @param round
 #' @param dist_func
@@ -8,7 +8,7 @@
 #' @param instance_id
 #' @param class_ind
 #' @param verbose
-#' 
+#'
 #' @export
 get_reward <- function(
     new_anchor,
@@ -42,7 +42,7 @@ get_reward <- function(
 #' @param n_actions
 #' @param success_probs
 #' @param failure_probs
-#' @export 
+#' @export
 select_action <- function(n_actions, success_probs, failure_probs) {
   r <- vector(mode = "numeric", length = n_actions)
   for (i_action in seq_len(n_actions)) {
@@ -64,7 +64,7 @@ select_action <- function(n_actions, success_probs, failure_probs) {
 #' @param seed Numeric. Seed to be used for the Multi-Armed Bandit algorithm.
 #' This ensures that the results stay consistent
 #' @param verbose Logical. Whether to print out diagnostics of the Multi-Armed Bandit Algorithm
-#' 
+#'
 #' @export
 run_mab <- function(
   n_games,
@@ -91,6 +91,8 @@ run_mab <- function(
   success_probs <- rep(1, n_actions)
   failure_probs <- rep(1, n_actions)
 
+  envir_reward_hist <- list() # save reward history for efficiency
+
   set.seed(seed)
   for (game in seq_len(n_games)) {
     current_envir <- rep(1, 2 * length(interest_cols))
@@ -105,16 +107,24 @@ run_mab <- function(
         interest_cols
       ) |>
         create_anchor_inst(interest_cols)
-      reward <- get_reward(
-        new_anchor,
-        round,
-        dist_func,
-        model_func,
-        dataset,
-        instance_id,
-        class_ind,
-        verbose
-      )
+
+      envir_tag <- paste0("E", current_envir, collapse = "")
+      if(is.null(names(envir_reward_hist)) ||
+         !envir_tag %in% names(envir_reward_hist)){
+        reward <- get_reward(
+          new_anchor,
+          round,
+          dist_func,
+          model_func,
+          dataset,
+          instance_id,
+          class_ind,
+          verbose
+        )
+        envir_reward_hist[[envir_tag]] <- reward
+      } else {
+        reward <- envir_reward_hist[[envir_tag]]
+      }
       outcome <- rbinom(1, size = 1, prob = reward$reward)
 
       if (!is.na(outcome) && outcome == 1) {
@@ -146,7 +156,7 @@ run_mab <- function(
 }
 
 #' Make anchors
-#' 
+#'
 #' @param model The model to be interrogated
 #' @param dataset Dataset to use containing predictors and response variables.
 #' @param cols Columns of interest
@@ -159,8 +169,8 @@ run_mab <- function(
 #' @param seed Numeric. Seed to be used for the Multi-Armed Bandit algorithm.
 #' This ensures that the results stay consistent
 #' @param verbose Logical. Whether to print out diagnostics of the Multi-Armed Bandit Algorithm
-#' 
-#' @export 
+#'
+#' @export
 make_anchors <- function(
   model,
   dataset,
@@ -176,7 +186,8 @@ make_anchors <- function(
 ) {
   class_ind <- dataset[[class_col]][instance] |> as.numeric()
   environment <- generate_cutpoints(dataset, instance, cols)
-  dist_func <- make_perturb_distn(n_perturb_samples, cols, dataset, instance, seed)
+  perturb_distn <- make_perturb_distn(n_perturb_samples, cols, dataset, instance, seed)
+  dist_func <- function(n) perturb_distn[1:n, ]
   model_func <- purrr::partial(model_func, model = model)
   final_bounds <- run_mab(
     n_games,
@@ -199,4 +210,4 @@ make_anchors <- function(
     lower_bound |> mutate(bound = "lower"),
     upper_bound |> mutate(bound = "upper")
   ))
-} 
+}

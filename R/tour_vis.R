@@ -14,7 +14,7 @@ bounding_box <- S7::new_class(
     cube <- geozoo::cube.iterate(p = ncol(target_inst_row))
     bounds_list <- bounds_tbl |>
       dplyr::select(
-        tidyselect::all_of(ncol(target_inst_row))
+        tidyselect::all_of(colnames(target_inst_row))
       ) |> as.list()
     bounds_box <- do.call(bounds_list, expand.grid)
     cube$points <- bounds_box

@@ -36,11 +36,11 @@ bounding_boxes <- S7::new_class(
     boxes = S7::class_vector # a vector of bounding box class
   ),
   validator = function(self) {
-    if (!all(sapply(self@boxes, \(x) S7::S7_inherits(x, bounding_box))) {
+    if (!all(sapply(self@boxes, \(x) S7::S7_inherits(x, bounding_box)))) {
       return(
         "The list of boxes should all inherit from the box class"
       )
-    })
+    }
   }
 )
 
@@ -58,9 +58,10 @@ tour_anchor <- S7::new_class(
     if(!S7::S7_inherits(self@boundary_boxes, boundary_boxes)) {
       return("The boundary boxes argument must be a object of class boundary boxes")
     }
-  }
-  #' @param boundary_boxes S7 object of type
-  #' param
+  },
+  #' @param boundary_boxes S7 object of type boundary boxes
+  #' @param data data.frame of points to visualize on tours
+  #' @param point_colors Vector of one of nrow(data)
   constructor = function(boundary_boxes, data, point_colors) {
     tour_vis_points <- NULL # the bounding box points are added first
     tour_vis_edges <- NULL # the bounding box edges are added with edge counts 
@@ -86,7 +87,7 @@ tour_anchor <- S7::new_class(
       tour_vis_data = list(
         points = tour_vis_points,
         edges = tour_vis_edges
-      )
+      ),
       tour_vis_colors = tour_vis_colors
     )
   }

@@ -7,8 +7,6 @@
 make_perturb_distn(n, interest_cols, dataset, instance_id, seed = 123)
 }
 \arguments{
-\item{n}{}
-
 \item{seed}{Numerical. Seed to ensure that the perturbation distribution remains consistent.}
 }
 \value{

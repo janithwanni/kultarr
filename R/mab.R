@@ -7,7 +7,7 @@
 #' @param dataset
 #' @param instance_id
 #' @param class_ind
-#' @param verbose
+#' @param verbose Logical. Whether to print out diagnostics of the Multi-Armed Bandit Algorithm
 #'
 #' @export
 get_reward <- function(

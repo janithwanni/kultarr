@@ -16,7 +16,7 @@ get_reward(
 )
 }
 \arguments{
-\item{verbose}{}
+\item{verbose}{Logical. Whether to print out diagnostics of the Multi-Armed Bandit Algorithm}
 }
 \description{
 Reward function for Multi Armed Bandit

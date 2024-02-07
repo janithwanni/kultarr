@@ -122,11 +122,11 @@ anc_tour <- anchor_tour(
 ``` r
 animate_anchor(
   anc_tour,
-  gif_file = "tour_animation.gif",
+  gif_file = "man/figures/tour_animation.gif",
   width = 500,
   height = 500,
   frames = 360
 )
 ```
 
-![](tour_animation.gif)
+![](man/figures/tour_animation.gif)

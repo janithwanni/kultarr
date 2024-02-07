@@ -110,7 +110,11 @@ bnd_box <- bounding_box(
 #### 2. Create an anchor_tour object to hold the data needed to create the animation
 
 ``` r
-anc_tour <- anchor_tour(bnd_box, train_data |> select(bill_length_mm:body_mass_g), "blue")
+anc_tour <- anchor_tour(
+  bnd_box,
+  train_data |> select(bill_length_mm:body_mass_g),
+  "blue"
+)
 ```
 
 #### 3. Animate using the animate_anchor function by passing the anchor_tour object
@@ -123,9 +127,6 @@ animate_anchor(
   height = 500,
   frames = 360
 )
-#> Converting input data to the required matrix format.
-#> Using half_range 2087
-#> [1] "tour_animation.gif"
 ```
 
 ![](tour_animation.gif)

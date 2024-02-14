@@ -33,11 +33,18 @@ make_anchors(
 
 \item{n_perturb_samples}{number of samples to be taken from the pertubation distribution}
 
+\item{n_games}{Numeric. Number of games to play. Default to 20 games}
+
+\item{n_epochs}{Numeric. Number of epochs in a single game. Default to 100 epochs.}
+
 \item{seed}{Numeric. Seed to be used for the Multi-Armed Bandit algorithm.
 This ensures that the results stay consistent}
 
 \item{verbose}{Logical. Whether to print out diagnostics of the Multi-Armed Bandit Algorithm}
 }
+\value{
+A data.frame of size 2 x (p+1) where p is the number of columns of interest with each row containing a upper. lower bound.
+}
 \description{
-Make anchors
+This function is the main entrypoint that generates anchors by running a Multi-Armed Bandit algorithm
 }

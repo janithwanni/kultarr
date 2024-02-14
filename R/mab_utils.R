@@ -2,6 +2,13 @@
 #'
 #' The current state of the multi armed bandit is marked based on the indices
 #' in the list of each combination of column and lower and upper bound type.
+#' 
+#' @param current_envir List of indexes, the current state
+#' @param envir The current environment
+#' @param interest_cols Columns of interest
+#' 
+#' @return A tibble of 1 x (2*p) where p is the number of columns of interest
+#' @rdname mab_utils
 #' @export
 envir_to_bounds <- function(current_envir, envir, interest_cols) {
   bounds <- matrix(
@@ -22,6 +29,7 @@ envir_to_bounds <- function(current_envir, envir, interest_cols) {
 #' @param selected_action The index of selected action from the actions list
 #'
 #' @return New bounds
+#' @rdname mab_utils
 #' @export
 update_bounds <- function(current_envir, envir, actions, selected_action) {
   new_bound <- current_envir + actions[[selected_action]]
@@ -39,6 +47,7 @@ update_bounds <- function(current_envir, envir, actions, selected_action) {
 #' @param interest_cols the columns of interest
 #'
 #' @return an instance of the anchor class
+#' @rdname mab_utils
 #' @export
 create_anchor_inst <- function(bounds, interest_cols) {
   pred_vec <- c()
@@ -59,6 +68,8 @@ create_anchor_inst <- function(bounds, interest_cols) {
 #' @param interest_coluns The columns of `dataset` to consider when creating lower and upper bounds
 #'
 #' @returns A list. Contains lower and upper bounds for each specific column of interest.
+#' 
+#' @rdname mab_utils
 #' @export
 generate_cutpoints <- function(dataset, instance_id, interest_columns) {
   envir <- purrr::map(interest_columns, function(cname) {
@@ -84,13 +95,14 @@ generate_cutpoints <- function(dataset, instance_id, interest_columns) {
 
 #' Make perturbation distribution function
 #'
-#' @param n
-#' @param interest_cols
-#' @param dataset
-#' @param instance_id
+#' @param n Number of samples
+#' @param interest_cols Columns from the dataset that are of interest
+#' @param dataset The dataset used to make the anchors
+#' @param instance_id The index of the target observation in the dataset
 #' @param seed Numerical. Seed to ensure that the perturbation distribution remains consistent.
 #'
 #' @return A purrr partial function that takes in N and returns N number of sample points around the instance
+#' @rdname mab_utils
 #' @export
 make_perturb_distn <- function(n, interest_cols, dataset, instance_id, seed = 123) {
   set.seed(seed)

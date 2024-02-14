@@ -1,3 +1,7 @@
+#' S7 class to define anchors
+#' @param predicates a vector of objects with the S7 class of predicate
+#' @return Object of S7 class anchors
+#' @rdname anchors
 #' @export
 anchors <- S7::new_class(
   "anchors",

@@ -1,7 +1,10 @@
-#' @export
-satisfies <- S7::new_generic("satisfies", "x")
+#' Generic function to calculate the number of rows in a dataset satisfied by an anchor
+#' @param x Object of S7 class anchor
 #' @param data The dataframe to apply anchors on. Can be one instance or an entire dataset.
 #' @return A logical vector indicating whether the anchors satisfies `data`
+#' @rdname anchors
+#' @export
+satisfies <- S7::new_generic("satisfies", "x")
 S7::method(satisfies, anchors) <- function(x, data) {
   predicate_cols <- sapply(x@predicates, \(x) x@feature)
   if (!all(predicate_cols %in% colnames(data))) {

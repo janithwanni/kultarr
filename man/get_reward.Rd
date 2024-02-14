@@ -2,7 +2,7 @@
 % Please edit documentation in R/mab.R
 \name{get_reward}
 \alias{get_reward}
-\title{Reward function for Multi Armed Bandit}
+\title{Reward function for Multi Armed Bandit.}
 \usage{
 get_reward(
   new_anchor,
@@ -16,8 +16,28 @@ get_reward(
 )
 }
 \arguments{
+\item{new_anchor}{Object of class anchor.}
+
+\item{round}{Numerical. A value to round the coverage by.}
+
+\item{dist_func}{Function that takes n as an argument and returns
+a data.frame of size n x p where p is the number of variables in the dataset}
+
+\item{model_func}{Function that takes in a data.frame of size m x p
+where m is the number of rows and p is the number of variables in the dataset
+and returns a vector of predictions of size m x 1}
+
+\item{dataset}{Data frame used in the algorithm}
+
+\item{instance_id}{The row index of the target instance in the \code{dataset} argument}
+
+\item{class_ind}{Numeric. The index of the required class when ordered alphabetically}
+
 \item{verbose}{Logical. Whether to print out diagnostics of the Multi-Armed Bandit Algorithm}
 }
+\value{
+List containing the reward, the precision and the coverage
+}
 \description{
-Reward function for Multi Armed Bandit
+This is an internal function
 }

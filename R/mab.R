@@ -1,14 +1,21 @@
-#' Reward function for Multi Armed Bandit
+#' Reward function for Multi Armed Bandit. 
+#' 
+#' This is an internal function 
 #'
-#' @param new_anchor
-#' @param round
-#' @param dist_func
-#' @param model_func
-#' @param dataset
-#' @param instance_id
-#' @param class_ind
+#' @param new_anchor Object of class anchor.
+#' @param round Numerical. A value to round the coverage by.
+#' @param dist_func Function that takes n as an argument and returns 
+#' a data.frame of size n x p where p is the number of variables in the dataset
+#' @param model_func Function that takes in a data.frame of size m x p 
+#' where m is the number of rows and p is the number of variables in the dataset 
+#' and returns a vector of predictions of size m x 1
+#' @param dataset Data frame used in the algorithm
+#' @param instance_id The row index of the target instance in the `dataset` argument
+#' @param class_ind Numeric. The index of the required class when ordered alphabetically
 #' @param verbose Logical. Whether to print out diagnostics of the Multi-Armed Bandit Algorithm
 #'
+#' @return List containing the reward, the precision and the coverage
+#' 
 #' @export
 get_reward <- function(
     new_anchor,
@@ -39,9 +46,13 @@ get_reward <- function(
   ))
 }
 
-#' @param n_actions
-#' @param success_probs
-#' @param failure_probs
+#' Function to decide on the appropriate actions
+#' 
+#' @param n_actions Number of possible actions
+#' @param success_probs Numeric vector with length equal to n_actions containing values between 0-1
+#' @param failure_probs Numeric vector with length equal to n_actions containing values between 0-1
+#' @return Numeric value in the range of 1 to n_actions
+#' 
 #' @export
 select_action <- function(n_actions, success_probs, failure_probs) {
   r <- vector(mode = "numeric", length = n_actions)
@@ -52,19 +63,25 @@ select_action <- function(n_actions, success_probs, failure_probs) {
   return(selected_action)
 }
 
-#' @param n_games
-#' @param n_epochs
-#' @param dataset
-#' @param instance_id
-#' @param environment
-#' @param interest_cols
-#' @param dist_func
-#' @param model_func
-#' @param class_ind
+#' Run Multi-Armed bandit algorithm
+#' 
+#' @param n_games Numeric. Number of games to play
+#' @param n_epochs Numeric. Number of epochs in a single game
+#' @param dataset The dataset to run algorithm on
+#' @param instance_id The index of the target observation in the datasert
+#' @param environment The environment of poss
+#' @param interest_cols The columns of interest
+#' @param dist_func Function that takes n as an argument and returns 
+#' a data.frame of size n x p where p is the number of variables in the dataset
+#' @param model_func Function that takes in a data.frame of size m x p 
+#' where m is the number of rows and p is the number of variables in the dataset 
+#' and returns a vector of predictions of size m x 1
+#' @param class_ind Numeric. The index of the required class when ordered alphabetically
 #' @param seed Numeric. Seed to be used for the Multi-Armed Bandit algorithm.
 #' This ensures that the results stay consistent
 #' @param verbose Logical. Whether to print out diagnostics of the Multi-Armed Bandit Algorithm
 #'
+#' @return A tibble of 1 x (2*p) where p is the number of columns of interest
 #' @export
 run_mab <- function(
   n_games,
@@ -156,6 +173,8 @@ run_mab <- function(
 }
 
 #' Make anchors
+#' 
+#' This function is the main entrypoint that generates anchors by running a Multi-Armed Bandit algorithm
 #'
 #' @param model The model to be interrogated
 #' @param dataset Dataset to use containing predictors and response variables.
@@ -164,12 +183,13 @@ run_mab <- function(
 #' @param model_func Function that gives takes in any data and the model to give predictions
 #' @param class_col Name of factor column containing class of interest
 #' @param n_perturb_samples number of samples to be taken from the pertubation distribution
-#' @param n_games
-#' @param n_epochs
+#' @param n_games Numeric. Number of games to play. Default to 20 games
+#' @param n_epochs Numeric. Number of epochs in a single game. Default to 100 epochs.
 #' @param seed Numeric. Seed to be used for the Multi-Armed Bandit algorithm.
 #' This ensures that the results stay consistent
 #' @param verbose Logical. Whether to print out diagnostics of the Multi-Armed Bandit Algorithm
 #'
+#' @return A data.frame of size 2 x (p+1) where p is the number of columns of interest with each row containing a upper. lower bound.
 #' @export
 make_anchors <- function(
   model,

@@ -1,3 +1,12 @@
+#' S7 class to hold the bounding box created by `make_anchors`
+#' 
+#' @param bounds_tbl Tibble containing two rows and (p+1) columns of p predictors
+#' @param target_inst_row Tibble of one row and p columns for the target instance
+#' @param point_colors Vector of 2^p length or 1 value
+#' 
+#' @return S7 object of class bounding box
+#' 
+#' @rdname bounding_box
 #' @export 
 bounding_box <- S7::new_class(
   "bounding_box",
@@ -7,9 +16,6 @@ bounding_box <- S7::new_class(
     box = S7::class_list,
     point_colors = S7::class_vector
   ),
-  #' @param bounds_tbl Tibble containing two rows and (p+1) columns of p predictors
-  #' @param target_inst_row Tibble of one row and p columns for the target instance
-  #' @param point_colors Vector of 2^p length or 1 value
   constructor = function(bounds_tbl, target_inst_row, point_colors) {
     n_box_points <- 2^(ncol(target_inst_row))
     if(!length(point_colors) != 1 && !length(point_colors) != n_box_points) {
@@ -40,6 +46,13 @@ bounding_box <- S7::new_class(
   }
 )
 
+#' S7 class to hold a list of bounding boxes
+#' 
+#' @param boxes A vector of S7 objects of class bounding box
+#' 
+#' @return S7 object of class bounding boxes
+#' 
+#' @rdname bounding_box
 #' @export 
 bounding_boxes <- S7::new_class(
   "bounding_boxes",
@@ -55,6 +68,12 @@ bounding_boxes <- S7::new_class(
   }
 )
 
+#' Data structure to hold information necessary to animate tours
+#' 
+#' @param b_boxes S7 object of type boundary boxes
+#' @param data data.frame of points to visualize on tours
+#' @param point_colors Vector of one or nrow(data)
+#' 
 #' @export
 anchor_tour <- S7::new_class(
   "anchor_tour",
@@ -65,9 +84,6 @@ anchor_tour <- S7::new_class(
     tour_vis_colors = S7::class_vector,
     box_indices = S7::class_vector
   ),
-  #' @param b_boxes S7 object of type boundary boxes
-  #' @param data data.frame of points to visualize on tours
-  #' @param point_colors Vector of one or nrow(data)
   constructor = function(b_boxes, data, point_colors) {
     if(!length(point_colors) != 1 && !length(point_colors) != nrow(data)) {
       cli::cli_abort(c(
@@ -114,8 +130,8 @@ anchor_tour <- S7::new_class(
   }
 )
 
-#' @export
-animate_anchor <- S7::new_generic("animate", "x")
+#' Generic function to visualize tours
+#' 
 #' @param x An object of type anchor_tour
 #' @param gif_file The file location to save the gif file
 #' @param tour_path An object of type 'tour_path' from the tourr package. Defaults to grand_tour()
@@ -126,6 +142,8 @@ animate_anchor <- S7::new_generic("animate", "x")
 #' @param ... Additional arguments passed to display_xy
 #' 
 #' @return None. Saves GIF at file location
+#' @export
+animate_anchor <- S7::new_generic("animate", "x")
 S7::method(animate_anchor, anchor_tour) <- function(
   x,
   gif_file,

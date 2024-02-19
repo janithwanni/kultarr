@@ -5,18 +5,20 @@
 \alias{bounding_boxes}
 \title{S7 class to hold the bounding box created by \code{make_anchors}}
 \usage{
-bounding_box(bounds_tbl, target_inst_row, point_colors)
+bounding_box(bounds_tbl, target_inst_row, point_colors, edges_colors)
 
 bounding_boxes(boxes = class_missing)
 }
 \arguments{
-\item{bounds_tbl}{Tibble containing two rows and (p+1) columns of p predictors}
+\item{bounds_tbl}{Tibble containing two rows and (p+1) columns of p predictors.}
 
-\item{target_inst_row}{Tibble of one row and p columns for the target instance}
+\item{target_inst_row}{Tibble of one row and p columns for the target instance.}
 
-\item{point_colors}{Vector of 2^p length or 1 value}
+\item{point_colors}{Character vector of 2^p length or 1 value.}
 
 \item{boxes}{A vector of S7 objects of class bounding box}
+
+\item{edge_colors}{Character cector of 2^(p-1) * p length or 1 value.}
 }
 \value{
 S7 object of class bounding box

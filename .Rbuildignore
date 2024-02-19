@@ -8,3 +8,5 @@
 ^scratchpad$
 ^\.vscode$
 ^\.lintr$
+^doc$
+^Meta$

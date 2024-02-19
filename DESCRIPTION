@@ -7,6 +7,8 @@ Authors@R:
 Description: What the package does (one paragraph).
 License: MIT + file LICENSE
 Suggests: 
+    knitr,
+    rmarkdown,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 Encoding: UTF-8
@@ -18,3 +20,4 @@ Imports:
     mulgar,
     purrr,
     S7
+VignetteBuilder: knitr

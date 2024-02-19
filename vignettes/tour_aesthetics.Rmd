@@ -43,7 +43,7 @@ anchor_result <- tibble::tibble(
 ```
 
 ```{r setup}
-library(anchorsRevisited)
+library(kultarr)
 ```
 
 Here we will be using two colors and two types of shapes to demonstrate the key capabilities. 

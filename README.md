@@ -1,25 +1,25 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# anchorsRevisited
+# kultarr
 
 <!-- badges: start -->
 
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 [![CRAN
-status](https://www.r-pkg.org/badges/version/anchorsRevisited)](https://CRAN.R-project.org/package=anchorsRevisited)
+status](https://www.r-pkg.org/badges/version/kultarr)](https://CRAN.R-project.org/package=kultarr)
 <!-- badges: end -->
 
-The goal of `anchorsRevisited` is to generate and understand how anchors
+The goal of `kultarr` is to generate and understand how anchors
 are generated in a simpler intuitive approach.
 
 ## Installation
 
-You can install the development version of anchorsRevisited like so:
+You can install the development version of kultarr like so:
 
 ``` r
-remotes::install_github("janithwanni/anchorsRevisited")
+remotes::install_github("janithwanni/kultarr")
 ```
 
 ## Example
@@ -27,7 +27,7 @@ remotes::install_github("janithwanni/anchorsRevisited")
 This is a basic example which shows you how to solve a common problem:
 
 ``` r
-library(anchorsRevisited)
+library(kultarr)
 ## basic example code
 
 library(randomForest)
@@ -74,7 +74,7 @@ final_bounds <- make_anchors(
 #> Warning: The `x` argument of `as_tibble.matrix()` must have unique column names if
 #> `.name_repair` is omitted as of tibble 2.0.0.
 #> ℹ Using compatibility `.name_repair`.
-#> ℹ The deprecated feature was likely used in the anchorsRevisited package.
+#> ℹ The deprecated feature was likely used in the kultarr package.
 #>   Please report the issue to the authors.
 #> This warning is displayed once every 8 hours.
 #> Call `lifecycle::last_lifecycle_warnings()` to see where this warning was

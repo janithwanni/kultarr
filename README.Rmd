@@ -13,22 +13,22 @@ knitr::opts_chunk$set(
 )
 ```
 
-# anchorsRevisited
+# kultarr
 
 <!-- badges: start -->
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
-[![CRAN status](https://www.r-pkg.org/badges/version/anchorsRevisited)](https://CRAN.R-project.org/package=anchorsRevisited)
+[![CRAN status](https://www.r-pkg.org/badges/version/kultarr)](https://CRAN.R-project.org/package=kultarr)
 <!-- badges: end -->
 
-The goal of `anchorsRevisited` is to generate and understand how anchors are generated in a simpler intuitive approach.
+The goal of `kultarr` is to generate and understand how anchors are generated in a simpler intuitive approach.
 
 
 ## Installation
 
-You can install the development version of anchorsRevisited like so:
+You can install the development version of kultarr like so:
 
 ``` r
-remotes::install_github("janithwanni/anchorsRevisited")
+remotes::install_github("janithwanni/kultarr")
 ```
 
 ## Example
@@ -36,7 +36,7 @@ remotes::install_github("janithwanni/anchorsRevisited")
 This is a basic example which shows you how to solve a common problem:
 
 ```{r example}
-library(anchorsRevisited)
+library(kultarr)
 ## basic example code
 
 library(randomForest)

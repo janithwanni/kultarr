@@ -1,6 +1,6 @@
 ^renv$
 ^renv\.lock$
-^anchorsRevisited\.Rproj$
+^kultarr\.Rproj$
 ^\.Rproj\.user$
 ^LICENSE\.md$
 ^README\.Rmd$

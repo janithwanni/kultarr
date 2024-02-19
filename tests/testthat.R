@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(anchorsRevisited)
+library(kultarr)
 
-test_check("anchorsRevisited")
+test_check("kultarr")

@@ -46,6 +46,8 @@ get_reward <- function(
   ))
 }
 
+get_reward_faster <- memoise::memoise(get_reward)
+
 #' Function to decide on the appropriate actions
 #' 
 #' @param n_actions Number of possible actions
@@ -118,7 +120,7 @@ run_mab <- function(
       selected_action <- select_action(n_actions, success_probs, failure_probs)
 
       current_envir <- update_bounds(current_envir, environment, actions, selected_action)
-      new_anchor <- envir_to_bounds(
+      new_anchor <- envir_to_bounds_faster(
         current_envir,
         environment,
         interest_cols
@@ -128,7 +130,7 @@ run_mab <- function(
       envir_tag <- paste0("E", current_envir, collapse = "")
       if(is.null(names(envir_reward_hist)) ||
          !envir_tag %in% names(envir_reward_hist)){
-        reward <- get_reward(
+        reward <- get_reward_faster(
           new_anchor,
           round,
           dist_func,
@@ -163,7 +165,7 @@ run_mab <- function(
       )
       }
     }
-    final_bounds <<- envir_to_bounds(
+    final_bounds <<- envir_to_bounds_faster(
       current_envir,
       environment,
       interest_cols

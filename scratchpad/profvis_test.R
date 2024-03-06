@@ -20,6 +20,17 @@ model_func <- function(model, data) {
   return(predict(model, data))
 }
 
+system.time({
+  final_bounds <- make_anchors(
+  rf_model,
+  dataset = train_data,
+  cols = train_data |> select(bill_length_mm:body_mass_g) |> colnames(),
+  instance = seq(10),
+  model_func = model_func,
+  class_col = "species",
+  verbose = FALSE
+)
+})
 profvis({
   final_bounds <- make_anchors(
     rf_model,

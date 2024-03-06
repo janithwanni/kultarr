@@ -15,7 +15,7 @@ envir_to_bounds <- function(current_envir, envir, interest_cols) {
     rep(NA, 2 * length(interest_cols))
   ) |>
     t() |>
-    as_tibble()
+    tibble::as_tibble()
   for (i in seq_along(current_envir)) {
     bounds[1, i] <- envir[[i]][current_envir[i]]
   }
@@ -116,6 +116,6 @@ make_perturb_distn <- function(n, interest_cols, dataset, instance_id, seed = 12
   ) |>
     as.data.frame()
   colnames(out) <- interest_cols
-  samples <- as_tibble(out)
+  samples <- tibble::as_tibble(out)
   return(samples)
 }

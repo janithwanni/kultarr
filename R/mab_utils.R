@@ -23,6 +23,8 @@ envir_to_bounds <- function(current_envir, envir, interest_cols) {
   return(bounds)
 }
 
+envir_to_bounds_faster <- memoise::memoise(envir_to_bounds)
+
 #' Advance the current environment
 #'
 #' @param current_envir List of indexes, the current state

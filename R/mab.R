@@ -206,6 +206,47 @@ make_anchors <- function(
   seed = 145,
   verbose = FALSE
 ) {
+  p <- progressr::progressor(steps = length(instance))
+  future::plan("multisession")
+  final_bounds <- furrr::future_map_dfr(
+    instance,
+    function(i) {
+      p()
+      make_single_anchor(
+        model = model,
+        dataset = dataset,
+        cols = cols,
+        i,
+        model_func = model_func,
+        class_col = class_col,
+        n_perturb_samples = n_perturb_samples,
+        n_games = n_games,
+        n_epochs = n_epochs,
+        seed = seed,
+        verbose = verbose
+      ) |> 
+      dplyr::mutate(id = i, .before = 1)
+    },
+    .options = furrr::furrr_options(
+      packages = c("randomForest")
+    )
+  )
+}
+
+#' @export
+make_single_anchor <- function(
+  model,
+  dataset,
+  cols,
+  instance,
+  model_func,
+  class_col,
+  n_perturb_samples = 10000,
+  n_games = 20,
+  n_epochs = 100,
+  seed = 145,
+  verbose = FALSE
+) {
   class_ind <- dataset[[class_col]][instance] |> as.numeric()
   environment <- generate_cutpoints(dataset, instance, cols)
   perturb_distn <- make_perturb_distn(n_perturb_samples, cols, dataset, instance, seed)
@@ -224,12 +265,12 @@ make_anchors <- function(
     seed = seed,
     verbose = verbose
   )
-  lower_bound <- final_bounds |> select(ends_with("_l"))
+  lower_bound <- final_bounds |> dplyr::select(ends_with("_l"))
   colnames(lower_bound) <- gsub("_l$", "", colnames(lower_bound))
-  upper_bound <- final_bounds |> select(ends_with("_u"))
+  upper_bound <- final_bounds |> dplyr::select(ends_with("_u"))
   colnames(upper_bound) <- gsub("_u$", "", colnames(upper_bound))
   return(rbind(
-    lower_bound |> mutate(bound = "lower"),
-    upper_bound |> mutate(bound = "upper")
+    lower_bound |> dplyr::mutate(bound = "lower"),
+    upper_bound |> dplyr::mutate(bound = "upper")
   ))
 }

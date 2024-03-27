@@ -265,7 +265,7 @@ make_single_anchor <- function(
     seed = seed,
     verbose = verbose
   )
-  if (!validate_bounds(final_bounds)) {
+  if (!validate_bound(final_bounds, dataset[instance, cols])) {
     final_bounds <- rep(1, 2 * length(cols)) |>
       envir_to_bounds_faster(environment, cols)
   }

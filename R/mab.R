@@ -265,6 +265,10 @@ make_single_anchor <- function(
     seed = seed,
     verbose = verbose
   )
+  if (!validate_bounds(final_bounds)) {
+    final_bounds <- rep(1, 2 * length(cols)) |>
+      envir_to_bounds_faster(environment, cols)
+  }
   lower_bound <- final_bounds |> dplyr::select(ends_with("_l"))
   colnames(lower_bound) <- gsub("_l$", "", colnames(lower_bound))
   upper_bound <- final_bounds |> dplyr::select(ends_with("_u"))

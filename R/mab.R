@@ -228,7 +228,7 @@ make_anchors <- function(
       dplyr::mutate(id = i, .before = 1)
     },
     .options = furrr::furrr_options(
-      packages = c("randomForest")
+      packages = c("randomForest") #TODO: Fix this, apparently global code inspection gets effed up
     )
   )
 }
@@ -265,6 +265,10 @@ make_single_anchor <- function(
     seed = seed,
     verbose = verbose
   )
+  if (!validate_bound(final_bounds, dataset[instance, cols])) {
+    final_bounds <- rep(1, 2 * length(cols)) |>
+      envir_to_bounds_faster(environment, cols)
+  }
   lower_bound <- final_bounds |> dplyr::select(ends_with("_l"))
   colnames(lower_bound) <- gsub("_l$", "", colnames(lower_bound))
   upper_bound <- final_bounds |> dplyr::select(ends_with("_u"))

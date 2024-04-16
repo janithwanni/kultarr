@@ -15,6 +15,7 @@ envir_to_bounds <- function(current_envir, envir, interest_cols) {
     rep(NA, 2 * length(interest_cols))
   ) |>
     t() |>
+    `colnames<-`(paste0("V", seq_len(2 * length(interest_cols)))) |>
     tibble::as_tibble()
   for (i in seq_along(current_envir)) {
     bounds[1, i] <- envir[[i]][current_envir[i]]
@@ -118,4 +119,30 @@ make_perturb_distn <- function(n, interest_cols, dataset, instance_id, seed = 12
   colnames(out) <- interest_cols
   samples <- tibble::as_tibble(out)
   return(samples)
+}
+
+#' Function to validate whether
+#' every edge case of the environment can contain the row
+#' @export
+validate_environment <- function(e, instance_row) {
+    combs_bounds <- e |> lapply(range) |> do.call(tidyr::expand_grid, args= _)
+    combs_bounds |>
+        split(seq(nrow(combs_bounds))) |>
+        sapply(\(x) {
+            x |>
+            create_anchor_inst(colnames(instance_row)) |>
+            satisfies(instance_row)
+        }) |>
+        all()
+}
+
+#' Function to validate if a created boundary satisfies a given instance row
+#' @export
+validate_bound <- function(b, instance_row) {
+  if(any(is.na(b))) {
+    return(FALSE)
+  }
+  b |> 
+  create_anchor_inst((colnames(instance_row))) |> 
+  satisfies(instance_row)
 }

@@ -111,6 +111,7 @@ run_mab <- function(
   failure_probs <- rep(1, n_actions)
 
   envir_reward_hist <- list() # save reward history for efficiency
+  reward_history <- NULL
 
   set.seed(seed)
   for (game in seq_len(n_games)) {
@@ -144,6 +145,20 @@ run_mab <- function(
       } else {
         reward <- envir_reward_hist[[envir_tag]]
       }
+      bound_row <- envir_to_bounds_faster(
+        current_envir,
+        environment,
+        interest_cols
+      ) |>
+        dplyr::mutate(
+          earned_reward = reward$reward,
+          prec = reward$prec,
+          cover = reward$cover,
+          game = game,
+          epoch = round,
+          id = instance_id
+        )
+      reward_history <- dplyr::bind_rows(reward_history, bound_row)
       outcome <- rbinom(1, size = 1, prob = reward$reward)
 
       if (!is.na(outcome) && outcome == 1) {
@@ -169,9 +184,17 @@ run_mab <- function(
       current_envir,
       environment,
       interest_cols
+    ) |> 
+    dplyr::mutate(
+      reward = reward_history$earned_reward[nrow(reward_history)],
+      prec = reward_history$prec[nrow(reward_history)],
+      cover = reward_history$cover[nrow(reward_history)],
     )
   }
-  return(final_bounds)
+  return(list(
+    final_anchor = final_bounds,
+    reward_history = reward_history
+  ))
 }
 
 #' Make anchors
@@ -208,7 +231,7 @@ make_anchors <- function(
 ) {
   p <- progressr::progressor(steps = length(instance))
   future::plan("multisession")
-  final_bounds <- furrr::future_map_dfr(
+  final_bounds <- furrr::future_map(
     instance,
     function(i) {
       p()
@@ -224,13 +247,16 @@ make_anchors <- function(
         n_epochs = n_epochs,
         seed = seed,
         verbose = verbose
-      ) |> 
-      dplyr::mutate(id = i, .before = 1)
+      )
     },
     .options = furrr::furrr_options(
       packages = c("randomForest") #TODO: Fix this, apparently global code inspection gets effed up
     )
   )
+  return(list(
+    final_anchor = final_bounds |> purrr::map_dfr(~.x[["final_anchor"]]),
+    reward_history = final_bounds |> purrr::map_dfr(~.x[["history"]])
+  ))
 }
 
 #' @export
@@ -252,7 +278,7 @@ make_single_anchor <- function(
   perturb_distn <- make_perturb_distn(n_perturb_samples, cols, dataset, instance, seed)
   dist_func <- function(n) perturb_distn[1:n, ]
   model_func <- purrr::partial(model_func, model = model)
-  final_bounds <- run_mab(
+  mab_results <- run_mab(
     n_games,
     n_epochs,
     dataset,
@@ -265,6 +291,7 @@ make_single_anchor <- function(
     seed = seed,
     verbose = verbose
   )
+  final_bounds <- mab_results[["final_anchor"]]
   if (!validate_bound(final_bounds, dataset[instance, cols])) {
     final_bounds <- rep(1, 2 * length(cols)) |>
       envir_to_bounds_faster(environment, cols)
@@ -273,8 +300,19 @@ make_single_anchor <- function(
   colnames(lower_bound) <- gsub("_l$", "", colnames(lower_bound))
   upper_bound <- final_bounds |> dplyr::select(ends_with("_u"))
   colnames(upper_bound) <- gsub("_u$", "", colnames(upper_bound))
-  return(rbind(
+
+  anchor_df <- rbind(
     lower_bound |> dplyr::mutate(bound = "lower"),
     upper_bound |> dplyr::mutate(bound = "upper")
-  ))
+  ) |>
+    dplyr::mutate(id = instance, .before = 1) |>
+    dplyr::mutate(
+      reward = final_bounds$reward,
+      prec = final_bounds$prec,
+      cover = final_bounds$cover
+    )
+
+  return(
+    list(final_anchor = anchor_df, history = mab_results[["reward_history"]])
+  )
 }

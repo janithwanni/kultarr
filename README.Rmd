@@ -60,15 +60,30 @@ final_bounds <- make_anchors(
   rf_model,
   dataset = train_data,
   cols = train_data |> select(bill_length_mm:body_mass_g) |> colnames(),
-  instance = 1,
+  instance = c(1),
   model_func = model_func,
   class_col = "species",
   n_games = 5,
   n_epochs = 50,
   verbose = FALSE
 )
+```
 
-final_bounds
+The `final_bounds` variable is a list containing both the history of the algorithm (`reward_history`) and the resulting anchor (`final_anchor`).
+
+```{r result_structure}
+str(final_bounds)
+```
+
+The resulting anchor will have the reward, the precision and the coverage of the underlying algorithm as additional diagnostic information.
+
+```{r result_anchor}
+final_bounds$final_anchor
+```
+
+The diagnostic information can be helpful in understanding where the algorithm explored in the solution space.
+
+
 ```
 
 # Visualizing anchors in high dimensions
@@ -82,9 +97,10 @@ There are several S7 classes built to make the process of visualizing the boundi
 
 ```{r step-1}
 bnd_box <- bounding_box(
-  bounds_tbl = final_bounds,
+  bounds_tbl = final_bounds$final_anchor,
   target_inst_row = train_data[1, ] |> select(bill_length_mm:body_mass_g),
-  point_colors = "black"
+  point_colors = "black",
+  edges_colors = "black"
 )
 ```
 

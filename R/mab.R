@@ -210,6 +210,7 @@ run_mab <- function(
 #' @param seed Numeric. Seed to be used for the Multi-Armed Bandit algorithm.
 #' This ensures that the results stay consistent
 #' @param verbose Logical. Whether to print out diagnostics of the Multi-Armed Bandit Algorithm
+#' @param parallel Logical. Whether to use parallel processing. Default set to FALSE.
 #'
 #' @return A data.frame of size 2 x (p+1) where p is the number of columns of interest with each row containing a upper. lower bound.
 #' @export
@@ -223,10 +224,11 @@ make_anchors <- function(
   n_games = 20,
   n_epochs = 100,
   seed = 145,
-  verbose = FALSE
+  verbose = FALSE,
+  parallel = FALSE
 ) {
   p <- progressr::progressor(steps = length(instance))
-  future::plan("multisession")
+  future::plan(ifelse(parallel, "multisession", "sequential"))
   final_bounds <- furrr::future_map(
     instance,
     function(i) {

@@ -1,4 +1,4 @@
-# Changes in v0.0.1
+# kultarr (0.1.0)
 
 * Added functions to create anchors
 

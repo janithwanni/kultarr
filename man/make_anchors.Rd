@@ -14,7 +14,8 @@ make_anchors(
   n_games = 20,
   n_epochs = 100,
   seed = 145,
-  verbose = FALSE
+  verbose = FALSE,
+  parallel = FALSE
 )
 }
 \arguments{
@@ -38,6 +39,8 @@ make_anchors(
 This ensures that the results stay consistent}
 
 \item{verbose}{Logical. Whether to print out diagnostics of the Multi-Armed Bandit Algorithm}
+
+\item{parallel}{Logical. Whether to use parallel processing. Default set to FALSE.}
 }
 \value{
 A data.frame of size 2 x (p+1) where p is the number of columns of interest with each row containing a upper. lower bound.

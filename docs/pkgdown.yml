@@ -2,6 +2,7 @@ pandoc: 3.1.12.2
 pkgdown: 2.0.7
 pkgdown_sha: ~
 articles:
+  kultarr: kultarr.html
   tour_aesthetics: tour_aesthetics.html
-last_built: 2024-07-09T14:24Z
+last_built: 2024-08-14T13:25Z
 

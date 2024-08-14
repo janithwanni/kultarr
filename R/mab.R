@@ -199,7 +199,6 @@ run_mab <- function(
 #' 
 #' This function is the main entrypoint that generates anchors by running a Multi-Armed Bandit algorithm
 #'
-#' @param model The model to be interrogated
 #' @param dataset Dataset to use containing predictors and response variables.
 #' @param cols Columns of interest
 #' @param instance Id of the instance of interest in the training dataset
@@ -215,7 +214,6 @@ run_mab <- function(
 #' @return A data.frame of size 2 x (p+1) where p is the number of columns of interest with each row containing a upper. lower bound.
 #' @export
 make_anchors <- function(
-  model,
   dataset,
   cols,
   instance,
@@ -234,7 +232,6 @@ make_anchors <- function(
     function(i) {
       p()
       make_single_anchor(
-        model = model,
         dataset = dataset,
         cols = cols,
         i,
@@ -260,7 +257,6 @@ make_anchors <- function(
 #' @keywords internal
 #' @noRd
 make_single_anchor <- function(
-  model,
   dataset,
   cols,
   instance,
@@ -276,7 +272,6 @@ make_single_anchor <- function(
   environment <- generate_cutpoints(dataset, instance, cols)
   perturb_distn <- make_perturb_distn(n_perturb_samples, cols, dataset, instance, seed)
   dist_func <- function(n) perturb_distn[1:n, ]
-  model_func <- purrr::partial(model_func, model = model)
   mab_results <- run_mab(
     n_games,
     n_epochs,

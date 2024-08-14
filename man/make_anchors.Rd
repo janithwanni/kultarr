@@ -5,7 +5,6 @@
 \title{Make anchors}
 \usage{
 make_anchors(
-  model,
   dataset,
   cols,
   instance,
@@ -19,8 +18,6 @@ make_anchors(
 )
 }
 \arguments{
-\item{model}{The model to be interrogated}
-
 \item{dataset}{Dataset to use containing predictors and response variables.}
 
 \item{cols}{Columns of interest}

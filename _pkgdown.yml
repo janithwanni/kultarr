@@ -1,4 +1,34 @@
 url: ~
 template:
   bootstrap: 5
+  light-switch: true
+  bootswatch: journal
+  theme: github-light
+  theme-dark: github-dark
+navbar:
+  structure:
+    left: [intro, reference, articles, news]
+    right: [search, github, lightswitch]
+reference:
+  - title: "Defining Anchors"
+  - contents: 
+    - anchors
+    - bounding_box
+  - title: "Making Anchors"
+  - contents:
+    - make_anchors
+  - title: "Validation"
+  - contents:
+    - validate_bound
+    - validate_environment
+  - title: "Multi-Armed Bandit Algorithm"
+  - contents:
+    - run_mab
+    - select_action
+    - get_reward
+    - envir_to_bounds
+  - title: "Visualizing Anchors"
+  - contents:
+    - animate_anchor
+    - anchor_tour
 

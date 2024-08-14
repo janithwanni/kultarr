@@ -129,24 +129,25 @@ final_bounds$final_anchor
 The diagnostic information can be helpful in understanding where the
 algorithm explored in the solution space.
 
+# Visualizing anchors in high dimensions
 
-    # Visualizing anchors in high dimensions
+If the anchor has a dimension larger than 3 then it is possible to
+visualize it in high dimensions using tours.
 
-    If the anchor has a dimension larger than 3 then it is possible to visualize it in high dimensions using tours.
+There are several S7 classes built to make the process of visualizing
+the bounding box(es). (The option to visualize multiple boxes is still
+under development)
 
-    There are several S7 classes built to make the process of visualizing the bounding box(es).
-    (The option to visualize multiple boxes is still under development)
+#### 1. Create a bounding_box object by giving the result from the Multi Armed Bandit algorithm
 
-    #### 1. Create a bounding_box object by giving the result from the Multi Armed Bandit algorithm
-
-
-    ```r
-    bnd_box <- bounding_box(
-      bounds_tbl = final_bounds$final_anchor,
-      target_inst_row = train_data[1, ] |> select(bill_length_mm:body_mass_g),
-      point_colors = "black",
-      edges_colors = "black"
-    )
+``` r
+bnd_box <- bounding_box(
+  bounds_tbl = final_bounds$final_anchor,
+  target_inst_row = train_data[1, ] |> select(bill_length_mm:body_mass_g),
+  point_colors = "black",
+  edges_colors = "black"
+)
+```
 
 #### 2. Create an anchor_tour object to hold the data needed to create the animation
 

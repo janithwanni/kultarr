@@ -83,9 +83,6 @@ final_bounds$final_anchor
 
 The diagnostic information can be helpful in understanding where the algorithm explored in the solution space.
 
-
-```
-
 # Visualizing anchors in high dimensions
 
 If the anchor has a dimension larger than 3 then it is possible to visualize it in high dimensions using tours.

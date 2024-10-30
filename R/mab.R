@@ -46,8 +46,6 @@ get_reward <- function(
   ))
 }
 
-get_reward_faster <- memoise::memoise(get_reward)
-
 #' Function to decide on the appropriate actions
 #' 
 #' @param n_actions Number of possible actions
@@ -59,7 +57,7 @@ get_reward_faster <- memoise::memoise(get_reward)
 select_action <- function(n_actions, success_probs, failure_probs) {
   r <- vector(mode = "numeric", length = n_actions)
   for (i_action in seq_len(n_actions)) {
-    r[i_action] <- rbeta(1, shape1 = success_probs[i_action], failure_probs[i_action])
+    r[i_action] <- stats::rbeta(1, shape1 = success_probs[i_action], failure_probs[i_action])
   }
   selected_action <- which.max(r)
   return(selected_action)
@@ -121,7 +119,7 @@ run_mab <- function(
       selected_action <- select_action(n_actions, success_probs, failure_probs)
 
       current_envir <- update_bounds(current_envir, environment, actions, selected_action)
-      new_anchor <- envir_to_bounds_faster(
+      new_anchor <- envir_to_bounds(
         current_envir,
         environment,
         interest_cols
@@ -131,7 +129,7 @@ run_mab <- function(
       envir_tag <- paste0("E", current_envir, collapse = "")
       if(is.null(names(envir_reward_hist)) ||
          !envir_tag %in% names(envir_reward_hist)){
-        reward <- get_reward_faster(
+        reward <- get_reward(
           new_anchor,
           round,
           dist_func,
@@ -145,7 +143,7 @@ run_mab <- function(
       } else {
         reward <- envir_reward_hist[[envir_tag]]
       }
-      bound_row <- envir_to_bounds_faster(
+      bound_row <- envir_to_bounds(
         current_envir,
         environment,
         interest_cols
@@ -159,7 +157,7 @@ run_mab <- function(
           id = instance_id
         )
       reward_history <- dplyr::bind_rows(reward_history, bound_row)
-      outcome <- rbinom(1, size = 1, prob = reward$reward)
+      outcome <- stats::rbinom(1, size = 1, prob = reward$reward)
 
       if (!is.na(outcome) && outcome == 1) {
         success_probs[selected_action] <- success_probs[selected_action] + 1
@@ -180,7 +178,7 @@ run_mab <- function(
       )
       }
     }
-    final_bounds <<- envir_to_bounds_faster(
+    final_bounds <- envir_to_bounds(
       current_envir,
       environment,
       interest_cols
@@ -259,7 +257,8 @@ make_anchors <- function(
   ))
 }
 
-#' @export
+#' @keywords internal
+#' @noRd
 make_single_anchor <- function(
   model,
   dataset,
@@ -294,11 +293,11 @@ make_single_anchor <- function(
   final_bounds <- mab_results[["final_anchor"]]
   if (!validate_bound(final_bounds, dataset[instance, cols])) {
     final_bounds <- rep(1, 2 * length(cols)) |>
-      envir_to_bounds_faster(environment, cols)
+      envir_to_bounds(environment, cols)
   }
-  lower_bound <- final_bounds |> dplyr::select(ends_with("_l"))
+  lower_bound <- final_bounds |> dplyr::select(tidyselect::ends_with("_l"))
   colnames(lower_bound) <- gsub("_l$", "", colnames(lower_bound))
-  upper_bound <- final_bounds |> dplyr::select(ends_with("_u"))
+  upper_bound <- final_bounds |> dplyr::select(tidyselect::ends_with("_u"))
   colnames(upper_bound) <- gsub("_u$", "", colnames(upper_bound))
 
   anchor_df <- rbind(

@@ -1,5 +1,7 @@
 ^renv$
 ^renv\.lock$
+^.*\.sh$
+^.*\.html$
 ^kultarr\.Rproj$
 ^\.Rproj\.user$
 ^LICENSE\.md$

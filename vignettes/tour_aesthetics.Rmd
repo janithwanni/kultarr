@@ -2,7 +2,7 @@
 title: "Setting the aesthetics of anchors in the grand tour"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{tour_aesthetics}
+  %\VignetteIndexEntry{Setting the aesthetics of anchors in the grand tour}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

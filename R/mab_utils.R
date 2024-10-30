@@ -24,8 +24,6 @@ envir_to_bounds <- function(current_envir, envir, interest_cols) {
   return(bounds)
 }
 
-envir_to_bounds_faster <- memoise::memoise(envir_to_bounds)
-
 #' Advance the current environment
 #'
 #' @param current_envir List of indexes, the current state
@@ -88,7 +86,7 @@ generate_cutpoints <- function(dataset, instance_id, interest_columns) {
     list(v_l, v_u)
   }) |>
     purrr::list_flatten() |>
-    setNames(
+    stats::setNames(
       paste0(
         rep(interest_columns, each = 2),
         rep(c("_l", "_u"), times = length(interest_columns))
@@ -113,7 +111,7 @@ make_perturb_distn <- function(n, interest_cols, dataset, instance_id, seed = 12
                       p = length(interest_cols),
                       mn = dataset[instance_id, interest_cols] |>
                         unlist(),
-                      vc = cov(dataset[,interest_cols])
+                      vc = stats::cov(dataset[,interest_cols])
   ) |>
     as.data.frame()
   colnames(out) <- interest_cols

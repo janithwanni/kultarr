@@ -4,4 +4,6 @@ NULL
 
 .onLoad <- function(...) {
   S7::methods_register()
+  envir_to_bounds <<- memoise::memoise(envir_to_bounds)
+  get_reward <<- memoise::memoise(get_reward)
 }

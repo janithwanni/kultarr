@@ -13,7 +13,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-# kultarr
+# kultarr <img src="man/figures/logo.png" align="right" height="139" alt="" />
 
 <!-- badges: start -->
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
@@ -52,12 +52,11 @@ train_data <- penguins |>
 
 rf_model <- randomForest(species ~ ., data = train_data)
 
-model_func <- function(model, data) {
-  return(predict(model, data))
-}
+model_func <- carrier::crate(function(data) {
+  return(randomForest:::predict.randomForest(!!rf_model, data))
+})
 
 final_bounds <- make_anchors(
-  rf_model,
   dataset = train_data,
   cols = train_data |> select(bill_length_mm:body_mass_g) |> colnames(),
   instance = c(1),

@@ -33,4 +33,5 @@ Imports:
     tidyr,
     tidyselect,
     tourr
+Depends: R (>= 3.5.0)
 VignetteBuilder: knitr

@@ -227,8 +227,12 @@ make_anchors <- function(
   verbose = FALSE,
   parallel = FALSE
 ) {
+  if (parallel) {
+    future::plan("multisession")
+  } else {
+    future::plan("sequential")
+  }
   p <- progressr::progressor(steps = length(instance))
-  future::plan(ifelse(parallel, "multisession", "sequential"))
   final_bounds <- furrr::future_map(
     instance,
     function(i) {
@@ -246,9 +250,7 @@ make_anchors <- function(
         verbose = verbose
       )
     },
-    .options = furrr::furrr_options(
-      packages = c("randomForest") #TODO: Fix this, apparently global code inspection gets effed up
-    )
+    .options = furrr::furrr_options(seed = seed)
   )
   return(list(
     final_anchor = final_bounds |> purrr::map_dfr(~.x[["final_anchor"]]),

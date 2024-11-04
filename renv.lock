@@ -168,6 +168,18 @@
       ],
       "Hash": "9b2191ede20fa29828139b9900922e51"
     },
+    "carrier": {
+      "Package": "carrier",
+      "Version": "0.1.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "lobstr",
+        "rlang"
+      ],
+      "Hash": "f734872bffd97db0755c3828cf3f8605"
+    },
     "cli": {
       "Package": "cli",
       "Version": "3.6.3",
@@ -840,6 +852,21 @@
         "R"
       ],
       "Hash": "e2fca3e12e4db979dccc6e519b10a7ee"
+    },
+    "lobstr": {
+      "Package": "lobstr",
+      "Version": "1.1.2",
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Requirements": [
+        "R",
+        "cpp11",
+        "crayon",
+        "methods",
+        "prettyunits",
+        "rlang"
+      ],
+      "Hash": "f2a94f8fc9db382a642e965339635ad6"
     },
     "magrittr": {
       "Package": "magrittr",

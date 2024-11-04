@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# kultarr
+# kultarr <img src="man/figures/logo.png" align="right" height="139" alt="" />
 
 <!-- badges: start -->
 
@@ -56,12 +56,11 @@ train_data <- penguins |>
 
 rf_model <- randomForest(species ~ ., data = train_data)
 
-model_func <- function(model, data) {
-  return(predict(model, data))
-}
+model_func <- carrier::crate(function(data) {
+  return(randomForest:::predict.randomForest(!!rf_model, data))
+})
 
 final_bounds <- make_anchors(
-  rf_model,
   dataset = train_data,
   cols = train_data |> select(bill_length_mm:body_mass_g) |> colnames(),
   instance = c(1),
@@ -71,12 +70,6 @@ final_bounds <- make_anchors(
   n_epochs = 50,
   verbose = FALSE
 )
-#> Warning: UNRELIABLE VALUE: Future ('<none>') unexpectedly generated random
-#> numbers without specifying argument 'seed'. There is a risk that those random
-#> numbers are not statistically sound and the overall results might be invalid.
-#> To fix this, specify 'seed=TRUE'. This ensures that proper, parallel-safe
-#> random numbers are produced via the L'Ecuyer-CMRG method. To disable this
-#> check, use 'seed=NULL', or set option 'future.rng.onMisuse' to "ignore".
 ```
 
 The `final_bounds` variable is a list containing both the history of the
@@ -87,26 +80,26 @@ str(final_bounds)
 #> List of 2
 #>  $ final_anchor  : tibble [2 × 9] (S3: tbl_df/tbl/data.frame)
 #>   ..$ id               : num [1:2] 1 1
-#>   ..$ bill_length_mm   : num [1:2] 44.1 47.5
-#>   ..$ bill_depth_mm    : num [1:2] 13.2 15
-#>   ..$ flipper_length_mm: num [1:2] 212 224
-#>   ..$ body_mass_g      : num [1:2] 4062 4662
+#>   ..$ bill_length_mm   : num [1:2] 45.2 48
+#>   ..$ bill_depth_mm    : num [1:2] 13.2 15.1
+#>   ..$ flipper_length_mm: num [1:2] 214 225
+#>   ..$ body_mass_g      : num [1:2] 4100 4700
 #>   ..$ bound            : chr [1:2] "lower" "upper"
 #>   ..$ reward           : num [1:2] 0.5 0.5
 #>   ..$ prec             : num [1:2] 1 1
-#>   ..$ cover            : num [1:2] 0.0216 0.0216
+#>   ..$ cover            : num [1:2] 0.0167 0.0167
 #>  $ reward_history: tibble [250 × 14] (S3: tbl_df/tbl/data.frame)
-#>   ..$ bill_length_mm_l   : num [1:250] 46.2 46.1 46 46 45.8 ...
-#>   ..$ bill_length_mm_u   : num [1:250] 46.3 46.4 46.4 46.4 46.4 ...
-#>   ..$ bill_depth_mm_l    : num [1:250] 14 14 14 14 14 ...
+#>   ..$ bill_length_mm_l   : num [1:250] 46.2 46.2 46.2 46.2 46.1 ...
+#>   ..$ bill_length_mm_u   : num [1:250] 46.2 46.3 46.4 46.4 46.4 ...
+#>   ..$ bill_depth_mm_l    : num [1:250] 14.1 14 13.9 13.9 13.9 ...
 #>   ..$ bill_depth_mm_u    : num [1:250] 14.2 14.2 14.2 14.2 14.2 ...
 #>   ..$ flipper_length_mm_l: num [1:250] 216 216 216 216 216 ...
 #>   ..$ flipper_length_mm_u: num [1:250] 218 218 218 218 218 ...
 #>   ..$ body_mass_g_l      : num [1:250] 4300 4300 4300 4300 4300 4300 4300 4300 4300 4300 ...
-#>   ..$ body_mass_g_u      : num [1:250] 4400 4400 4400 4400 4400 ...
-#>   ..$ earned_reward      : num [1:250] 0 0 0 0 0 0 0 0 0 0 ...
-#>   ..$ prec               : num [1:250] 0 0 0 0 0 0 0 0 0 0 ...
-#>   ..$ cover              : num [1:250] 0 0 0 0 0 0 0 0 0 0 ...
+#>   ..$ body_mass_g_u      : num [1:250] 4400 4400 4400 4400 4400 4400 4400 4400 4400 4400 ...
+#>   ..$ earned_reward      : num [1:250] 0 0 0 0 0 ...
+#>   ..$ prec               : num [1:250] 0 0 0 0 0 0 0 0 1 1 ...
+#>   ..$ cover              : num [1:250] 0e+00 0e+00 0e+00 0e+00 0e+00 0e+00 0e+00 0e+00 1e-04 1e-04 ...
 #>   ..$ game               : int [1:250] 1 1 1 1 1 1 1 1 1 1 ...
 #>   ..$ epoch              : int [1:250] 1 2 3 4 5 6 7 8 9 10 ...
 #>   ..$ id                 : num [1:250] 1 1 1 1 1 1 1 1 1 1 ...
@@ -121,8 +114,8 @@ final_bounds$final_anchor
 #> # A tibble: 2 × 9
 #>      id bill_length_mm bill_depth_mm flipper_length_mm body_mass_g bound reward
 #>   <dbl>          <dbl>         <dbl>             <dbl>       <dbl> <chr>  <dbl>
-#> 1     1           44.1          13.2              212        4062. lower  0.500
-#> 2     1           47.5          15                224.       4662. upper  0.500
+#> 1     1           45.2          13.2               214        4100 lower  0.500
+#> 2     1           48.0          15.1               225        4700 upper  0.500
 #> # ℹ 2 more variables: prec <dbl>, cover <dbl>
 ```
 

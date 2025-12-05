@@ -108,6 +108,7 @@ run_mab <- function(
   seed = 145,
   verbose
 ) {
+  logger::log_info("Running MAB for {instance_id}")
   ## Define environment and actions
   all_possible_actions <- purrr::map(
     seq_len(2 * length(interest_cols)),
@@ -316,6 +317,7 @@ make_single_anchor <- function(
   seed = 145,
   verbose = FALSE
 ) {
+  logger::log_info("Making a single anchor for {instance}")
   class_ind <- dataset[[class_col]][instance] |> as.numeric()
   environment <- generate_cutpoints(dataset, instance, cols)
   perturb_distn <- make_perturb_distn(

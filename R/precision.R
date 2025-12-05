@@ -11,6 +11,10 @@ S7::method(precision, anchors) <- function(x, model, dist, n_samples = 100) {
   satisfying_rows <- which(satisfies(x, samples), arr.ind = TRUE)
   samples <- samples |>
     dplyr::slice(satisfying_rows)
+  print("sending samples")
+  print(head(samples))
   preds <- model(samples)
+  print("Precision")
+  print(head(preds))
   return(prop = as.vector(table(preds) / sum(table(preds))))
 }

@@ -2,11 +2,11 @@
 #'
 #' The current state of the multi armed bandit is marked based on the indices
 #' in the list of each combination of column and lower and upper bound type.
-#' 
+#'
 #' @param current_envir List of indexes, the current state
 #' @param envir The current environment
 #' @param interest_cols Columns of interest
-#' 
+#'
 #' @return A tibble of 1 x (2*p) where p is the number of columns of interest
 #' @rdname mab_utils
 #' @export
@@ -34,8 +34,8 @@ envir_to_bounds <- function(current_envir, envir, interest_cols) {
 #' @export
 update_bounds <- function(current_envir, envir, actions, selected_action) {
   new_bound <- current_envir + actions[[selected_action]]
-  for(i in seq_along(new_bound)) {
-    if(is.na(envir[[i]][new_bound[i]])) {
+  for (i in seq_along(new_bound)) {
+    if (is.na(envir[[i]][new_bound[i]])) {
       new_bound[i] <- current_envir[i]
     }
   }
@@ -56,7 +56,10 @@ create_anchor_inst <- function(bounds, interest_cols) {
   op_vec <- rep(c(`>`, `<`), times = length(interest_cols))
   bound_var <- colnames(bounds)
   for (i in seq(1, length(feat_vec))) {
-    pred_vec <- c(pred_vec, predicate(feat_vec[i], op_vec[i][[1]], constant = bounds[[bound_var[i]]]))
+    pred_vec <- c(
+      pred_vec,
+      predicate(feat_vec[i], op_vec[i][[1]], constant = bounds[[bound_var[i]]])
+    )
   }
   anchor_box <- anchors(pred_vec)
   return(anchor_box)
@@ -69,15 +72,19 @@ create_anchor_inst <- function(bounds, interest_cols) {
 #' @param interest_coluns The columns of `dataset` to consider when creating lower and upper bounds
 #'
 #' @returns A list. Contains lower and upper bounds for each specific column of interest.
-#' 
+#'
 #' @rdname mab_utils
 #' @export
 generate_cutpoints <- function(dataset, instance_id, interest_columns) {
   envir <- purrr::map(interest_columns, function(cname) {
     vals <- dataset[-instance_id, ][[cname]] |> sort()
-    cutpoints <- purrr::map2_dbl(vals[-length(vals)], vals[-1], function(x, x_1) {
-      return(mean(c(x, x_1)))
-    })
+    cutpoints <- purrr::map2_dbl(
+      vals[-length(vals)],
+      vals[-1],
+      function(x, x_1) {
+        return(mean(c(x, x_1)))
+      }
+    )
     v_l <- sort(
       cutpoints[cutpoints < dataset[instance_id, ][[cname]]],
       decreasing = TRUE
@@ -105,13 +112,20 @@ generate_cutpoints <- function(dataset, instance_id, interest_columns) {
 #' @return A purrr partial function that takes in N and returns N number of sample points around the instance
 #' @rdname mab_utils
 #' @export
-make_perturb_distn <- function(n, interest_cols, dataset, instance_id, seed = 123) {
+make_perturb_distn <- function(
+  n,
+  interest_cols,
+  dataset,
+  instance_id,
+  seed = 123
+) {
   set.seed(seed)
-  out <- mulgar::rmvn(n = n,
-                      p = length(interest_cols),
-                      mn = dataset[instance_id, interest_cols] |>
-                        unlist(),
-                      vc = stats::cov(dataset[,interest_cols])
+  out <- mulgar::rmvn(
+    n = n,
+    p = length(interest_cols),
+    mn = dataset[instance_id, interest_cols] |>
+      unlist(),
+    vc = stats::cov(dataset[, interest_cols])
   ) |>
     as.data.frame()
   colnames(out) <- interest_cols
@@ -123,24 +137,24 @@ make_perturb_distn <- function(n, interest_cols, dataset, instance_id, seed = 12
 #' every edge case of the environment can contain the row
 #' @export
 validate_environment <- function(e, instance_row) {
-    combs_bounds <- e |> lapply(range) |> do.call(tidyr::expand_grid, args= _)
-    combs_bounds |>
-        split(seq(nrow(combs_bounds))) |>
-        sapply(\(x) {
-            x |>
-            create_anchor_inst(colnames(instance_row)) |>
-            satisfies(instance_row)
-        }) |>
-        all()
+  combs_bounds <- e |> lapply(range) |> do.call(tidyr::expand_grid, args = _)
+  combs_bounds |>
+    split(seq(nrow(combs_bounds))) |>
+    sapply(\(x) {
+      x |>
+        create_anchor_inst(colnames(instance_row)) |>
+        satisfies(instance_row)
+    }) |>
+    all()
 }
 
 #' Function to validate if a created boundary satisfies a given instance row
 #' @export
 validate_bound <- function(b, instance_row) {
-  if(any(is.na(b))) {
+  if (any(is.na(b))) {
     return(FALSE)
   }
-  b |> 
-  create_anchor_inst((colnames(instance_row))) |> 
-  satisfies(instance_row)
+  b |>
+    create_anchor_inst((colnames(instance_row))) |>
+    satisfies(instance_row)
 }

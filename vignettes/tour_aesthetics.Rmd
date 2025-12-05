@@ -89,7 +89,7 @@ bnd_box <- bounding_box(
 
 The next step is to create the `anchor_tour` object to hold the data
 
-```{r}
+```{r, eval=FALSE}
 anc_tour <- anchor_tour(
   bnd_box, 
   dataset,

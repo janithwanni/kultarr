@@ -10,7 +10,7 @@
 \alias{satisfies}
 \title{S7 class to define anchors}
 \usage{
-anchors(predicates = class_missing)
+anchors(predicates = logical(0))
 
 coverage(x, ...)
 
@@ -19,9 +19,9 @@ extend(x, ...)
 precision(x, ...)
 
 predicate(
-  feature = class_missing,
-  operator = class_missing,
-  constant = class_missing
+  feature = character(0),
+  operator = function() NULL,
+  constant = integer(0)
 )
 
 satisfies(x, ...)

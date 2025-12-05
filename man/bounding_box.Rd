@@ -7,7 +7,7 @@
 \usage{
 bounding_box(bounds_tbl, target_inst_row, point_colors, edges_colors)
 
-bounding_boxes(boxes = class_missing)
+bounding_boxes(boxes = logical(0))
 }
 \arguments{
 \item{bounds_tbl}{Tibble containing two rows and (p+1) columns of p predictors.}

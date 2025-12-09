@@ -28,8 +28,10 @@ get_reward <- function(
   verbose
 ) {
   # cover <- coverage_area(new_anchor, train_df |> select(all_of(interest_cols)))
-  cover <- coverage(new_anchor, dist_func, n_samples = 10000)
-  prec <- precision(new_anchor, model_func, dist_func, n_samples = 10000)
+  cover <- coverage(new_anchor, dataset, n_samples = 10000)
+  prec <- precision(new_anchor, model_func, dataset, n_samples = 10000)
+  # print(cover)
+  # print(prec)
   prec <- prec[class_ind]
   if (is.null(prec) | is.na(prec)) {
     prec <- 0
@@ -142,11 +144,15 @@ run_mab <- function(
         actions,
         selected_action
       )
-      new_anchor <- envir_to_bounds(
+      new_bounds <- envir_to_bounds(
         current_envir,
         environment,
         interest_cols
-      ) |>
+      )
+      # print(current_envir)
+      # print(environment)
+      # print(new_bounds)
+      new_anchor <- new_bounds |>
         create_anchor_inst(interest_cols)
 
       envir_tag <- paste0("E", current_envir, collapse = "")
@@ -250,16 +256,21 @@ make_anchors <- function(
   n_epochs = 100,
   seed = 145,
   verbose = FALSE,
-  parallel = FALSE
+  parallel = FALSE,
+  progress = FALSE
 ) {
-  p <- progressr::progressor(steps = length(instance))
+  if (progress) {
+    p <- progressr::progressor(steps = length(instance))
+  }
 
   if (parallel) {
     future::plan("multisession")
     final_bounds <- furrr::future_map(
       instance,
       function(i) {
-        p()
+        if (progress) {
+          p()
+        }
         make_single_anchor(
           dataset = dataset,
           cols = cols,
@@ -280,7 +291,9 @@ make_anchors <- function(
     final_bounds <- purrr::map(
       instance,
       function(i) {
-        p()
+        if (progress) {
+          p()
+        }
         make_single_anchor(
           dataset = dataset,
           cols = cols,

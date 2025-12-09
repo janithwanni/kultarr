@@ -16,5 +16,9 @@ predicate <- S7::new_class(
       S7::class_logical
     )
   ),
-  validator = function(self) {}
+  validator = function(self) {
+    if (is.na(self@constant)) {
+      return("Can not set predicate with missing constant")
+    }
+  }
 )

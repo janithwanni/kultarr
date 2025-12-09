@@ -82,15 +82,24 @@ generate_cutpoints <- function(dataset, instance_id, interest_columns) {
       vals[-length(vals)],
       vals[-1],
       function(x, x_1) {
-        return(mean(c(x, x_1)))
+        # print(glue::glue(
+        #   "in generate cutpoints for {instance_id} and column {cname}, getting mean of {x},{x_1}"
+        # ))
+        return(mean(c(x, x_1), na.rm = TRUE))
       }
     )
+    # print("generated cutpoints")
+    # print(cutpoints)
+    # print("target point")
+    # print(dataset[instance_id, ])
     v_l <- sort(
       cutpoints[cutpoints < dataset[instance_id, ][[cname]]],
       decreasing = TRUE
     )
+    # print("lower bounds")
+    # print(v_l)
     v_u <- cutpoints[cutpoints > dataset[instance_id, ][[cname]]]
-    list(v_l, v_u)
+    envir <- list(v_l, v_u)
   }) |>
     purrr::list_flatten() |>
     stats::setNames(
@@ -99,6 +108,7 @@ generate_cutpoints <- function(dataset, instance_id, interest_columns) {
         rep(c("_l", "_u"), times = length(interest_columns))
       )
     )
+  return(envir)
 }
 
 #' Make perturbation distribution function

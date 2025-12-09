@@ -25,11 +25,11 @@ describe("anchors", {
   it("should satisfy the correct data points that are specific to predicates", {
     # Arrange
     A <- anchors(c(predicate("B", `<=`, 8), predicate("A", `>=`, 3)))
-    data <- data.frame(A = seq(1,10), B = seq(1,10) * 2)
+    data <- data.frame(A = seq(1, 10), B = seq(1, 10) * 2)
     # Act
     result <- satisfies(A, data)
     # Assert
-    expect_equal(result, c(F,F,T,T,F,F,F,F,F,F))
+    expect_equal(result, c(F, F, T, T, F, F, F, F, F, F))
   })
   it("should calculate some precision for some anchor", {
     # Arrange
@@ -37,32 +37,42 @@ describe("anchors", {
     model_func <- function(data) {
       sample(c("Y", "N"), nrow(data), replace = TRUE)
     }
-    dist_func <- function(n) {
-      return(
-        data.frame(
-          A = runif(n, min = 4.5, max = 5.5),
-          B = runif(n, min = 4.5, max = 5.5))
-      )
-    }
+    n <- 10
+    samples <- data.frame(
+      A = runif(n, min = 4.5, max = 5.5),
+      B = runif(n, min = 4.5, max = 5.5)
+    )
     # Act
-    prec <- precision(A, model_func, dist_func)
+    prec <- precision(A, model_func, samples)
     # Assert
     expect_vector(prec, ptype = double())
   })
   it("should calculate the coverage for a given anchor", {
     # Arrange
     A <- anchors(c(predicate("B", `<=`, 8), predicate("A", `>=`, 3)))
-    dist_func <- function(n) {
-      return(
-        data.frame(
-          A = c(4,6,7,8,0,2,1,2,2),
-          B = c(2,3,4,5,1,9,9,9,8)
-        )
+    samples <-
+      data.frame(
+        A = c(4, 6, 7, 8, 0, 2, 1, 2, 2),
+        B = c(2, 3, 4, 5, 1, 9, 9, 9, 8)
       )
-    }
     # Act
-    covr <- coverage(A, dist_func)
+    covr <- coverage(A, samples)
     # Assert
     expect_vector(covr, ptype = double())
+  })
+})
+# Additional test I wrote cause I didn't read the existing tests
+describe("satisfies", {
+  it("should capture the right rows", {
+    # Arrange
+    A <- anchors(c(predicate("B", `<`, 8), predicate("A", `>=`, 3)))
+    data <- data.frame(
+      A = c(4, 6, 7, 8, 0, 2, 1, 2, 2),
+      B = c(2, 3, 4, 5, 1, 9, 9, 9, 8)
+    )
+    # Act
+    satis_list <- satisfies(A, data)
+    # Assert
+    expect_equal(which(satis_list), c(1, 2, 3, 4))
   })
 })

@@ -39,9 +39,9 @@ satisfies(x, ...)
 
 \item{pred}{Object of S7 class predicate}
 
-\item{model}{a predict function that will provide the predicted labels given a dataset}
+\item{samples}{the dataset to test coverage on}
 
-\item{dist}{the function that can be used to generate samples by providing an argument n. Should return a dataframe with proper column names.}
+\item{model}{a predict function that will provide the predicted labels given a dataset}
 
 \item{n_samples}{the number of samples to generate from \code{dist} (the perturbation distribution)}
 

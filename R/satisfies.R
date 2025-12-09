@@ -15,7 +15,10 @@ S7::method(satisfies, anchors) <- function(x, data) {
   }
   satis_list <- rep(TRUE, nrow(data))
   for (predicate in x@predicates) {
-    result_list <- predicate@operator(data[[predicate@feature]], predicate@constant)
+    result_list <- predicate@operator(
+      data[[predicate@feature]],
+      predicate@constant
+    )
     satis_list <- satis_list & result_list
   }
   return(satis_list)

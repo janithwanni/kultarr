@@ -15,7 +15,8 @@ make_anchors(
   n_epochs = 100,
   seed = 145,
   verbose = FALSE,
-  parallel = FALSE
+  parallel = FALSE,
+  progress = FALSE
 )
 }
 \arguments{

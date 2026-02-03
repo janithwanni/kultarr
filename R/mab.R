@@ -56,27 +56,6 @@ get_reward <- function(
   ))
 }
 
-#' Function to decide on the appropriate actions
-#'
-#' @param n_actions Number of possible actions
-#' @param success_probs Numeric vector with length equal to n_actions containing values between 0-1
-#' @param failure_probs Numeric vector with length equal to n_actions containing values between 0-1
-#' @return Numeric value in the range of 1 to n_actions
-#'
-#' @export
-select_action <- function(n_actions, success_probs, failure_probs) {
-  r <- vector(mode = "numeric", length = n_actions)
-  for (i_action in seq_len(n_actions)) {
-    r[i_action] <- stats::rbeta(
-      1,
-      shape1 = success_probs[i_action],
-      failure_probs[i_action]
-    )
-  }
-  selected_action <- which.max(r)
-  return(selected_action)
-}
-
 #' Run Multi-Armed bandit algorithm
 #'
 #' @param n_games Numeric. Number of games to play
@@ -111,17 +90,7 @@ run_mab <- function(
   verbose
 ) {
   ## Define environment and actions
-  all_possible_actions <- purrr::map(
-    seq_len(2 * length(interest_cols)),
-    ~ return(c(0, 1))
-  ) |>
-    expand.grid()
-  actions <- all_possible_actions[
-    rowSums(all_possible_actions) == length(interest_cols),
-  ]
-  actions <- actions |>
-    split(seq(nrow(actions))) |>
-    purrr::map(~ unlist(.x) |> unname())
+  actions <- define_actions(interest_cols)
   n_actions <- length(actions)
 
   ## Run games
@@ -254,6 +223,7 @@ make_anchors <- function(
   n_perturb_samples = 10000,
   n_games = 20,
   n_epochs = 100,
+  n_bins = 4,
   seed = 145,
   verbose = FALSE,
   parallel = FALSE,
@@ -262,6 +232,8 @@ make_anchors <- function(
   if (progress) {
     p <- progressr::progressor(steps = length(instance))
   }
+
+  bin_edges <- define_bin_edges(dataset, interest_columns, n_bins)
 
   if (parallel) {
     future::plan("multisession")
@@ -280,6 +252,7 @@ make_anchors <- function(
           n_perturb_samples = n_perturb_samples,
           n_games = n_games,
           n_epochs = n_epochs,
+          bin_edges = bin_edges,
           seed = seed,
           verbose = verbose
         )
@@ -326,11 +299,17 @@ make_single_anchor <- function(
   n_perturb_samples = 10000,
   n_games = 20,
   n_epochs = 100,
+  bin_edges = NULL,
   seed = 145,
   verbose = FALSE
 ) {
   class_ind <- dataset[[class_col]][instance] |> as.numeric()
-  environment <- generate_cutpoints(dataset, instance, cols)
+  if (is.null(bin_edges)) {
+    bin_edges <- define_bin_edges(dataset, cols)
+    print(bin_edges)
+  }
+  # WARN: Name clashes with internal function
+  environment <- generate_environment(dataset, instance, cols, bin_edges)
   perturb_distn <- make_perturb_distn(
     n_perturb_samples,
     cols,
@@ -354,6 +333,9 @@ make_single_anchor <- function(
   )
   final_bounds <- mab_results[["final_anchor"]]
   if (!validate_bound(final_bounds, dataset[instance, cols])) {
+    # WARN: Send warning that the final bound
+    cli::cli_alert_warning("Found an invalid bound")
+    print(final_bounds)
     final_bounds <- rep(1, 2 * length(cols)) |>
       envir_to_bounds(environment, cols)
   }

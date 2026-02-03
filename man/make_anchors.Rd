@@ -13,6 +13,7 @@ make_anchors(
   n_perturb_samples = 10000,
   n_games = 20,
   n_epochs = 100,
+  n_bins = 4,
   seed = 145,
   verbose = FALSE,
   parallel = FALSE,

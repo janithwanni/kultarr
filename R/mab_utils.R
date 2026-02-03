@@ -1,3 +1,43 @@
+#' Function to decide on the appropriate actions
+#'
+#' @param n_actions Number of possible actions
+#' @param success_probs Numeric vector with length equal to n_actions containing values between 0-1
+#' @param failure_probs Numeric vector with length equal to n_actions containing values between 0-1
+#' @return Numeric value in the range of 1 to n_actions
+#'
+#' @export
+select_action <- function(n_actions, success_probs, failure_probs) {
+  r <- vector(mode = "numeric", length = n_actions)
+  for (i_action in seq_len(n_actions)) {
+    r[i_action] <- stats::rbeta(
+      1,
+      shape1 = success_probs[i_action],
+      failure_probs[i_action]
+    )
+  }
+  selected_action <- which.max(r)
+  return(selected_action)
+}
+
+#' Define the set of actions to be taken
+#' @keywords internal
+#' @noRd
+define_actions <- function(interest_cols) {
+  all_possible_actions <- purrr::map(
+    seq_len(2 * length(interest_cols)),
+    ~ return(c(0, 1))
+  ) |>
+    expand.grid()
+  actions <- all_possible_actions[
+    # rowSums(all_possible_actions) == length(interest_cols),
+    rowSums(all_possible_actions) == 1,
+  ]
+  actions <- actions |>
+    split(seq(nrow(actions))) |>
+    purrr::map(~ unlist(.x) |> unname())
+  return(actions)
+}
+
 #' Lookup function to get value of upper and lower bounds for the current state
 #'
 #' The current state of the multi armed bandit is marked based on the indices
@@ -70,35 +110,34 @@ create_anchor_inst <- function(bounds, interest_cols) {
 #' @param dataset Cutpoints will be generated from in between the points in the dataset
 #' @param instance_id The index of the instance of interest
 #' @param interest_coluns The columns of `dataset` to consider when creating lower and upper bounds
+#' @param bin_edges Output of `define_bin_edges` function
 #'
 #' @returns A list. Contains lower and upper bounds for each specific column of interest.
 #'
 #' @rdname mab_utils
 #' @export
-generate_cutpoints <- function(dataset, instance_id, interest_columns) {
+generate_environment <- function(
+  dataset,
+  instance_id,
+  interest_columns,
+  bin_edges
+) {
   envir <- purrr::map(interest_columns, function(cname) {
     vals <- dataset[-instance_id, ][[cname]] |> sort()
-    cutpoints <- purrr::map2_dbl(
-      vals[-length(vals)],
-      vals[-1],
-      function(x, x_1) {
-        # print(glue::glue(
-        #   "in generate cutpoints for {instance_id} and column {cname}, getting mean of {x},{x_1}"
-        # ))
-        return(mean(c(x, x_1), na.rm = TRUE))
-      }
-    )
-    # print("generated cutpoints")
-    # print(cutpoints)
-    # print("target point")
-    # print(dataset[instance_id, ])
+    cutpoints <- bin_edges[[cname]]
     v_l <- sort(
       cutpoints[cutpoints < dataset[instance_id, ][[cname]]],
       decreasing = TRUE
     )
+    if (length(v_l) == 0) {
+      v_l <- min(dataset[[cname]]) - 1e-3
+    }
     # print("lower bounds")
     # print(v_l)
     v_u <- cutpoints[cutpoints > dataset[instance_id, ][[cname]]]
+    if (length(v_u) == 0) {
+      v_u <- max(dataset[[cname]]) + 1e-3
+    }
     envir <- list(v_l, v_u)
   }) |>
     purrr::list_flatten() |>
@@ -109,6 +148,23 @@ generate_cutpoints <- function(dataset, instance_id, interest_columns) {
       )
     )
   return(envir)
+}
+
+#' Defines the bin edges for each interest column
+#'
+#'
+#' @keywords internal
+#' @noRd
+define_bin_edges <- function(dataset, interest_columns, num_bins = 3) {
+  edges <- purrr::map(interest_columns, function(cname) {
+    values <- dataset[[cname]]
+    # we set num_bins + 1 to delete a bin at the end
+    probs <- seq(0, 1, length.out = num_bins + 1)
+    breaks <- quantile(values, probs = probs, na.rm = TRUE) |>
+      setNames(NULL)
+    return(breaks[-c(1, length(breaks))])
+  }) |>
+    stats::setNames(interest_columns)
 }
 
 #' Make perturbation distribution function

@@ -4,7 +4,7 @@
 \alias{envir_to_bounds}
 \alias{update_bounds}
 \alias{create_anchor_inst}
-\alias{generate_cutpoints}
+\alias{generate_environment}
 \alias{make_perturb_distn}
 \title{Lookup function to get value of upper and lower bounds for the current state}
 \usage{
@@ -14,7 +14,7 @@ update_bounds(current_envir, envir, actions, selected_action)
 
 create_anchor_inst(bounds, interest_cols)
 
-generate_cutpoints(dataset, instance_id, interest_columns)
+generate_environment(dataset, instance_id, interest_columns, bin_edges)
 
 make_perturb_distn(n, interest_cols, dataset, instance_id, seed = 123)
 }
@@ -32,6 +32,8 @@ make_perturb_distn(n, interest_cols, dataset, instance_id, seed = 123)
 \item{dataset}{The dataset used to make the anchors}
 
 \item{instance_id}{The index of the target observation in the dataset}
+
+\item{bin_edges}{Output of \code{define_bin_edges} function}
 
 \item{n}{Number of samples}
 

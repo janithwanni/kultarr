@@ -43,7 +43,7 @@ get_reward <- function(
     cover <- 0
   }
   if (verbose) {
-    print(glue::glue(
+    logger::log_info(glue::glue(
       "==== {cover} | {prec} | {mean(c(cover, prec), na.rm = TRUE) }====="
     ))
   }
@@ -166,7 +166,7 @@ run_mab <- function(
       }
 
       if (verbose) {
-        print(
+        logger::log_info(
           glue::glue(
             "Game {game}: Round {round} \n
             selected : {selected_action}
@@ -233,7 +233,9 @@ make_anchors <- function(
     p <- progressr::progressor(steps = length(instance))
   }
 
-  bin_edges <- define_bin_edges(dataset, interest_columns, n_bins)
+  bin_edges <- define_bin_edges(dataset, cols, n_bins)
+  logger::log_info("setting up bin edges")
+  # print(bin_edges)
 
   if (parallel) {
     future::plan("multisession")
@@ -276,6 +278,7 @@ make_anchors <- function(
           n_perturb_samples = n_perturb_samples,
           n_games = n_games,
           n_epochs = n_epochs,
+          bin_edges = bin_edges,
           seed = seed,
           verbose = verbose
         )
@@ -306,7 +309,6 @@ make_single_anchor <- function(
   class_ind <- dataset[[class_col]][instance] |> as.numeric()
   if (is.null(bin_edges)) {
     bin_edges <- define_bin_edges(dataset, cols)
-    print(bin_edges)
   }
   # WARN: Name clashes with internal function
   environment <- generate_environment(dataset, instance, cols, bin_edges)
@@ -335,7 +337,7 @@ make_single_anchor <- function(
   if (!validate_bound(final_bounds, dataset[instance, cols])) {
     # WARN: Send warning that the final bound
     cli::cli_alert_warning("Found an invalid bound")
-    print(final_bounds)
+    # print(final_bounds)
     final_bounds <- rep(1, 2 * length(cols)) |>
       envir_to_bounds(environment, cols)
   }

@@ -125,17 +125,34 @@ generate_environment <- function(
   envir <- purrr::map(interest_columns, function(cname) {
     vals <- dataset[-instance_id, ][[cname]] |> sort()
     cutpoints <- bin_edges[[cname]]
+    # print(cutpoints)
+    # print(dataset[instance_id, ][[cname]])
+    logger::log_info("setting lower bounds for {instance_id}")
+
     v_l <- sort(
       cutpoints[cutpoints < dataset[instance_id, ][[cname]]],
       decreasing = TRUE
     )
+    logger::log_info(
+      "Have {length(v_l)} lower bounds with {paste(head(v_l, collapse=','))}"
+    )
+    # print(paste(v_l, collapse = ','))
+
     if (length(v_l) == 0) {
+      logger::log_warn("setting lower bounds to max")
       v_l <- min(dataset[[cname]]) - 1e-3
     }
     # print("lower bounds")
     # print(v_l)
+    logger::log_info("setting upper bounds for {instance_id} as")
     v_u <- cutpoints[cutpoints > dataset[instance_id, ][[cname]]]
+    # print(paste(v_u, collapse = ','))
+    logger::log_info(
+      "Have {length(v_u)} upper bounds with {paste(head(v_u, collapse=','))}"
+    )
+
     if (length(v_u) == 0) {
+      logger::log_warn("Setting upper bound to max")
       v_u <- max(dataset[[cname]]) + 1e-3
     }
     envir <- list(v_l, v_u)

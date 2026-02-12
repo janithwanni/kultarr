@@ -6,7 +6,7 @@
 #' @rdname anchors
 #' @export
 precision <- S7::new_generic("precision", "x")
-S7::method(precision, anchors) <- function(x, model, samples, n_samples = 100) {
+S7::method(precision, anchors) <- function(x, model, samples) {
   # print("Getting precision for anchor")
   # print(x)
   satisfying_rows <- which(satisfies(x, samples), arr.ind = TRUE)

@@ -56,32 +56,32 @@ describe("generate_environment", {
   it("contains at least one element", {})
 })
 
-describe("define_actions", {
-  # Arrange
-  cols <- c("x", "y")
-  it("should give a list with the tested characteristics", {
-    # Act
-    acts <- define_actions(cols)
-    # Arrange
-    expect_type(acts, "list")
-    expect_equal(length(acts), 2^length(cols))
-  })
-})
-
-describe("select_action", {
-  it("should return an action within the set of actions", {
-    # Arrange
-    nacts <- 4
-    probs <- rep(0.5, nacts)
-
-    # Act
-    sact <- select_action(nacts, probs, probs)
-
-    # Assert
-    expect_true(sact %in% seq(nacts))
-  })
-})
-
+# describe("define_actions", {
+#   # Arrange
+#   cols <- c("x", "y")
+#   it("should give a list with the tested characteristics", {
+#     # Act
+#     acts <- define_actions(cols)
+#     # Arrange
+#     expect_type(acts, "list")
+#     expect_equal(length(acts), 2^length(cols))
+#   })
+# })
+#
+# describe("select_action", {
+#   it("should return an action within the set of actions", {
+#     # Arrange
+#     nacts <- 4
+#     probs <- rep(0.5, nacts)
+#
+#     # Act
+#     sact <- select_action(nacts, probs, probs)
+#
+#     # Assert
+#     expect_true(sact %in% seq(nacts))
+#   })
+# })
+#
 describe("update_bounds", {
   # Arrange
   # Act

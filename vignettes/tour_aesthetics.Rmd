@@ -20,7 +20,7 @@ We are going to use a dataset containing 200 points of 3 dimensional data.
 ```{r}
 set.seed(123)
 n_points <- 200
-dataset <- mulgar::rmvn(n = n_points, p = 3) |> tibble::as_tibble()
+dataset <- MASS::mvrnorm(n = n_points, mu = c(0, 0,0), Sigma = diag(1,3)) |> as.data.frame() |> setNames(c("x1", "x2", "x3")) |> tibble::tibble()
 ```
 
 Next we are going to add a distinctive point that we want to highlight. Let's put the point a bit farther away from the rest of the points at (3,3,3)

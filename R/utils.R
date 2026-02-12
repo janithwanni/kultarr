@@ -1,43 +1,3 @@
-#' Function to decide on the appropriate actions
-#'
-#' @param n_actions Number of possible actions
-#' @param success_probs Numeric vector with length equal to n_actions containing values between 0-1
-#' @param failure_probs Numeric vector with length equal to n_actions containing values between 0-1
-#' @return Numeric value in the range of 1 to n_actions
-#'
-#' @export
-select_action <- function(n_actions, success_probs, failure_probs) {
-  r <- vector(mode = "numeric", length = n_actions)
-  for (i_action in seq_len(n_actions)) {
-    r[i_action] <- stats::rbeta(
-      1,
-      shape1 = success_probs[i_action],
-      failure_probs[i_action]
-    )
-  }
-  selected_action <- which.max(r)
-  return(selected_action)
-}
-
-#' Define the set of actions to be taken
-#' @keywords internal
-#' @noRd
-define_actions <- function(interest_cols) {
-  all_possible_actions <- purrr::map(
-    seq_len(2 * length(interest_cols)),
-    ~ return(c(0, 1))
-  ) |>
-    expand.grid()
-  actions <- all_possible_actions[
-    # rowSums(all_possible_actions) == length(interest_cols),
-    rowSums(all_possible_actions) == 1,
-  ]
-  actions <- actions |>
-    split(seq(nrow(actions))) |>
-    purrr::map(~ unlist(.x) |> unname())
-  return(actions)
-}
-
 #' Lookup function to get value of upper and lower bounds for the current state
 #'
 #' The current state of the multi armed bandit is marked based on the indices
@@ -177,43 +137,11 @@ define_bin_edges <- function(dataset, interest_columns, num_bins = 3) {
     values <- dataset[[cname]]
     # we set num_bins + 1 to delete a bin at the end
     probs <- seq(0, 1, length.out = num_bins + 1)
-    breaks <- quantile(values, probs = probs, na.rm = TRUE) |>
+    breaks <- stats::quantile(values, probs = probs, na.rm = TRUE) |>
       setNames(NULL)
-    return(breaks[-c(1, length(breaks))])
+    return(breaks)
   }) |>
     stats::setNames(interest_columns)
-}
-
-#' Make perturbation distribution function
-#'
-#' @param n Number of samples
-#' @param interest_cols Columns from the dataset that are of interest
-#' @param dataset The dataset used to make the anchors
-#' @param instance_id The index of the target observation in the dataset
-#' @param seed Numerical. Seed to ensure that the perturbation distribution remains consistent.
-#'
-#' @return A purrr partial function that takes in N and returns N number of sample points around the instance
-#' @rdname mab_utils
-#' @export
-make_perturb_distn <- function(
-  n,
-  interest_cols,
-  dataset,
-  instance_id,
-  seed = 123
-) {
-  set.seed(seed)
-  out <- mulgar::rmvn(
-    n = n,
-    p = length(interest_cols),
-    mn = dataset[instance_id, interest_cols] |>
-      unlist(),
-    vc = stats::cov(dataset[, interest_cols])
-  ) |>
-    as.data.frame()
-  colnames(out) <- interest_cols
-  samples <- tibble::as_tibble(out)
-  return(samples)
 }
 
 #' Function to validate whether

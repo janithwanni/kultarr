@@ -5,6 +5,6 @@
 #' @rdname anchors
 #' @export
 coverage <- S7::new_generic("coverage", "x")
-S7::method(coverage, anchors) <- function(x, samples, n_samples = 100) {
+S7::method(coverage, anchors) <- function(x, samples) {
   return(mean(satisfies(x, samples)))
 }

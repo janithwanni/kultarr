@@ -12,6 +12,7 @@ describe("make_single_anchor", {
   })
   class_col <- "z"
   mock_bin_edges <- list(x = c(1.5, 2.5), y = c(1.5, 2.5))
+
   # Act
   a <- make_single_anchor(
     d,
@@ -28,5 +29,16 @@ describe("make_single_anchor", {
     expect_s3_class(a$final_anchor, "tbl_df")
   })
   it("should give the correct final anchor", {})
-  it("should give the history as a dataframe", {})
+
+  it("should work for a series of test cases", {
+    # Arrange
+    data <- data.frame(
+      x = runif(50, -1, 1),
+      y = runif(50, -1, 1)
+    )
+    data$cls <- factor(ifelse(data$x > data$y, "up", "down"))
+    # Act
+
+    # Assert
+  })
 })

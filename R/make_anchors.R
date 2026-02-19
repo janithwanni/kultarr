@@ -33,7 +33,7 @@ make_anchors <- function(
     p <- progressr::progressor(steps = length(instance))
   }
 
-  bin_edges <- define_bin_edges(dataset, cols, n_bins)
+  # bin_edges <- define_bin_edges(dataset, cols, n_bins)
   logger::log_info("setting up bin edges")
   # print(bin_edges)
 
@@ -51,7 +51,7 @@ make_anchors <- function(
           i,
           model_func = model_func,
           class_col = class_col,
-          bin_edges = bin_edges,
+          n_bins = n_bins,
           seed = seed,
           verbose = verbose
         )
@@ -72,7 +72,7 @@ make_anchors <- function(
           i,
           model_func = model_func,
           class_col = class_col,
-          bin_edges = bin_edges,
+          n_bins = n_bins,
           seed = seed,
           verbose = verbose
         )
@@ -81,7 +81,8 @@ make_anchors <- function(
   }
   return(list(
     final_anchor = final_bounds |> purrr::map_dfr(~ .x[["final_anchor"]]),
-    reward_history = final_bounds |> purrr::map_dfr(~ .x[["history"]])
+    reward_history = final_bounds |> purrr::map_dfr(~ .x[["history"]]),
+    perturbs = final_bounds |> purrr::map_dfr(~ .x[["perturbs"]])
   ))
 }
 
@@ -93,21 +94,21 @@ make_single_anchor <- function(
   instance,
   model_func,
   class_col,
-  bin_edges = NULL,
+  n_bins,
   seed = 145,
   verbose = FALSE
 ) {
-  # WARN: shouldn't this be the predicted class_ind
-  # class_ind <- dataset[[class_col]][instance] |> as.numeric()
-  class_ind <- model_func(dataset[instance, c(cols)]) |> as.numeric()
-  if (is.null(bin_edges)) {
-    bin_edges <- define_bin_edges(dataset, cols)
-  }
-  state_space <- generate_environment(dataset, instance, cols, bin_edges)
+  cls_levels <- dataset[[class_col]] |> levels()
+  inst_pred <- model_func(dataset[instance, c(cols)])
+  class_ind <- match(as.character(inst_pred), cls_levels)
+  perturbs <- generate_perturbations(dataset, instance, cols)
+  perturbs[instance, cols] <- dataset[instance, cols]
+  bin_edges <- define_bin_edges(perturbs, cols, n_bins)
+  state_space <- generate_environment(perturbs, instance, cols, bin_edges)
   start_state <- rep(1, 2 * length(cols))
   bfs_results <- run_bfs(
     start_state,
-    dataset,
+    perturbs,
     instance,
     state_space,
     cols,
@@ -116,12 +117,13 @@ make_single_anchor <- function(
     seed = seed,
     verbose = verbose
   )
+
   final_bounds <- bfs_results[["final_anchor"]]
-  if (!validate_bound(final_bounds, dataset[instance, cols])) {
+  if (!validate_bound(final_bounds, perturbs[instance, cols])) {
     # WARN: Send warning that the final bound
     cli::cli_alert_warning("Found an invalid bound")
     # print(final_bounds) final_bounds <- rep(1, 2 * length(cols)) |>
-    envir_to_bounds(state_space, cols)
+    # envir_to_bounds(state_space, cols)
   }
   lower_bound <- final_bounds |> dplyr::select(tidyselect::ends_with("_l"))
   colnames(lower_bound) <- gsub("_l$", "", colnames(lower_bound))
@@ -140,6 +142,10 @@ make_single_anchor <- function(
     )
 
   return(
-    list(final_anchor = anchor_df, history = bfs_results[["reward_history"]])
+    list(
+      final_anchor = anchor_df,
+      history = bfs_results[["reward_history"]] |> dplyr::mutate(id = instance),
+      perturbs = perturbs |> dplyr::mutate(id = instance)
+    )
   )
 }

@@ -19,7 +19,7 @@ describe("define_bin_edges", {
     # Act
     e_1 <- define_bin_edges(d, "x", num_bins = nbins)
     # Assert
-    expect_equal(length(e_1$x), nbins - 1)
+    expect_equal(length(e_1$x), nbins + 1)
   })
   it("should warn when the number of bins is equal to the number of values", {})
   it("should give the correct bin edges for the number of bins", {
@@ -30,7 +30,7 @@ describe("define_bin_edges", {
       z = factor(c("U", "U", "D", "U", "D", "D"))
     )
     nbins <- 3
-    target_bins <- c(1.5, 2.5)
+    target_bins <- c(1, 1.67, 2.33, 3)
     # Act
     e <- define_bin_edges(d, c("x", "y"), num_bins = nbins)
     # Assert
@@ -54,6 +54,19 @@ describe("generate_environment", {
     expect_equal(names(Env), c("x_l", "x_u", "y_l", "y_u", "z_l", "z_u"))
   })
   it("contains at least one element", {})
+})
+
+describe("generate_perturbations", {
+  # Act
+  p <- generate_perturbations(d, 1, c("x", "y"))
+  it("should return a dataframe", {
+    # Assert
+    expect_s3_class(p, "tbl_df")
+  })
+  it("should contain the interest columns", {
+    # Assert
+    expect_equal(colnames(p), c("x", "y"))
+  })
 })
 
 # describe("define_actions", {

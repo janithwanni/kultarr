@@ -7,20 +7,11 @@
 #' @export
 precision <- S7::new_generic("precision", "x")
 S7::method(precision, anchors) <- function(x, model, samples) {
-  # print("Getting precision for anchor")
-  # print(x)
   satisfying_rows <- which(satisfies(x, samples), arr.ind = TRUE)
   samples <- samples |>
     dplyr::slice(satisfying_rows)
-  # print("sending samples")
-  # print(head(samples))
   preds <- model(samples)
-  # print("Precision")
-  # print(head(preds))
   tab_preds <- table(preds)
-  # print("table preds")
-  # print(tab_preds)
   prop <- as.vector(tab_preds / sum(tab_preds))
-  # print(prop)
   return(prop = prop)
 }

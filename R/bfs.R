@@ -11,6 +11,7 @@ get_reward <- function(
   # cover <- coverage_area(new_anchor, train_df |> select(all_of(interest_cols)))
   cover <- coverage(new_anchor, dataset)
   prec <- precision(new_anchor, model_func, dataset)
+  logger::log_info("received precisions {prec[1]} , {prec[2]}")
   prec <- prec[class_ind]
   if (is.null(prec) | is.na(prec)) {
     prec <- 0
@@ -23,7 +24,7 @@ get_reward <- function(
       "==== {cover} | {prec} | {mean(c(cover, prec), na.rm = TRUE) }====="
     ))
   }
-  reward = mean(prec, cover)
+  reward <- mean(c(exp(prec), prec * cover))
   return(list(reward = reward, prec = prec, cover = cover))
 }
 
@@ -93,6 +94,13 @@ run_bfs <- function(
   max_reward <- list(reward = c(-1), prec = c(), cover = c())
   max_reward_node <- c()
   queue_idx <- 1
+  reward_history <- data.frame(
+    node_tag = c(NA),
+    reward = c(NA),
+    prec = c(NA),
+    cover = c(NA)
+  )
+  history_id <- 1
   while (queue_idx <= length(queue)) {
     # Dequeue first element
     node <- queue[[queue_idx]]
@@ -115,6 +123,14 @@ run_bfs <- function(
       class_ind,
       verbose
     )
+    reward_history[history_id, ] <- list(
+      node_tag = state_tag(node),
+      reward = reward$reward,
+      prec = reward$prec,
+      cover = reward$cover
+    )
+    history_id <- history_id + 1
+
     logger::log_info(
       "current reward for {state_tag(node)} is {reward$reward} and max_reward is {max_reward$reward}"
     )
@@ -148,12 +164,11 @@ run_bfs <- function(
     }
   }
   logger::log_info("creating new bounds")
-  print(state_space)
 
   bounds <- envir_to_bounds(max_reward_node, state_space, interest_columns)
   bounds$reward = max_reward$reward
   bounds$prec = max_reward$prec
   bounds$cover = max_reward$cover
   # TODO: add a reward history
-  return(list(final_anchor = bounds, reward_history = tibble::tibble()))
+  return(list(final_anchor = bounds, reward_history = reward_history))
 }

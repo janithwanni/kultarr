@@ -1,3 +1,30 @@
+#' Generate Perturbations Around a Point of Interest
+#'
+#' @param data Training data frame
+#' @param poi Row number of point of interest
+#' @param radius Perturbation radius (default: 0.1)
+#' @param step Step size for perturbations (default: 0.01)
+#' @param x_var Name of x variable (default: "x")
+#' @param y_var Name of y variable (default: "y")
+#'
+#' @return A data frame of perturbed points
+#' @export
+generate_perturbations <- function(
+  data,
+  instance,
+  interest_columns,
+  radius = 0.25,
+  step = 0.01
+) {
+  local_obs <- data[instance, ]
+  perturb_params <- lapply(interest_columns, function(i) {
+    seq(local_obs[[i]] - radius, local_obs[[i]] + radius, by = step)
+  })
+  names(perturb_params) <- interest_columns
+  pertubs <- do.call(tidyr::expand_grid, perturb_params)
+  return(pertubs)
+}
+
 #' Lookup function to get value of upper and lower bounds for the current state
 #'
 #' The current state of the multi armed bandit is marked based on the indices

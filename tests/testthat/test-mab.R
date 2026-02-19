@@ -11,7 +11,6 @@ describe("make_single_anchor", {
     return(factor(ifelse(data$x > data$y, "U", "D")))
   })
   class_col <- "z"
-  mock_bin_edges <- list(x = c(1.5, 2.5), y = c(1.5, 2.5))
 
   # Act
   a <- make_single_anchor(
@@ -20,7 +19,6 @@ describe("make_single_anchor", {
     instance,
     model_func,
     class_col,
-    bin_edges = mock_bin_edges
   )
   it("should return a list containing the final anchor and the history", {
     # Assert

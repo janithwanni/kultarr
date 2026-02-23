@@ -14,7 +14,9 @@ make_anchors(
   seed = 145,
   verbose = FALSE,
   parallel = FALSE,
-  progress = FALSE
+  progress = FALSE,
+  perturb_distance = 0.1,
+  perturb_step = 0.01
 )
 }
 \arguments{
@@ -28,22 +30,23 @@ make_anchors(
 
 \item{class_col}{Name of factor column containing class of interest}
 
-\item{seed}{Numeric. Seed to be used for the Multi-Armed Bandit algorithm.
-This ensures that the results stay consistent}
+\item{n_bins}{Number of bins used for binning the perturbation distribution. A higher bin size would make granular anchors but will increase computation time.}
+
+\item{seed}{Numeric. Seed to ensure that the results stay consistent}
 
 \item{verbose}{Logical. Whether to print out diagnostics of the Multi-Armed Bandit Algorithm}
 
 \item{parallel}{Logical. Whether to use parallel processing. Default set to FALSE.}
 
-\item{n_perturb_samples}{number of samples to be taken from the pertubation distribution}
+\item{progress}{Logical. Whether to show a bar progress bar when performing parallel computation}
 
-\item{n_games}{Numeric. Number of games to play. Default to 20 games}
+\item{perturb_distance}{Numeric. The distance from the given instance to start creating perturbations}
 
-\item{n_epochs}{Numeric. Number of epochs in a single game. Default to 100 epochs.}
+\item{perturb_step}{Numeric. The step size to create the grid of points around the given instance}
 }
 \value{
-A data.frame of size 2 x (p+1) where p is the number of columns of interest with each row containing a upper. lower bound.
+A list containing the final anchor which is a data.frame of size 2 x (p+1) where p is the number of columns of interest with each row containing a upper. lower bound, the reward history which contains the reward history for each node traversed and the perturbations generated
 }
 \description{
-This function is the main entrypoint that generates anchors by running a Multi-Armed Bandit algorithm
+This function is the main entrypoint that generates anchors by running a Breadth First Search algorithm
 }

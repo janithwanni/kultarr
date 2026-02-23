@@ -16,9 +16,9 @@ bounding_boxes(boxes = logical(0))
 
 \item{point_colors}{Character vector of 2^p length or 1 value.}
 
-\item{boxes}{A vector of S7 objects of class bounding box}
+\item{edges_colors}{Character cector of 2^(p-1) * p length or 1 value.}
 
-\item{edge_colors}{Character cector of 2^(p-1) * p length or 1 value.}
+\item{boxes}{A vector of S7 objects of class bounding box}
 }
 \value{
 S7 object of class bounding box

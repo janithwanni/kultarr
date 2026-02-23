@@ -1,11 +1,10 @@
 #' Generate Perturbations Around a Point of Interest
 #'
 #' @param data Training data frame
-#' @param poi Row number of point of interest
+#' @param instance Row number of point of interest
+#' @param interest_columns The columns of the dataset used for generating anchors
 #' @param radius Perturbation radius (default: 0.1)
 #' @param step Step size for perturbations (default: 0.01)
-#' @param x_var Name of x variable (default: "x")
-#' @param y_var Name of y variable (default: "y")
 #'
 #' @return A data frame of perturbed points
 #' @export
@@ -13,12 +12,18 @@ generate_perturbations <- function(
   data,
   instance,
   interest_columns,
-  radius = 0.25,
+  radius = 0.1,
   step = 0.01
 ) {
   local_obs <- data[instance, ]
   perturb_params <- lapply(interest_columns, function(i) {
-    seq(local_obs[[i]] - radius, local_obs[[i]] + radius, by = step)
+    col_max <- max(data[[i]], na.rm = TRUE)
+    col_min <- min(data[[i]], na.rm = TRUE)
+    seq(
+      max(local_obs[[i]] - radius, col_min),
+      min(local_obs[[i]] + radius, col_max),
+      by = step
+    )
   })
   names(perturb_params) <- interest_columns
   pertubs <- do.call(tidyr::expand_grid, perturb_params)
@@ -35,7 +40,6 @@ generate_perturbations <- function(
 #' @param interest_cols Columns of interest
 #'
 #' @return A tibble of 1 x (2*p) where p is the number of columns of interest
-#' @rdname mab_utils
 #' @export
 envir_to_bounds <- function(current_envir, envir, interest_cols) {
   bounds <- matrix(
@@ -57,8 +61,7 @@ envir_to_bounds <- function(current_envir, envir, interest_cols) {
 #' @param selected_action The index of selected action from the actions list
 #'
 #' @return New bounds
-#' @rdname mab_utils
-#' @export
+#' @noRd
 update_bounds <- function(current_envir, envir, actions, selected_action) {
   new_bound <- current_envir + actions[[selected_action]]
   for (i in seq_along(new_bound)) {
@@ -75,7 +78,6 @@ update_bounds <- function(current_envir, envir, actions, selected_action) {
 #' @param interest_cols the columns of interest
 #'
 #' @return an instance of the anchor class
-#' @rdname mab_utils
 #' @export
 create_anchor_inst <- function(bounds, interest_cols) {
   pred_vec <- c()
@@ -101,8 +103,7 @@ create_anchor_inst <- function(bounds, interest_cols) {
 #'
 #' @returns A list. Contains lower and upper bounds for each specific column of interest.
 #'
-#' @rdname mab_utils
-#' @export
+#' @noRd
 generate_environment <- function(
   dataset,
   instance_id,
@@ -165,7 +166,7 @@ define_bin_edges <- function(dataset, interest_columns, num_bins = 3) {
     # we set num_bins + 1 to delete a bin at the end
     probs <- seq(0, 1, length.out = num_bins + 1)
     breaks <- stats::quantile(values, probs = probs, na.rm = TRUE) |>
-      setNames(NULL)
+      stats::setNames(NULL)
     return(breaks)
   }) |>
     stats::setNames(interest_columns)
@@ -173,7 +174,8 @@ define_bin_edges <- function(dataset, interest_columns, num_bins = 3) {
 
 #' Function to validate whether
 #' every edge case of the environment can contain the row
-#' @export
+#' @keywords internal
+#' @noRd
 validate_environment <- function(e, instance_row) {
   combs_bounds <- e |> lapply(range) |> do.call(tidyr::expand_grid, args = _)
   combs_bounds |>
@@ -187,7 +189,8 @@ validate_environment <- function(e, instance_row) {
 }
 
 #' Function to validate if a created boundary satisfies a given instance row
-#' @export
+#' @keywords internal
+#' @noRd
 validate_bound <- function(b, instance_row) {
   if (any(is.na(b))) {
     return(FALSE)

@@ -1,14 +1,14 @@
 #' S7 class to hold the bounding box created by `make_anchors`
-#' 
+#'
 #' @param bounds_tbl Tibble containing two rows and (p+1) columns of p predictors.
 #' @param target_inst_row Tibble of one row and p columns for the target instance.
-#' @param point_colors Character vector of 2^p length or 1 value. 
-#' @param edge_colors Character cector of 2^(p-1) * p length or 1 value.
-#' 
+#' @param point_colors Character vector of 2^p length or 1 value.
+#' @param edges_colors Character cector of 2^(p-1) * p length or 1 value.
+#'
 #' @return S7 object of class bounding box
-#' 
+#'
 #' @rdname bounding_box
-#' @export 
+#' @export
 bounding_box <- S7::new_class(
   "bounding_box",
   properties = list(
@@ -18,17 +18,22 @@ bounding_box <- S7::new_class(
     point_colors = S7::class_vector,
     edges_colors = S7::class_vector
   ),
-  constructor = function(bounds_tbl, target_inst_row, point_colors, edges_colors) {
+  constructor = function(
+    bounds_tbl,
+    target_inst_row,
+    point_colors,
+    edges_colors
+  ) {
     n_dim <- ncol(target_inst_row)
     n_box_points <- 2^n_dim
     n_box_edges <- (2^(n_dim - 1)) * n_dim
-    if(!length(point_colors) != 1 && !length(point_colors) != n_box_points) {
+    if (!length(point_colors) != 1 && !length(point_colors) != n_box_points) {
       cli::cli_abort(c(
         "point_colors argument should be vector of either 2^p length or 1",
         "i" = "There {?is/are} {length(point_colors)} only element{?s}"
       ))
     }
-    if(!length(edges_colors) != 1 && !length(edges_colors) != n_box_edges) {
+    if (!length(edges_colors) != 1 && !length(edges_colors) != n_box_edges) {
       cli::cli_abort(c(
         "edges_colors argument should be vector of either 2^(p-1)*p length or 1",
         "i" = "There {?is/are} {length(edges_colors)} only element{?s}"
@@ -38,15 +43,16 @@ bounding_box <- S7::new_class(
     bounds_list <- bounds_tbl |>
       dplyr::select(
         tidyselect::all_of(colnames(target_inst_row))
-      ) |> as.list()
+      ) |>
+      as.list()
     bounds_box <- do.call(expand.grid, bounds_list)
     cube$points <- bounds_box
 
-    if(length(point_colors) == 1) {
+    if (length(point_colors) == 1) {
       point_colors <- rep(point_colors, n_box_points)
     }
 
-    if(length(edges_colors) == 1) {
+    if (length(edges_colors) == 1) {
       edges_colors <- rep(edges_colors, n_box_edges)
     }
 
@@ -62,13 +68,13 @@ bounding_box <- S7::new_class(
 )
 
 #' S7 class to hold a list of bounding boxes
-#' 
+#'
 #' @param boxes A vector of S7 objects of class bounding box
-#' 
+#'
 #' @return S7 object of class bounding boxes
-#' 
+#'
 #' @rdname bounding_box
-#' @export 
+#' @export
 bounding_boxes <- S7::new_class(
   "bounding_boxes",
   properties = list(
@@ -84,13 +90,13 @@ bounding_boxes <- S7::new_class(
 )
 
 #' Data structure to hold information necessary to animate tours
-#' 
+#'
 #' @param b_boxes S7 object of type boundary boxes
 #' @param data data.frame of points to visualize on tours
 #' @param point_colors Character vector of one or nrow(data)
 #' @param point_shapes Numeric vector of one or nrow(data) containing shape number. Defaults to hollow (i.e. 1)
 #' @param point_sizes Numeric vector of one or nrow(data) containing size. Defaults to 1
-#' 
+#'
 #' @export
 anchor_tour <- S7::new_class(
   "anchor_tour",
@@ -104,27 +110,33 @@ anchor_tour <- S7::new_class(
     tour_point_sizes = S7::class_vector,
     box_indices = S7::class_vector
   ),
-  constructor = function(b_boxes, data, point_colors, point_shapes = 1, point_sizes = 1) {
-    if(!length(point_colors) != 1 && !length(point_colors) != nrow(data)) {
+  constructor = function(
+    b_boxes,
+    data,
+    point_colors,
+    point_shapes = 1,
+    point_sizes = 1
+  ) {
+    if (!length(point_colors) != 1 && !length(point_colors) != nrow(data)) {
       cli::cli_abort(c(
         "point_colors argument should be vector of either length 1 or nrow(data)",
         "i" = "There {?is/are} {length(point_colors)} only element{?s}"
       ))
     }
-    if(!length(point_shapes) != 1 && !length(point_shapes) != nrow(data)) {
+    if (!length(point_shapes) != 1 && !length(point_shapes) != nrow(data)) {
       cli::cli_abort(c(
         "point_shapes argument should be vector of either length 1 or {nrow(data)}",
         "i" = "There {?is/are} {length(point_shapes)} only element{?s}"
       ))
     }
-    if(!length(point_sizes) != 1 && !length(point_sizes) != nrow(data)) {
+    if (!length(point_sizes) != 1 && !length(point_sizes) != nrow(data)) {
       cli::cli_abort(c(
         "point_sizes argument should be vector of either length 1 or {nrow(data)}",
         "i" = "There {?is/are} {length(point_sizes)} only element{?s}"
       ))
     }
     tour_vis_points <- NULL # the bounding box points are added first
-    tour_vis_edges <- NULL # the bounding box edges are added with edge counts 
+    tour_vis_edges <- NULL # the bounding box edges are added with edge counts
     tour_vis_colors <- NULL # the colors of the points including bounding boxes vertices used in the tourr visualization
     tour_edges_colors <- NULL # the colors of the edges of all bounding boxes
     tour_point_shapes <- NULL # the shape of the points in the entire tour
@@ -134,9 +146,9 @@ anchor_tour <- S7::new_class(
     if (S7::S7_inherits(b_boxes, bounding_box)) {
       b_boxes <- bounding_boxes(c(b_boxes))
     }
-    for(b_box in b_boxes@boxes) {
-      # Need to ensure that the 
-      # edges are always updated with the number of points 
+    for (b_box in b_boxes@boxes) {
+      # Need to ensure that the
+      # edges are always updated with the number of points
       # that were used in the previous bounding box
       tour_vis_points <- rbind(tour_vis_points, b_box@box$points)
       tour_vis_edges <- rbind(tour_vis_edges, b_box@box$edges + increment)
@@ -144,18 +156,24 @@ anchor_tour <- S7::new_class(
       box_indices <- c(box_indices, increment)
 
       tour_vis_colors <- c(tour_vis_colors, b_box@point_colors)
-      tour_point_shapes <- c(tour_point_shapes, rep(16, length(b_box@point_colors))) # for solids
-      tour_point_sizes <- c(tour_point_sizes, rep(1, length(b_box@point_colors))) # box edges are size 1
+      tour_point_shapes <- c(
+        tour_point_shapes,
+        rep(16, length(b_box@point_colors))
+      ) # for solids
+      tour_point_sizes <- c(
+        tour_point_sizes,
+        rep(1, length(b_box@point_colors))
+      ) # box edges are size 1
       tour_edges_colors <- c(tour_edges_colors, b_box@edges_colors)
     }
     tour_vis_points <- rbind(tour_vis_points, data)
-    if(length(point_colors) == 1) {
+    if (length(point_colors) == 1) {
       point_colors <- rep(point_colors, nrow(data))
     }
-    if(length(point_shapes) == 1){
+    if (length(point_shapes) == 1) {
       point_shapes <- rep(point_shapes, nrow(data))
     }
-    if(length(point_sizes) == 1) {
+    if (length(point_sizes) == 1) {
       point_sizes <- rep(point_sizes, nrow(data))
     }
     tour_vis_colors <- c(tour_vis_colors, point_colors)
@@ -178,8 +196,11 @@ anchor_tour <- S7::new_class(
   }
 )
 
+#' @export
+animate_anchor <- S7::new_generic("animate", "x")
+
 #' Generic function to visualize tours
-#' 
+#'
 #' @param x An object of type anchor_tour
 #' @param gif_file The file location to save the gif file
 #' @param tour_path An object of type 'tour_path' from the tourr package. Defaults to grand_tour()
@@ -188,23 +209,23 @@ anchor_tour <- S7::new_class(
 #' @param frames the number of frames to be included in the gif file. Defaults to 360
 #' @param loop Logical. Defaults to TRUE
 #' @param ... Additional arguments passed to display_xy
-#' 
+#'
 #' @return None. Saves GIF at file location
+#' @name animate_anchor
 #' @export
-animate_anchor <- S7::new_generic("animate", "x")
 S7::method(animate_anchor, anchor_tour) <- function(
   x,
   gif_file,
   tour_path = tourr::grand_tour(),
-  width = 500, 
-  height = 500, 
-  frames = 360, 
+  width = 500,
+  height = 500,
+  frames = 360,
   loop = TRUE,
   rescale = TRUE,
   ...
 ) {
-  if(rescale) {
-    data <- x@tour_vis_data$points |> tourr::rescale() 
+  if (rescale) {
+    data <- x@tour_vis_data$points |> tourr::rescale()
   } else {
     data <- x@tour_vis_data$points
   }

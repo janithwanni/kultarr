@@ -3,13 +3,8 @@
 \name{animate_anchor}
 \alias{animate_anchor}
 \title{Generic function to visualize tours}
-\usage{
-animate_anchor(x, ...)
-}
 \arguments{
 \item{x}{An object of type anchor_tour}
-
-\item{...}{Additional arguments passed to display_xy}
 
 \item{gif_file}{The file location to save the gif file}
 
@@ -22,6 +17,8 @@ animate_anchor(x, ...)
 \item{frames}{the number of frames to be included in the gif file. Defaults to 360}
 
 \item{loop}{Logical. Defaults to TRUE}
+
+\item{...}{Additional arguments passed to display_xy}
 }
 \value{
 None. Saves GIF at file location

@@ -1,5 +1,6 @@
 #'
-#' @export
+#' @keywords internal
+#' @noRd
 get_reward <- function(
   new_anchor,
   model_func,
@@ -28,6 +29,8 @@ get_reward <- function(
   return(list(reward = reward, prec = prec, cover = cover))
 }
 
+#' Breadth First Search function to get the neighbors
+#' @noRd
 get_neighbors <- function(node, max_values = NULL) {
   logger::log_info("max_values")
   logger::log_info(state_tag(max_values))
@@ -48,6 +51,8 @@ get_neighbors <- function(node, max_values = NULL) {
   return(neighbors)
 }
 
+#' Compute reward for a specific node
+#' @noRd
 reward_for_node <- function(
   node,
   state_space,
@@ -71,10 +76,14 @@ reward_for_node <- function(
   return(reward)
 }
 
+#' Conveience function to generate a tag for a node
+#' @noRd
 state_tag <- function(node) {
   return(paste(node, collapse = ':'))
 }
 
+#' Perform Breadth First Search
+#' @noRd
 run_bfs <- function(
   start_state,
   dataset,
@@ -109,10 +118,7 @@ run_bfs <- function(
       logger::log_info(state_tag(node))
     }
     queue_idx <- queue_idx + 1
-    # queue <- queue[-1]
-
     current_depth <- depth[[state_tag(node)]]
-
     reward <- reward_for_node(
       node,
       state_space,
@@ -130,13 +136,11 @@ run_bfs <- function(
       cover = reward$cover
     )
     history_id <- history_id + 1
-
-    logger::log_info(
-      "current reward for {state_tag(node)} is {reward$reward} and max_reward is {max_reward$reward}"
-    )
-    # if (is_stable) {
-    #   return(list(node = node, depth = current_depth))
-    # }
+    if (verbose) {
+      logger::log_info(
+        "current reward for {state_tag(node)} is {reward$reward} and max_reward is {max_reward$reward}"
+      )
+    }
     if (reward$reward > max_reward$reward) {
       logger::log_info(
         "found new max_reward {max_reward$reward} and node {state_tag(node)}"
@@ -163,12 +167,9 @@ run_bfs <- function(
       }
     }
   }
-  logger::log_info("creating new bounds")
-
   bounds <- envir_to_bounds(max_reward_node, state_space, interest_columns)
   bounds$reward = max_reward$reward
   bounds$prec = max_reward$prec
   bounds$cover = max_reward$cover
-  # TODO: add a reward history
   return(list(final_anchor = bounds, reward_history = reward_history))
 }

@@ -1,21 +1,21 @@
 #' Make anchors
 #'
-#' This function is the main entrypoint that generates anchors by running a Multi-Armed Bandit algorithm
+#' This function is the main entrypoint that generates anchors by running a Breadth First Search algorithm
 #'
 #' @param dataset Dataset to use containing predictors and response variables.
 #' @param cols Columns of interest
 #' @param instance Id of the instance of interest in the training dataset
 #' @param model_func Function that gives takes in any data and the model to give predictions
 #' @param class_col Name of factor column containing class of interest
-#' @param n_perturb_samples number of samples to be taken from the pertubation distribution
-#' @param n_games Numeric. Number of games to play. Default to 20 games
-#' @param n_epochs Numeric. Number of epochs in a single game. Default to 100 epochs.
-#' @param seed Numeric. Seed to be used for the Multi-Armed Bandit algorithm.
-#' This ensures that the results stay consistent
+#' @param n_bins Number of bins used for binning the perturbation distribution. A higher bin size would make granular anchors but will increase computation time.
+#' @param seed Numeric. Seed to ensure that the results stay consistent
 #' @param verbose Logical. Whether to print out diagnostics of the Multi-Armed Bandit Algorithm
 #' @param parallel Logical. Whether to use parallel processing. Default set to FALSE.
+#' @param progress Logical. Whether to show a bar progress bar when performing parallel computation
+#' @param perturb_distance Numeric. The distance from the given instance to start creating perturbations
+#' @param perturb_step Numeric. The step size to create the grid of points around the given instance
 #'
-#' @return A data.frame of size 2 x (p+1) where p is the number of columns of interest with each row containing a upper. lower bound.
+#' @return A list containing the final anchor which is a data.frame of size 2 x (p+1) where p is the number of columns of interest with each row containing a upper. lower bound, the reward history which contains the reward history for each node traversed and the perturbations generated
 #' @export
 make_anchors <- function(
   dataset,
@@ -27,7 +27,9 @@ make_anchors <- function(
   seed = 145,
   verbose = FALSE,
   parallel = FALSE,
-  progress = FALSE
+  progress = FALSE,
+  perturb_distance = 0.1,
+  perturb_step = 0.01
 ) {
   if (progress) {
     p <- progressr::progressor(steps = length(instance))
@@ -53,7 +55,9 @@ make_anchors <- function(
           class_col = class_col,
           n_bins = n_bins,
           seed = seed,
-          verbose = verbose
+          verbose = verbose,
+          perturb_distance = perturb_distance,
+          perturb_step = perturb_step
         )
       },
       .options = furrr::furrr_options(seed = seed)
@@ -74,7 +78,9 @@ make_anchors <- function(
           class_col = class_col,
           n_bins = n_bins,
           seed = seed,
-          verbose = verbose
+          verbose = verbose,
+          perturb_distance = perturb_distance,
+          perturb_step = perturb_step
         )
       }
     )
@@ -94,14 +100,22 @@ make_single_anchor <- function(
   instance,
   model_func,
   class_col,
-  n_bins,
+  n_bins = 4,
   seed = 145,
-  verbose = FALSE
+  verbose = FALSE,
+  perturb_distance = 0.1,
+  perturb_step = 0.01
 ) {
   cls_levels <- dataset[[class_col]] |> levels()
   inst_pred <- model_func(dataset[instance, c(cols)])
   class_ind <- match(as.character(inst_pred), cls_levels)
-  perturbs <- generate_perturbations(dataset, instance, cols)
+  perturbs <- generate_perturbations(
+    dataset,
+    instance,
+    cols,
+    perturb_distance,
+    perturb_step
+  )
   perturbs[instance, cols] <- dataset[instance, cols]
   bin_edges <- define_bin_edges(perturbs, cols, n_bins)
   state_space <- generate_environment(perturbs, instance, cols, bin_edges)
@@ -120,7 +134,6 @@ make_single_anchor <- function(
 
   final_bounds <- bfs_results[["final_anchor"]]
   if (!validate_bound(final_bounds, perturbs[instance, cols])) {
-    # WARN: Send warning that the final bound
     cli::cli_alert_warning("Found an invalid bound")
     # print(final_bounds) final_bounds <- rep(1, 2 * length(cols)) |>
     # envir_to_bounds(state_space, cols)

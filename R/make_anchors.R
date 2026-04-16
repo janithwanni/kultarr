@@ -116,14 +116,18 @@ make_single_anchor <- function(
     perturb_distance,
     perturb_step
   )
-  perturbs[instance, cols] <- dataset[instance, cols]
+  # perturbs[instance, cols] <- dataset[instance, cols]
   bin_edges <- define_bin_edges(perturbs, cols, n_bins)
-  state_space <- generate_environment(perturbs, instance, cols, bin_edges)
+  state_space <- generate_environment(
+    perturbs,
+    dataset[instance, ],
+    cols,
+    bin_edges
+  )
   start_state <- rep(1, 2 * length(cols))
   bfs_results <- run_bfs(
     start_state,
     perturbs,
-    instance,
     state_space,
     cols,
     model_func,
@@ -133,7 +137,7 @@ make_single_anchor <- function(
   )
 
   final_bounds <- bfs_results[["final_anchor"]]
-  if (!validate_bound(final_bounds, perturbs[instance, cols])) {
+  if (!validate_bound(final_bounds, cols, dataset[instance, cols])) {
     cli::cli_alert_warning("Found an invalid bound")
     # print(final_bounds) final_bounds <- rep(1, 2 * length(cols)) |>
     # envir_to_bounds(state_space, cols)

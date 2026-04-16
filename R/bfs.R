@@ -5,7 +5,6 @@ get_reward <- function(
   new_anchor,
   model_func,
   dataset,
-  instance_id,
   class_ind = 1,
   verbose
 ) {
@@ -59,7 +58,6 @@ reward_for_node <- function(
   interest_columns,
   model_func,
   dataset,
-  instance_id,
   class_ind,
   verbose
 ) {
@@ -69,7 +67,6 @@ reward_for_node <- function(
     anchor,
     model_func,
     dataset,
-    instance_id,
     class_ind,
     verbose
   )
@@ -87,7 +84,6 @@ state_tag <- function(node) {
 run_bfs <- function(
   start_state,
   dataset,
-  instance_id,
   state_space,
   interest_columns,
   model_func,
@@ -125,7 +121,6 @@ run_bfs <- function(
       interest_columns,
       model_func,
       dataset,
-      instance_id,
       class_ind,
       verbose
     )

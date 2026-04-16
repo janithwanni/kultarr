@@ -97,7 +97,7 @@ create_anchor_inst <- function(bounds, interest_cols) {
 #' Generates lower and upper bounds around a given instance
 #'
 #' @param dataset Cutpoints will be generated from in between the points in the dataset
-#' @param instance_id The index of the instance of interest
+#' @param instance_data The actual instance of the data
 #' @param interest_coluns The columns of `dataset` to consider when creating lower and upper bounds
 #' @param bin_edges Output of `define_bin_edges` function
 #'
@@ -106,19 +106,19 @@ create_anchor_inst <- function(bounds, interest_cols) {
 #' @noRd
 generate_environment <- function(
   dataset,
-  instance_id,
+  instance_data,
   interest_columns,
   bin_edges
 ) {
   envir <- purrr::map(interest_columns, function(cname) {
-    vals <- dataset[-instance_id, ][[cname]] |> sort()
+    vals <- dataset[[cname]] |> sort()
     cutpoints <- bin_edges[[cname]]
     # print(cutpoints)
     # print(dataset[instance_id, ][[cname]])
-    logger::log_info("setting lower bounds for {instance_id}")
+    logger::log_info("setting lower bounds")
 
     v_l <- sort(
-      cutpoints[cutpoints < dataset[instance_id, ][[cname]]],
+      cutpoints[cutpoints < instance_data[[cname]]],
       decreasing = TRUE
     )
     logger::log_info(
@@ -132,8 +132,8 @@ generate_environment <- function(
     }
     # print("lower bounds")
     # print(v_l)
-    logger::log_info("setting upper bounds for {instance_id} as")
-    v_u <- cutpoints[cutpoints > dataset[instance_id, ][[cname]]]
+    logger::log_info("setting upper bounds")
+    v_u <- cutpoints[cutpoints > instance_data[[cname]]]
     # print(paste(v_u, collapse = ','))
     logger::log_info(
       "Have {length(v_u)} upper bounds with {paste(head(v_u, collapse=','))}"
@@ -172,30 +172,14 @@ define_bin_edges <- function(dataset, interest_columns, num_bins = 3) {
     stats::setNames(interest_columns)
 }
 
-#' Function to validate whether
-#' every edge case of the environment can contain the row
-#' @keywords internal
-#' @noRd
-validate_environment <- function(e, instance_row) {
-  combs_bounds <- e |> lapply(range) |> do.call(tidyr::expand_grid, args = _)
-  combs_bounds |>
-    split(seq(nrow(combs_bounds))) |>
-    sapply(\(x) {
-      x |>
-        create_anchor_inst(colnames(instance_row)) |>
-        satisfies(instance_row)
-    }) |>
-    all()
-}
-
 #' Function to validate if a created boundary satisfies a given instance row
 #' @keywords internal
 #' @noRd
-validate_bound <- function(b, instance_row) {
+validate_bound <- function(b, cols, instance_row) {
   if (any(is.na(b))) {
     return(FALSE)
   }
   b |>
-    create_anchor_inst((colnames(instance_row))) |>
+    create_anchor_inst(cols) |>
     satisfies(instance_row)
 }

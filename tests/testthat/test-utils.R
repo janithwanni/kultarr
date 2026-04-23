@@ -46,7 +46,7 @@ describe("generate_environment", {
     # Act
     Env <- generate_environment(
       d,
-      2,
+      d[2, ],
       interest_columns = c("x", "y", "z"),
       bin_edges = e
     )

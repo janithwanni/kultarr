@@ -24,7 +24,7 @@ make_anchors(
 
 \item{cols}{Columns of interest}
 
-\item{instance}{Id of the instance of interest in the training dataset}
+\item{instance}{A tibble row containing the instance to interpret, can be a dataframe containing multiple rows}
 
 \item{model_func}{Function that gives takes in any data and the model to give predictions}
 

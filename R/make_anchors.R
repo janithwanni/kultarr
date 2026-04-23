@@ -4,7 +4,7 @@
 #'
 #' @param dataset Dataset to use containing predictors and response variables.
 #' @param cols Columns of interest
-#' @param instance Id of the instance of interest in the training dataset
+#' @param instance A tibble row containing the instance to interpret, can be a dataframe containing multiple rows
 #' @param model_func Function that gives takes in any data and the model to give predictions
 #' @param class_col Name of factor column containing class of interest
 #' @param n_bins Number of bins used for binning the perturbation distribution. A higher bin size would make granular anchors but will increase computation time.
@@ -31,8 +31,9 @@ make_anchors <- function(
   perturb_distance = 0.1,
   perturb_step = 0.01
 ) {
+  # TODO: Assert if instance is a dataframe and has more than 0 rows
   if (progress) {
-    p <- progressr::progressor(steps = length(instance))
+    p <- progressr::progressor(steps = nrow(instance))
   }
 
   # bin_edges <- define_bin_edges(dataset, cols, n_bins)
@@ -42,15 +43,16 @@ make_anchors <- function(
   if (parallel) {
     future::plan("multisession")
     final_bounds <- furrr::future_map(
-      instance,
+      seq_len(nrow(instance)),
       function(i) {
         if (progress) {
           p()
         }
+        inst <- instance[i, ]
         make_single_anchor(
           dataset = dataset,
           cols = cols,
-          i,
+          inst,
           model_func = model_func,
           class_col = class_col,
           n_bins = n_bins,
@@ -65,15 +67,16 @@ make_anchors <- function(
   } else {
     future::plan("sequential")
     final_bounds <- purrr::map(
-      instance,
+      seq_len(nrow(instance)),
       function(i) {
         if (progress) {
           p()
         }
+        inst <- instance[i, ]
         make_single_anchor(
           dataset = dataset,
           cols = cols,
-          i,
+          inst,
           model_func = model_func,
           class_col = class_col,
           n_bins = n_bins,
@@ -107,7 +110,7 @@ make_single_anchor <- function(
   perturb_step = 0.01
 ) {
   cls_levels <- dataset[[class_col]] |> levels()
-  inst_pred <- model_func(dataset[instance, c(cols)])
+  inst_pred <- model_func(instance[, c(cols)])
   class_ind <- match(as.character(inst_pred), cls_levels)
   perturbs <- generate_perturbations(
     dataset,
@@ -120,7 +123,7 @@ make_single_anchor <- function(
   bin_edges <- define_bin_edges(perturbs, cols, n_bins)
   state_space <- generate_environment(
     perturbs,
-    dataset[instance, ],
+    instance,
     cols,
     bin_edges
   )
@@ -137,7 +140,7 @@ make_single_anchor <- function(
   )
 
   final_bounds <- bfs_results[["final_anchor"]]
-  if (!validate_bound(final_bounds, cols, dataset[instance, cols])) {
+  if (!validate_bound(final_bounds, cols, instance[, cols])) {
     cli::cli_alert_warning("Found an invalid bound")
     # print(final_bounds) final_bounds <- rep(1, 2 * length(cols)) |>
     # envir_to_bounds(state_space, cols)
@@ -147,22 +150,36 @@ make_single_anchor <- function(
   upper_bound <- final_bounds |> dplyr::select(tidyselect::ends_with("_u"))
   colnames(upper_bound) <- gsub("_u$", "", colnames(upper_bound))
 
+  instance_lbl <- uuid::UUIDgenerate(instance)
+
   anchor_df <- rbind(
     lower_bound |> dplyr::mutate(bound = "lower"),
     upper_bound |> dplyr::mutate(bound = "upper")
   ) |>
-    dplyr::mutate(id = instance, .before = 1) |>
+    dplyr::mutate(id = instance_lbl, .before = 1) |>
     dplyr::mutate(
       reward = final_bounds$reward,
       prec = final_bounds$prec,
       cover = final_bounds$cover
     )
 
+  perturb_bounds <- rbind(
+    perturbs |>
+      dplyr::summarise(dplyr::across(tidyselect::all_of(cols), min)) |>
+      dplyr::mutate(bound = "lower"),
+    perturbs |>
+      dplyr::summarise(dplyr::across(tidyselect::all_of(cols), max)) |>
+      dplyr::mutate(bound = "upper")
+  )
+
   return(
     list(
       final_anchor = anchor_df,
-      history = bfs_results[["reward_history"]] |> dplyr::mutate(id = instance),
-      perturbs = perturbs |> dplyr::mutate(id = instance)
+      history = bfs_results[["reward_history"]] |>
+        dplyr::mutate(id = instance_lbl),
+      perturbs = perturbs |>
+        dplyr::mutate(id = instance_lbl, preds = model_func(perturbs[, cols])),
+      perturb_bounds = perturb_bounds
     )
   )
 }

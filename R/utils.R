@@ -15,7 +15,7 @@ generate_perturbations <- function(
   radius = 0.1,
   step = 0.01
 ) {
-  local_obs <- data[instance, ]
+  local_obs <- instance
   perturb_params <- lapply(interest_columns, function(i) {
     col_max <- max(data[[i]], na.rm = TRUE)
     col_min <- min(data[[i]], na.rm = TRUE)

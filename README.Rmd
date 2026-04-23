@@ -51,13 +51,13 @@ train_data$cls <- factor(ifelse(train_data$x > 0.5, "U", "D"))
 rf_model <- randomForest(cls ~ ., data = train_data)
 
 model_func <- carrier::crate(function(data) {
-  return(predict(!!rf_model, data))
+  return(randomForest:::predict(!!rf_model, data))
 })
 
 final_bounds <- make_anchors(
   dataset = train_data,
   cols = c("x", "y"),
-  instance = 21,
+  instance = train_data[21,],
   model_func = model_func,
   class_col = "cls",
   verbose = FALSE

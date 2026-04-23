@@ -91,7 +91,8 @@ make_anchors <- function(
   return(list(
     final_anchor = final_bounds |> purrr::map_dfr(~ .x[["final_anchor"]]),
     reward_history = final_bounds |> purrr::map_dfr(~ .x[["history"]]),
-    perturbs = final_bounds |> purrr::map_dfr(~ .x[["perturbs"]])
+    perturbs = final_bounds |> purrr::map_dfr(~ .x[["perturbs"]]),
+    perturb_bounds = final_bounds |> purrr::map_dfr(~ .x[["perturb_bounds"]])
   ))
 }
 

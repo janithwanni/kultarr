@@ -1,5 +1,5 @@
 #' @importFrom rlang .data
-#' @noRd
+#' @export
 rule_rect_layers <- function(
   rule_tbl,
   fill = "#ffffff00",
@@ -47,13 +47,15 @@ vis_anchor <- function(anchor, dataset, instance, model_func) {
         ggplot2::aes(x = .data$x, y = .data$y, color = .data$cls),
         size = 3
       ) +
-      ggplot2::geom_point(
-        data = anchor$perturbs |>
-          dplyr::mutate(cls = model_func(anchor$perturbs)),
-        ggplot2::aes(x = .data$x, y = .data$y, color = .data$cls),
-        size = 0.1,
-        alpha = 0.5
-      ) +
+      # TODO: This needs to be a box underneath the anchors
+      # ggplot2::geom_point(
+      #   data = anchor$perturbs |>
+      #     dplyr::mutate(cls = model_func(anchor$perturbs)),
+      #   ggplot2::aes(x = .data$x, y = .data$y, color = .data$cls),
+      #   size = 0.1,
+      #   alpha = 0.5
+      # ) +
+      rule_rect_layers(anchor$perturb_bounds) +
       rule_rect_layers(anchor$final_anchor)
   )
 }

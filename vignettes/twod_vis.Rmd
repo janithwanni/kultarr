@@ -1,0 +1,67 @@
+---
+title: "Two dimensional visualization of kultarr"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{twod_vis}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(kultarr)
+library(randomForest)
+library(dplyr)
+library(tidyr)
+
+set.seed(145)
+train_data <- data.frame(x = runif(1000), y = runif(1000))
+train_data[21, ] <- c(0.5, 0.5)
+train_data$cls <- factor(ifelse(train_data$x > 0.5, "U", "D"))
+
+rf_model <- randomForest(cls ~ ., data = train_data)
+
+model_func <- carrier::crate(function(data) {
+  return(randomForest:::predict.randomForest(!!rf_model, data))
+})
+
+final_bounds <- make_anchors(
+  dataset = train_data,
+  cols = c("x", "y"),
+  instance = train_data[21,],
+  model_func = model_func,
+  class_col = "cls",
+  verbose = FALSE
+)
+```
+
+The returned object has several parts in it. For visualisation we would primarily need the final_anchor and the perturbations used in it.
+
+kultarr has a convenience function called `rule_rect_layers`, which when given a tibble containing the bounds of either the anchors or the perturbations, will create a `geom_rect` object that can be used in ggplot visualisations.
+
+<!-- TODO: The model predictions should be used as the background. Check this in the README, and the tourd. -->
+
+```{r}
+library(ggplot2)
+ggplot() +
+  geom_point(data = train_data, mapping = aes(x = x,y = y,colour = cls)) +
+  rule_rect_layers(final_bounds$perturb_bounds, fill = "gray", alpha = 0.8) + 
+  rule_rect_layers(final_bounds$final_anchor) +
+    geom_point(data = train_data[21, ], mapping = aes(x = x,y = y, colour = cls), size = 2, shape = 19, fill="black") +
+  theme_minimal()
+```
+
+```{r}
+ggplot() +
+  geom_point(data = final_bounds$perturbs, mapping = aes(x = x,y =y, color=preds)) +
+  rule_rect_layers(final_bounds$perturb_bounds, fill = "gray", alpha=0.8) +
+  rule_rect_layers(final_bounds$final_anchor) +
+    geom_point(data = train_data[21, ], mapping = aes(x=x,y=y,color=cls), size = 2, shape = 19, fill = "black") +
+  theme_minimal()
+```

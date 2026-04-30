@@ -76,7 +76,7 @@ point_shapes <- dataset |>
   ifelse(solid, hollow)
 ```
 
-Now that we have the indegredients set up. The first step is to create a bounding box instance. 
+Now that we have the ingredients set up. The first step is to create a bounding box instance. 
 
 ```{r}
 bnd_box <- bounding_box(

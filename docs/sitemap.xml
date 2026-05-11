@@ -1,66 +1,29 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>/404.html</loc>
-  </url>
-  <url>
-    <loc>/LICENSE-text.html</loc>
-  </url>
-  <url>
-    <loc>/LICENSE.html</loc>
-  </url>
-  <url>
-    <loc>/articles/index.html</loc>
-  </url>
-  <url>
-    <loc>/articles/kultarr.html</loc>
-  </url>
-  <url>
-    <loc>/articles/tour_aesthetics.html</loc>
-  </url>
-  <url>
-    <loc>/authors.html</loc>
-  </url>
-  <url>
-    <loc>/index.html</loc>
-  </url>
-  <url>
-    <loc>/news/index.html</loc>
-  </url>
-  <url>
-    <loc>/reference/anchor_tour.html</loc>
-  </url>
-  <url>
-    <loc>/reference/anchors.html</loc>
-  </url>
-  <url>
-    <loc>/reference/animate_anchor.html</loc>
-  </url>
-  <url>
-    <loc>/reference/bounding_box.html</loc>
-  </url>
-  <url>
-    <loc>/reference/get_reward.html</loc>
-  </url>
-  <url>
-    <loc>/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>/reference/mab_utils.html</loc>
-  </url>
-  <url>
-    <loc>/reference/make_anchors.html</loc>
-  </url>
-  <url>
-    <loc>/reference/run_mab.html</loc>
-  </url>
-  <url>
-    <loc>/reference/select_action.html</loc>
-  </url>
-  <url>
-    <loc>/reference/validate_bound.html</loc>
-  </url>
-  <url>
-    <loc>/reference/validate_environment.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>/404.html</loc></url>
+<url><loc>/LICENSE-text.html</loc></url>
+<url><loc>/LICENSE.html</loc></url>
+<url><loc>/articles/index.html</loc></url>
+<url><loc>/articles/kultarr.html</loc></url>
+<url><loc>/articles/tour_aesthetics.html</loc></url>
+<url><loc>/articles/twod_vis.html</loc></url>
+<url><loc>/authors.html</loc></url>
+<url><loc>/index.html</loc></url>
+<url><loc>/news/index.html</loc></url>
+<url><loc>/reference/anchor_tour.html</loc></url>
+<url><loc>/reference/anchors.html</loc></url>
+<url><loc>/reference/animate_anchor.html</loc></url>
+<url><loc>/reference/bounding_box.html</loc></url>
+<url><loc>/reference/coverage.html</loc></url>
+<url><loc>/reference/create_anchor_inst.html</loc></url>
+<url><loc>/reference/envir_to_bounds.html</loc></url>
+<url><loc>/reference/extend.html</loc></url>
+<url><loc>/reference/generate_perturbations.html</loc></url>
+<url><loc>/reference/index.html</loc></url>
+<url><loc>/reference/make_anchors.html</loc></url>
+<url><loc>/reference/precision.html</loc></url>
+<url><loc>/reference/predicate.html</loc></url>
+<url><loc>/reference/satisfies.html</loc></url>
+<url><loc>/reference/validate_bound.html</loc></url>
+<url><loc>/reference/vis_anchor.html</loc></url>
 </urlset>
+

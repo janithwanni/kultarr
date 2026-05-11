@@ -19,24 +19,30 @@ library(kultarr)
 library(randomForest)
 library(dplyr)
 library(tidyr)
+library(kumquat)
 
 set.seed(145)
-train_data <- data.frame(x = runif(1000), y = runif(1000))
-train_data[21, ] <- c(0.5, 0.5)
-train_data$cls <- factor(ifelse(train_data$x > 0.5, "U", "D"))
-
-rf_model <- randomForest(cls ~ ., data = train_data)
+data("d_multitwo")
+train_data <- d_multitwo
+rf_model <- randomForest(class ~ ., data = train_data)
 
 model_func <- carrier::crate(function(data) {
   return(randomForest:::predict.randomForest(!!rf_model, data))
 })
 
+find_closest <- function(pt, data) {
+    dst <- data |>
+        mutate(dst = sqrt((x - pt$x)^2 + (y - pt$y)^2))
+    return(which.min(dst$dst))
+}
+obs <- find_closest(tibble(x = 0, y=0), train_data)
+
 final_bounds <- make_anchors(
   dataset = train_data,
   cols = c("x", "y"),
-  instance = train_data[21,],
+  instance = train_data[obs,],
   model_func = model_func,
-  class_col = "cls",
+  class_col = "class",
   verbose = FALSE
 )
 ```
@@ -47,21 +53,75 @@ kultarr has a convenience function called `rule_rect_layers`, which when given a
 
 <!-- TODO: The model predictions should be used as the background. Check this in the README, and the tourd. -->
 
+This one is on the lower end 
+
 ```{r}
+model_fit <- expand_grid(x = seq(-1,1,length.out=50), y=seq(-1,1,length.out=50))
+model_fit$pred <- model_func(model_fit)
 library(ggplot2)
 ggplot() +
-  geom_point(data = train_data, mapping = aes(x = x,y = y,colour = cls)) +
-  rule_rect_layers(final_bounds$perturb_bounds, fill = "gray", alpha = 0.8) + 
-  rule_rect_layers(final_bounds$final_anchor) +
-    geom_point(data = train_data[21, ], mapping = aes(x = x,y = y, colour = cls), size = 2, shape = 19, fill="black") +
-  theme_minimal()
+  geom_point(data = model_fit, mapping = aes(x = x,y = y,colour = pred),alpha=0.1) +
+  rule_rect_layers(final_bounds$perturb_bounds, fill = "gray", alpha = 0.5) + 
+  rule_rect_layers(final_bounds$final_anchor,fill="black", alpha =0.8) +
+    geom_point(data = train_data[obs, ], mapping = aes(x = x,y = y, colour = class), size = 2, shape = 19, fill="black") +
+  theme_minimal() +
+  coord_equal()
 ```
+
+```{r}
+obs <- find_closest(tibble(x = 0, y=0.1), train_data)
+
+final_bounds <- make_anchors(
+  dataset = train_data,
+  cols = c("x", "y"),
+  instance = train_data[obs,],
+  model_func = model_func,
+  class_col = "class",
+  verbose = FALSE
+)
+```
+
+This one is right on the boundary
+
+```{r}
+ggplot() +
+  geom_point(data = model_fit, mapping = aes(x = x,y = y,colour = pred),alpha=0.1) +
+  rule_rect_layers(final_bounds$perturb_bounds, fill = "gray", alpha = 0.5) + 
+  rule_rect_layers(final_bounds$final_anchor,fill="black", alpha =0.8) +
+    geom_point(data = train_data[obs, ], mapping = aes(x = x,y = y, colour = class), size = 2, shape = 19, fill="black") +
+  theme_minimal() +
+  coord_equal()
+```
+
+
+```{r}
+obs <- find_closest(tibble(x = 0, y=0.2), train_data)
+
+final_bounds <- make_anchors(
+  dataset = train_data,
+  cols = c("x", "y"),
+  instance = train_data[obs,],
+  model_func = model_func,
+  class_col = "class",
+  verbose = FALSE
+)
+```
+```{r}
+ggplot() +
+  geom_point(data = model_fit, mapping = aes(x = x,y = y,colour = pred),alpha=0.1) +
+  rule_rect_layers(final_bounds$perturb_bounds, fill = "gray", alpha = 0.5) + 
+  rule_rect_layers(final_bounds$final_anchor,fill="black", alpha =0.7) +
+    geom_point(data = train_data[obs, ], mapping = aes(x = x,y = y, colour = class), size = 2, shape = 19, fill="black") +
+  theme_minimal() +
+  coord_equal()
+```
+
+Try six more different places, some from the axis parallel places etc.
 
 ```{r}
 ggplot() +
   geom_point(data = final_bounds$perturbs, mapping = aes(x = x,y =y, color=preds)) +
-  rule_rect_layers(final_bounds$perturb_bounds, fill = "gray", alpha=0.8) +
   rule_rect_layers(final_bounds$final_anchor) +
-    geom_point(data = train_data[21, ], mapping = aes(x=x,y=y,color=cls), size = 2, shape = 19, fill = "black") +
+    geom_point(data = train_data[21, ], mapping = aes(x=x,y=y), size = 2, shape = 19, fill = "black") +
   theme_minimal()
 ```

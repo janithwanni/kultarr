@@ -4,16 +4,16 @@
 \alias{vis_anchor}
 \title{Visualize the anchor in two dimensional space}
 \usage{
-vis_anchor(anchor, dataset, instance, model_func)
+vis_anchor(anchors, dataset, instance, model_func)
 }
 \arguments{
-\item{anchor}{The result of \code{make_anchors()} function call.}
-
 \item{dataset}{The dataset passed to \code{make_anchors()}}
 
 \item{instance}{The point of interest}
 
 \item{model_func}{A crate object containing the prediction function of the modelfor visualisation}
+
+\item{anchor}{The result of \code{make_anchors()} function call.}
 }
 \value{
 A ggplot object

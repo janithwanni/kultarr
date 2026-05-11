@@ -2,9 +2,6 @@
 #' @export
 rule_rect_layers <- function(
   rule_tbl,
-  fill = "#ffffff00",
-  alpha = 0,
-  color = "steelblue4",
   ...
 ) {
   lower <- rule_tbl |> dplyr::filter(.data$bound == "lower")
@@ -18,10 +15,6 @@ rule_rect_layers <- function(
         ymin = lower$y,
         ymax = upper$y
       ),
-      fill = fill,
-      alpha = alpha,
-      color = color,
-      linewidth = 0.8,
       ...
     )
   )
@@ -35,27 +28,29 @@ rule_rect_layers <- function(
 #' @return A ggplot object
 #' @importFrom rlang .data
 #' @export
-vis_anchor <- function(anchor, dataset, instance, model_func) {
-  return(
-    ggplot2::ggplot() +
-      ggplot2::geom_point(
-        data = dataset,
-        ggplot2::aes(x = .data$x, y = .data$y, color = .data$cls)
-      ) +
-      ggplot2::geom_point(
-        data = dataset[instance, ],
-        ggplot2::aes(x = .data$x, y = .data$y, color = .data$cls),
-        size = 3
-      ) +
-      # TODO: This needs to be a box underneath the anchors
-      # ggplot2::geom_point(
-      #   data = anchor$perturbs |>
-      #     dplyr::mutate(cls = model_func(anchor$perturbs)),
-      #   ggplot2::aes(x = .data$x, y = .data$y, color = .data$cls),
-      #   size = 0.1,
-      #   alpha = 0.5
-      # ) +
-      rule_rect_layers(anchor$perturb_bounds) +
-      rule_rect_layers(anchor$final_anchor)
-  )
+vis_anchor <- function(anchors, dataset, instance, model_func) {
+  lapply(anchors, function(anchor) {
+    return(
+      ggplot2::ggplot() +
+        ggplot2::geom_point(
+          data = dataset,
+          ggplot2::aes(x = .data$x, y = .data$y, color = .data$cls)
+        ) +
+        ggplot2::geom_point(
+          data = dataset[instance, ],
+          ggplot2::aes(x = .data$x, y = .data$y, color = .data$cls),
+          size = 3
+        ) +
+        # TODO: This needs to be a box underneath the anchors
+        # ggplot2::geom_point(
+        #   data = anchor$perturbs |>
+        #     dplyr::mutate(cls = model_func(anchor$perturbs)),
+        #   ggplot2::aes(x = .data$x, y = .data$y, color = .data$cls),
+        #   size = 0.1,
+        #   alpha = 0.5
+        # ) +
+        rule_rect_layers(anchor$perturb_bounds) +
+        rule_rect_layers(anchor$final_anchor)
+    )
+  })
 }

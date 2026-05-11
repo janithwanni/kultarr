@@ -174,7 +174,6 @@ define_bin_edges <- function(dataset, interest_columns, num_bins = 3) {
 
 #' Function to validate if a created boundary satisfies a given instance row
 #' @keywords internal
-#' @noRd
 validate_bound <- function(b, cols, instance_row) {
   if (any(is.na(b))) {
     return(FALSE)

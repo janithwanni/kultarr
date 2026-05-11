@@ -182,7 +182,8 @@ make_single_anchor <- function(
     perturbs |>
       dplyr::summarise(dplyr::across(tidyselect::all_of(cols), max)) |>
       dplyr::mutate(bound = "upper")
-  )
+  ) |>
+    dplyr::mutate(id = instance_lbl, .before = 1)
 
   return(
     list(

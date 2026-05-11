@@ -6,7 +6,7 @@ describe("make_single_anchor", {
     z = factor(c("U", "U", "D", "U", "D", "D"))
   )
   cols <- c("x", "y")
-  instance <- c(1)
+  instance <- d[1, ]
   model_func <- function(data) {
     return(factor(ifelse(data$x > data$y, "U", "D")))
   }
@@ -22,7 +22,10 @@ describe("make_single_anchor", {
   )
   it("should return a list containing the final anchor and the history", {
     # Assert
-    expect_equal(names(a), c("final_anchor", "history", "perturbs"))
+    expect_equal(
+      names(a),
+      c("final_anchor", "history", "perturbs", "perturb_bounds")
+    )
     expect_s3_class(a$history, "data.frame")
     expect_s3_class(a$final_anchor, "tbl_df")
   })

@@ -58,7 +58,7 @@ describe("generate_environment", {
 
 describe("generate_perturbations", {
   # Act
-  p <- generate_perturbations(d, 1, c("x", "y"))
+  p <- generate_perturbations(d, d[1, ], c("x", "y"))
   it("should return a dataframe", {
     # Assert
     expect_s3_class(p, "tbl_df")

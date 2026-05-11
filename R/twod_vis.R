@@ -4,17 +4,28 @@ rule_rect_layers <- function(
   rule_tbl,
   ...
 ) {
-  lower <- rule_tbl |> dplyr::filter(.data$bound == "lower")
-  upper <- rule_tbl |> dplyr::filter(.data$bound == "upper")
+  rect_data <- rule_tbl |>
+    tidyr::pivot_wider(
+      names_from = .data$bound,
+      values_from = c(.data$x, .data$y)
+    ) |>
+    dplyr::rename(
+      xmin = .data$x_lower,
+      ymin = .data$y_lower,
+      xmax = .data$x_upper,
+      ymax = .data$y_upper
+    )
 
   list(
     ggplot2::geom_rect(
+      data = rect_data,
       ggplot2::aes(
-        xmin = lower$x,
-        xmax = upper$x,
-        ymin = lower$y,
-        ymax = upper$y
+        xmin = .data$xmin,
+        xmax = .data$xmax,
+        ymin = .data$ymin,
+        ymax = .data$ymax
       ),
+      inherit.aes = FALSE,
       ...
     )
   )

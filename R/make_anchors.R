@@ -14,6 +14,7 @@
 #' @param progress Logical. Whether to show a bar progress bar when performing parallel computation
 #' @param perturb_distance Numeric. The distance from the given instance to start creating perturbations
 #' @param perturb_step Numeric. The step size to create the grid of points around the given instance
+#' @param instance_lbls Character. A vector of labels to be used in the result. Needs to have length equal to number of rows in instance
 #'
 #' @return A list containing the final anchor which is a data.frame of size 2 x (p+1) where p is the number of columns of interest with each row containing a upper. lower bound, the reward history which contains the reward history for each node traversed and the perturbations generated
 #' @export
@@ -29,7 +30,8 @@ make_anchors <- function(
   parallel = FALSE,
   progress = FALSE,
   perturb_distance = 0.1,
-  perturb_step = 0.01
+  perturb_step = 0.01,
+  instance_lbls = NULL
 ) {
   # TODO: Assert if instance is a dataframe and has more than 0 rows
   if (progress) {
@@ -39,6 +41,10 @@ make_anchors <- function(
   # bin_edges <- define_bin_edges(dataset, cols, n_bins)
   logger::log_info("setting up bin edges")
   # print(bin_edges)
+
+  if (is.null(instance_lbls)) {
+    instance_lbls <- seq_along(instance)
+  }
 
   if (parallel) {
     future::plan("multisession")
@@ -59,7 +65,8 @@ make_anchors <- function(
           seed = seed,
           verbose = verbose,
           perturb_distance = perturb_distance,
-          perturb_step = perturb_step
+          perturb_step = perturb_step,
+          instance_lbl = instance_lbls[i]
         )
       },
       .options = furrr::furrr_options(seed = seed)
@@ -83,7 +90,8 @@ make_anchors <- function(
           seed = seed,
           verbose = verbose,
           perturb_distance = perturb_distance,
-          perturb_step = perturb_step
+          perturb_step = perturb_step,
+          instance_lbl = instance_lbls[i]
         )
       }
     )
@@ -108,7 +116,8 @@ make_single_anchor <- function(
   seed = 145,
   verbose = FALSE,
   perturb_distance = 0.1,
-  perturb_step = 0.01
+  perturb_step = 0.01,
+  instance_lbl = NULL
 ) {
   cls_levels <- dataset[[class_col]] |> levels()
   inst_pred <- model_func(instance[, c(cols)])
@@ -151,7 +160,9 @@ make_single_anchor <- function(
   upper_bound <- final_bounds |> dplyr::select(tidyselect::ends_with("_u"))
   colnames(upper_bound) <- gsub("_u$", "", colnames(upper_bound))
 
-  instance_lbl <- uuid::UUIDgenerate(instance)
+  if (is.null(instance_lbl)) {
+    instance_lbl <- uuid::UUIDgenerate(instance)
+  }
 
   anchor_df <- rbind(
     lower_bound |> dplyr::mutate(bound = "lower"),

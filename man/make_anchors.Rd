@@ -16,7 +16,8 @@ make_anchors(
   parallel = FALSE,
   progress = FALSE,
   perturb_distance = 0.1,
-  perturb_step = 0.01
+  perturb_step = 0.01,
+  instance_lbls = NULL
 )
 }
 \arguments{
@@ -43,6 +44,8 @@ make_anchors(
 \item{perturb_distance}{Numeric. The distance from the given instance to start creating perturbations}
 
 \item{perturb_step}{Numeric. The step size to create the grid of points around the given instance}
+
+\item{instance_lbls}{Character. A vector of labels to be used in the result. Needs to have length equal to number of rows in instance}
 }
 \value{
 A list containing the final anchor which is a data.frame of size 2 x (p+1) where p is the number of columns of interest with each row containing a upper. lower bound, the reward history which contains the reward history for each node traversed and the perturbations generated

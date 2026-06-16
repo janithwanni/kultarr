@@ -3,6 +3,10 @@
 \name{satisfies}
 \alias{satisfies}
 \title{Generic function to calculate the number of rows in a dataset satisfied by an anchor}
+\usage{
+## S7 method for class <kultarr::anchors>
+satisfies(x, data)
+}
 \arguments{
 \item{x}{Object of S7 class anchor}
 

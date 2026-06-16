@@ -3,10 +3,14 @@
 \name{precision}
 \alias{precision}
 \title{Generic function to calculate precision of anchors}
+\usage{
+## S7 method for class <kultarr::anchors>
+precision(x, model, samples)
+}
 \arguments{
-\item{samples}{the dataset to test coverage on}
-
 \item{model}{a predict function that will provide the predicted labels given a dataset}
+
+\item{samples}{the dataset to test coverage on}
 }
 \value{
 a named vector of proportions for each class type predicted by the model

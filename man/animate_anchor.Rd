@@ -3,6 +3,20 @@
 \name{animate_anchor}
 \alias{animate_anchor}
 \title{Generic function to visualize tours}
+\usage{
+## S7 method for class <kultarr::anchor_tour>
+animate(
+  x,
+  gif_file,
+  tour_path = tourr::grand_tour(),
+  width = 500,
+  height = 500,
+  frames = 360,
+  loop = TRUE,
+  rescale = TRUE,
+  ...
+)
+}
 \arguments{
 \item{x}{An object of type anchor_tour}
 

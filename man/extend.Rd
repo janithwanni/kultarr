@@ -3,6 +3,10 @@
 \name{extend}
 \alias{extend}
 \title{Generic function to extend anchors}
+\usage{
+## S7 method for class <kultarr::anchors>
+extend(x, pred)
+}
 \arguments{
 \item{x}{Object of S7 class anchors}
 

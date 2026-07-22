@@ -17,7 +17,6 @@ knitr::opts_chunk$set(
 
 <!-- badges: start -->
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
-[![CRAN status](https://www.r-pkg.org/badges/version/kultarr)]()
 <!-- badges: end -->
 
 The goal of `kultarr` is to generate and understand how anchors are generated in a simpler intuitive approach.
@@ -28,7 +27,7 @@ The goal of `kultarr` is to generate and understand how anchors are generated in
 You can install the development version of kultarr like so:
 
 ``` r
-remotes::install_github("janithwanni/kultarr")
+pak::pak("janithwanni/kultarr")
 ```
 
 ## Example
@@ -90,7 +89,7 @@ There are several S7 classes built to make the process of visualizing the boundi
 ```{r step-1}
 bnd_box <- bounding_box(
   bounds_tbl = final_bounds$final_anchor,
-  target_inst_row = train_data[1, ] |> select(bill_length_mm:body_mass_g),
+  target_inst_row = train_data[1, ] |> select(x,y),
   point_colors = "black",
   edges_colors = "black"
 )
@@ -101,7 +100,7 @@ bnd_box <- bounding_box(
 ```{r step-2}
 anc_tour <- anchor_tour(
   bnd_box,
-  train_data |> select(bill_length_mm:body_mass_g),
+  train_data |> select(x,y),
   "blue"
 )
 ```

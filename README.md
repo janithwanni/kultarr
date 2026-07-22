@@ -7,8 +7,6 @@
 
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
-[![CRAN
-status](https://www.r-pkg.org/badges/version/kultarr)](https://CRAN.R-project.org/package=kultarr)
 <!-- badges: end -->
 
 The goal of `kultarr` is to generate and understand how anchors are
@@ -31,9 +29,8 @@ library(kultarr)
 ## basic example code
 
 library(randomForest)
-#> randomForest 4.7-1.1
+#> randomForest 4.7-1.2
 #> Type rfNews() to see new features/changes/bug fixes.
-library(palmerpenguins)
 library(dplyr)
 #> 
 #> Attaching package: 'dplyr'
@@ -49,12 +46,11 @@ library(dplyr)
 library(tidyr)
 
 set.seed(145)
-train_data <- penguins |> 
-  drop_na() |>
-  select(bill_length_mm: body_mass_g, species) |>
-  slice_sample(prop = 0.8)
+train_data <- data.frame(x = runif(1000), y = runif(1000))
+train_data[21, ] <- c(0.5, 0.5)
+train_data$cls <- factor(ifelse(train_data$x > 0.5, "U", "D"))
 
-rf_model <- randomForest(species ~ ., data = train_data)
+rf_model <- randomForest(cls ~ ., data = train_data)
 
 model_func <- carrier::crate(function(data) {
   return(randomForest:::predict.randomForest(!!rf_model, data))
@@ -62,12 +58,10 @@ model_func <- carrier::crate(function(data) {
 
 final_bounds <- make_anchors(
   dataset = train_data,
-  cols = train_data |> select(bill_length_mm:body_mass_g) |> colnames(),
-  instance = c(1),
+  cols = c("x", "y"),
+  instance = train_data[21,],
   model_func = model_func,
-  class_col = "species",
-  n_games = 5,
-  n_epochs = 50,
+  class_col = "cls",
   verbose = FALSE
 )
 ```
@@ -77,32 +71,32 @@ algorithm (`reward_history`) and the resulting anchor (`final_anchor`).
 
 ``` r
 str(final_bounds)
-#> List of 2
-#>  $ final_anchor  : tibble [2 × 9] (S3: tbl_df/tbl/data.frame)
-#>   ..$ id               : num [1:2] 1 1
-#>   ..$ bill_length_mm   : num [1:2] 45.2 48
-#>   ..$ bill_depth_mm    : num [1:2] 13.2 15.1
-#>   ..$ flipper_length_mm: num [1:2] 214 225
-#>   ..$ body_mass_g      : num [1:2] 4100 4700
-#>   ..$ bound            : chr [1:2] "lower" "upper"
-#>   ..$ reward           : num [1:2] 0.5 0.5
-#>   ..$ prec             : num [1:2] 1 1
-#>   ..$ cover            : num [1:2] 0.0167 0.0167
-#>  $ reward_history: tibble [250 × 14] (S3: tbl_df/tbl/data.frame)
-#>   ..$ bill_length_mm_l   : num [1:250] 46.2 46.2 46.2 46.2 46.1 ...
-#>   ..$ bill_length_mm_u   : num [1:250] 46.2 46.3 46.4 46.4 46.4 ...
-#>   ..$ bill_depth_mm_l    : num [1:250] 14.1 14 13.9 13.9 13.9 ...
-#>   ..$ bill_depth_mm_u    : num [1:250] 14.2 14.2 14.2 14.2 14.2 ...
-#>   ..$ flipper_length_mm_l: num [1:250] 216 216 216 216 216 ...
-#>   ..$ flipper_length_mm_u: num [1:250] 218 218 218 218 218 ...
-#>   ..$ body_mass_g_l      : num [1:250] 4300 4300 4300 4300 4300 4300 4300 4300 4300 4300 ...
-#>   ..$ body_mass_g_u      : num [1:250] 4400 4400 4400 4400 4400 4400 4400 4400 4400 4400 ...
-#>   ..$ earned_reward      : num [1:250] 0 0 0 0 0 ...
-#>   ..$ prec               : num [1:250] 0 0 0 0 0 0 0 0 1 1 ...
-#>   ..$ cover              : num [1:250] 0e+00 0e+00 0e+00 0e+00 0e+00 0e+00 0e+00 0e+00 1e-04 1e-04 ...
-#>   ..$ game               : int [1:250] 1 1 1 1 1 1 1 1 1 1 ...
-#>   ..$ epoch              : int [1:250] 1 2 3 4 5 6 7 8 9 10 ...
-#>   ..$ id                 : num [1:250] 1 1 1 1 1 1 1 1 1 1 ...
+#> List of 4
+#>  $ final_anchor  : tibble [2 × 7] (S3: tbl_df/tbl/data.frame)
+#>   ..$ id    : int [1:2] 1 1
+#>   ..$ x     : num [1:2] 0.4 0.55
+#>   ..$ y     : num [1:2] 0.4 0.6
+#>   ..$ bound : chr [1:2] "lower" "upper"
+#>   ..$ reward: num [1:2] 1.24 1.24
+#>   ..$ prec  : num [1:2] 0.714 0.714
+#>   ..$ cover : num [1:2] 0.603 0.603
+#>  $ reward_history:'data.frame':  16 obs. of  5 variables:
+#>   ..$ node_tag: chr [1:16] "1:1:1:1" "2:1:1:1" "1:2:1:1" "1:1:2:1" ...
+#>   ..$ reward  : num [1:16] 0.922 1.123 0.766 0.951 0.951 ...
+#>   ..$ prec    : num [1:16] 0.556 0.714 0.357 0.556 0.556 ...
+#>   ..$ cover   : num [1:16] 0.184 0.286 0.286 0.286 0.286 ...
+#>   ..$ id      : int [1:16] 1 1 1 1 1 1 1 1 1 1 ...
+#>  $ perturbs      : tibble [441 × 4] (S3: tbl_df/tbl/data.frame)
+#>   ..$ x    : num [1:441] 0.4 0.4 0.4 0.4 0.4 0.4 0.4 0.4 0.4 0.4 ...
+#>   ..$ y    : num [1:441] 0.4 0.41 0.42 0.43 0.44 0.45 0.46 0.47 0.48 0.49 ...
+#>   ..$ id   : int [1:441] 1 1 1 1 1 1 1 1 1 1 ...
+#>   ..$ preds: Factor w/ 2 levels "D","U": 1 1 1 1 1 1 1 1 1 1 ...
+#>   .. ..- attr(*, "names")= chr [1:441] "1" "2" "3" "4" ...
+#>  $ perturb_bounds: tibble [2 × 4] (S3: tbl_df/tbl/data.frame)
+#>   ..$ id   : int [1:2] 1 1
+#>   ..$ x    : num [1:2] 0.4 0.6
+#>   ..$ y    : num [1:2] 0.4 0.6
+#>   ..$ bound: chr [1:2] "lower" "upper"
 ```
 
 The resulting anchor will have the reward, the precision and the
@@ -111,12 +105,11 @@ information.
 
 ``` r
 final_bounds$final_anchor
-#> # A tibble: 2 × 9
-#>      id bill_length_mm bill_depth_mm flipper_length_mm body_mass_g bound reward
-#>   <dbl>          <dbl>         <dbl>             <dbl>       <dbl> <chr>  <dbl>
-#> 1     1           45.2          13.2               214        4100 lower  0.500
-#> 2     1           48.0          15.1               225        4700 upper  0.500
-#> # ℹ 2 more variables: prec <dbl>, cover <dbl>
+#> # A tibble: 2 × 7
+#>      id     x     y bound reward  prec cover
+#>   <int> <dbl> <dbl> <chr>  <dbl> <dbl> <dbl>
+#> 1     1  0.4    0.4 lower   1.24 0.714 0.603
+#> 2     1  0.55   0.6 upper   1.24 0.714 0.603
 ```
 
 The diagnostic information can be helpful in understanding where the
@@ -136,7 +129,7 @@ under development)
 ``` r
 bnd_box <- bounding_box(
   bounds_tbl = final_bounds$final_anchor,
-  target_inst_row = train_data[1, ] |> select(bill_length_mm:body_mass_g),
+  target_inst_row = train_data[1, ] |> select(x,y),
   point_colors = "black",
   edges_colors = "black"
 )
@@ -147,7 +140,7 @@ bnd_box <- bounding_box(
 ``` r
 anc_tour <- anchor_tour(
   bnd_box,
-  train_data |> select(bill_length_mm:body_mass_g),
+  train_data |> select(x,y),
   "blue"
 )
 ```

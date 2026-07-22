@@ -16,3 +16,5 @@
 ^pkgdown$
 ^\.positai$
 ^\.claude$
+^.*\.json$
+^\.github$

@@ -1,6 +1,6 @@
 Package: kultarr
 Title: High Dimensional Visualization of Anchors explanations 
-Version: 0.1.0.9002
+Version: 0.1.0
 Authors@R: 
     person("Janith", "Wanniarachchi", email = "janithcwanni@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-7945-1036"))
@@ -10,7 +10,9 @@ BugReports: https://github.com/janithwanni/kultarr/issues
 License: MIT + file LICENSE
 Suggests: 
     carrier,
+    doclisting,
     knitr,
+    kumquat,
     MASS,
     randomForest,
     rmarkdown,

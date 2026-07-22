@@ -32,6 +32,7 @@ rule_rect_layers <- function(
 }
 
 #' Visualize the anchor in two dimensional space
+#'
 #' @param anchor The result of `make_anchors()` function call.
 #' @param dataset The dataset passed to `make_anchors()`
 #' @param instance The point of interest

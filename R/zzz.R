@@ -4,8 +4,9 @@ NULL
 
 .onLoad <- function(...) {
   S7::methods_register()
-  if (FALSE) {
-    # WARN: Simply to get tourr in the imports field
-    tourr::grand_tour()
-  }
+}
+
+ignore_unused_imports <- function() {
+  doclisting::methods_list
+  tourr::grand_tour
 }

@@ -1,12 +1,29 @@
+#' Check whether data satisfies an anchor
+#'
+#' @description
+#' `satisfies()` is an S7 generic that checks whether each row in a
+#' dataset is satisfied by an anchor's predicates, with methods available
+#' for the following classes:
+#'
+#' `r doclisting::methods_list("satisfies")`
+#'
+#' @param x An object.
+#' @param data The dataframe to apply anchors on. Can be one instance or
+#'   an entire dataset.
+#' @returns A logical vector indicating whether the anchor is satisfied
+#'   by each row of `data`.
 #' @export
 satisfies <- S7::new_generic("satisfies", "x")
 
-#' Generic function to calculate the number of rows in a dataset satisfied by an anchor
-#' @param x Object of S7 class anchor
-#' @param data The dataframe to apply anchors on. Can be one instance or an entire dataset.
-#' @return A logical vector indicating whether the anchors satisfies `data`
-#' @name satisfies
-#' @export
+#' Check whether data satisfies an anchor
+#'
+#' Checks each predicate's column exists in `data`, then evaluates every
+#' predicate's `operator` against `data` and combines results with
+#' logical AND. See [satisfies()] for the generic.
+#'
+#' @param x An `anchors` object.
+#' @param data The dataframe to apply anchors on.
+#' @returns A logical vector.
 S7::method(satisfies, anchors) <- function(x, data) {
   predicate_cols <- sapply(x@predicates, \(x) x@feature)
   if (!all(predicate_cols %in% colnames(data))) {

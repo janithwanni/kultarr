@@ -1,4 +1,5 @@
-#' @title Defines a predicate object
+#' Defines a predicate object
+#'
 #' @description A predicate is built up of a feature column name, a comparison operator and a constant to compare with
 #'  For example a predicate can take the form of x > 10, which captures all the observations that have the feature x greater than 10
 #' @param feature Character. Defines the column that the predicate is applied to

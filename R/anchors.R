@@ -1,4 +1,5 @@
-#' @title Defines a new `anchor` object
+#' Defines a new `anchor` object
+#'
 #' @param predicates a vector of `predicate` objects
 #' @return A new `anchors` object containing the properties `predicates`
 #' @export

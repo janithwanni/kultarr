@@ -12,13 +12,12 @@
 <link rel="icon" sizes="any" href="favicon.ico">
 <link rel="manifest" href="site.webmanifest">
 <script src="lightswitch.js"></script><script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="High Dimensional Visualization of Anchors explanations">
 <meta name="description" content="A package to create Anchors as specified in Ribeiro et al. (2018) &lt;doi:10.1609/aaai.v32i1.11491&gt; in a simple to understand intuitive approach and visualize the data and the explanations in high dimensions using the tourrs method.">
 <meta property="og:description" content="A package to create Anchors as specified in Ribeiro et al. (2018) &lt;doi:10.1609/aaai.v32i1.11491&gt; in a simple to understand intuitive approach and visualize the data and the explanations in high dimensions using the tourrs method.">
-<meta property="og:image" content="/logo.png">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -28,7 +27,7 @@
 
     <a class="navbar-brand me-2" href="index.html">kultarr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0.9002</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -69,10 +68,8 @@
 </nav><div class="container template-home">
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
-<div class="page-header">
-<img src="logo.png" class="logo" alt=""><h1 id="kultarr-">kultarr <a class="anchor" aria-label="anchor" href="#kultarr-"></a>
-</h1>
-</div>
+<div class="page-header"><h1 id="kultarr-">kultarr <img src="reference/figures/logo.png" align="right" height="139" alt=""><a class="anchor" aria-label="anchor" href="#kultarr-"></a>
+</h1></div>
 <!-- badges: start -->
 
 <p>The goal of <code>kultarr</code> is to generate and understand how anchors are generated in a simpler intuitive approach.</p>
@@ -81,7 +78,7 @@
 </h2>
 <p>You can install the development version of kultarr like so:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"janithwanni/kultarr"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"janithwanni/kultarr"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
@@ -92,9 +89,8 @@
 <span><span class="co">## basic example code</span></span>
 <span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://www.stat.berkeley.edu/~breiman/RandomForests/" class="external-link">randomForest</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; randomForest 4.7-1.1</span></span>
+<span><span class="co">#&gt; randomForest 4.7-1.2</span></span>
 <span><span class="co">#&gt; Type rfNews() to see new features/changes/bug fixes.</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://allisonhorst.github.io/palmerpenguins/" class="external-link">palmerpenguins</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Attaching package: 'dplyr'</span></span>
@@ -110,12 +106,11 @@
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org" class="external-link">tidyr</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">145</span><span class="op">)</span></span>
-<span><span class="va">train_data</span> <span class="op">&lt;-</span> <span class="va">penguins</span> <span class="op">|&gt;</span> </span>
-<span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/drop_na.html" class="external-link">drop_na</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">bill_length_mm</span><span class="op">:</span> <span class="va">body_mass_g</span>, <span class="va">species</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_sample</a></span><span class="op">(</span>prop <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span></span>
+<span><span class="va">train_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">1000</span><span class="op">)</span>, y <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">1000</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">train_data</span><span class="op">[</span><span class="fl">21</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">0.5</span><span class="op">)</span></span>
+<span><span class="va">train_data</span><span class="op">$</span><span class="va">cls</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">train_data</span><span class="op">$</span><span class="va">x</span> <span class="op">&gt;</span> <span class="fl">0.5</span>, <span class="st">"U"</span>, <span class="st">"D"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">rf_model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/randomForest/man/randomForest.html" class="external-link">randomForest</a></span><span class="op">(</span><span class="va">species</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">train_data</span><span class="op">)</span></span>
+<span><span class="va">rf_model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/randomForest/man/randomForest.html" class="external-link">randomForest</a></span><span class="op">(</span><span class="va">cls</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">train_data</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">model_func</span> <span class="op">&lt;-</span> <span class="fu">carrier</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/carrier/man/crate.html" class="external-link">crate</a></span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="fu">randomForest</span><span class="fu">:::</span><span class="fu"><a href="https://rdrr.io/pkg/randomForest/man/predict.randomForest.html" class="external-link">predict.randomForest</a></span><span class="op">(</span><span class="op">!</span><span class="op">!</span><span class="va">rf_model</span>, <span class="va">data</span><span class="op">)</span><span class="op">)</span></span>
@@ -123,52 +118,49 @@
 <span></span>
 <span><span class="va">final_bounds</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/make_anchors.html">make_anchors</a></span><span class="op">(</span></span>
 <span>  dataset <span class="op">=</span> <span class="va">train_data</span>,</span>
-<span>  cols <span class="op">=</span> <span class="va">train_data</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">bill_length_mm</span><span class="op">:</span><span class="va">body_mass_g</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  instance <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>,</span>
+<span>  cols <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"x"</span>, <span class="st">"y"</span><span class="op">)</span>,</span>
+<span>  instance <span class="op">=</span> <span class="va">train_data</span><span class="op">[</span><span class="fl">21</span>,<span class="op">]</span>,</span>
 <span>  model_func <span class="op">=</span> <span class="va">model_func</span>,</span>
-<span>  class_col <span class="op">=</span> <span class="st">"species"</span>,</span>
-<span>  n_games <span class="op">=</span> <span class="fl">5</span>,</span>
-<span>  n_epochs <span class="op">=</span> <span class="fl">50</span>,</span>
+<span>  class_col <span class="op">=</span> <span class="st">"cls"</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>The <code>final_bounds</code> variable is a list containing both the history of the algorithm (<code>reward_history</code>) and the resulting anchor (<code>final_anchor</code>).</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">final_bounds</span><span class="op">)</span></span>
-<span><span class="co">#&gt; List of 2</span></span>
-<span><span class="co">#&gt;  $ final_anchor  : tibble [2 × 9] (S3: tbl_df/tbl/data.frame)</span></span>
-<span><span class="co">#&gt;   ..$ id               : num [1:2] 1 1</span></span>
-<span><span class="co">#&gt;   ..$ bill_length_mm   : num [1:2] 45.2 48</span></span>
-<span><span class="co">#&gt;   ..$ bill_depth_mm    : num [1:2] 13.2 15.1</span></span>
-<span><span class="co">#&gt;   ..$ flipper_length_mm: num [1:2] 214 225</span></span>
-<span><span class="co">#&gt;   ..$ body_mass_g      : num [1:2] 4100 4700</span></span>
-<span><span class="co">#&gt;   ..$ bound            : chr [1:2] "lower" "upper"</span></span>
-<span><span class="co">#&gt;   ..$ reward           : num [1:2] 0.5 0.5</span></span>
-<span><span class="co">#&gt;   ..$ prec             : num [1:2] 1 1</span></span>
-<span><span class="co">#&gt;   ..$ cover            : num [1:2] 0.0167 0.0167</span></span>
-<span><span class="co">#&gt;  $ reward_history: tibble [250 × 14] (S3: tbl_df/tbl/data.frame)</span></span>
-<span><span class="co">#&gt;   ..$ bill_length_mm_l   : num [1:250] 46.2 46.2 46.2 46.2 46.1 ...</span></span>
-<span><span class="co">#&gt;   ..$ bill_length_mm_u   : num [1:250] 46.2 46.3 46.4 46.4 46.4 ...</span></span>
-<span><span class="co">#&gt;   ..$ bill_depth_mm_l    : num [1:250] 14.1 14 13.9 13.9 13.9 ...</span></span>
-<span><span class="co">#&gt;   ..$ bill_depth_mm_u    : num [1:250] 14.2 14.2 14.2 14.2 14.2 ...</span></span>
-<span><span class="co">#&gt;   ..$ flipper_length_mm_l: num [1:250] 216 216 216 216 216 ...</span></span>
-<span><span class="co">#&gt;   ..$ flipper_length_mm_u: num [1:250] 218 218 218 218 218 ...</span></span>
-<span><span class="co">#&gt;   ..$ body_mass_g_l      : num [1:250] 4300 4300 4300 4300 4300 4300 4300 4300 4300 4300 ...</span></span>
-<span><span class="co">#&gt;   ..$ body_mass_g_u      : num [1:250] 4400 4400 4400 4400 4400 4400 4400 4400 4400 4400 ...</span></span>
-<span><span class="co">#&gt;   ..$ earned_reward      : num [1:250] 0 0 0 0 0 ...</span></span>
-<span><span class="co">#&gt;   ..$ prec               : num [1:250] 0 0 0 0 0 0 0 0 1 1 ...</span></span>
-<span><span class="co">#&gt;   ..$ cover              : num [1:250] 0e+00 0e+00 0e+00 0e+00 0e+00 0e+00 0e+00 0e+00 1e-04 1e-04 ...</span></span>
-<span><span class="co">#&gt;   ..$ game               : int [1:250] 1 1 1 1 1 1 1 1 1 1 ...</span></span>
-<span><span class="co">#&gt;   ..$ epoch              : int [1:250] 1 2 3 4 5 6 7 8 9 10 ...</span></span>
-<span><span class="co">#&gt;   ..$ id                 : num [1:250] 1 1 1 1 1 1 1 1 1 1 ...</span></span></code></pre></div>
+<span><span class="co">#&gt; List of 4</span></span>
+<span><span class="co">#&gt;  $ final_anchor  : tibble [2 × 7] (S3: tbl_df/tbl/data.frame)</span></span>
+<span><span class="co">#&gt;   ..$ id    : int [1:2] 1 1</span></span>
+<span><span class="co">#&gt;   ..$ x     : num [1:2] 0.4 0.55</span></span>
+<span><span class="co">#&gt;   ..$ y     : num [1:2] 0.4 0.6</span></span>
+<span><span class="co">#&gt;   ..$ bound : chr [1:2] "lower" "upper"</span></span>
+<span><span class="co">#&gt;   ..$ reward: num [1:2] 1.24 1.24</span></span>
+<span><span class="co">#&gt;   ..$ prec  : num [1:2] 0.714 0.714</span></span>
+<span><span class="co">#&gt;   ..$ cover : num [1:2] 0.603 0.603</span></span>
+<span><span class="co">#&gt;  $ reward_history:'data.frame':  16 obs. of  5 variables:</span></span>
+<span><span class="co">#&gt;   ..$ node_tag: chr [1:16] "1:1:1:1" "2:1:1:1" "1:2:1:1" "1:1:2:1" ...</span></span>
+<span><span class="co">#&gt;   ..$ reward  : num [1:16] 0.922 1.123 0.766 0.951 0.951 ...</span></span>
+<span><span class="co">#&gt;   ..$ prec    : num [1:16] 0.556 0.714 0.357 0.556 0.556 ...</span></span>
+<span><span class="co">#&gt;   ..$ cover   : num [1:16] 0.184 0.286 0.286 0.286 0.286 ...</span></span>
+<span><span class="co">#&gt;   ..$ id      : int [1:16] 1 1 1 1 1 1 1 1 1 1 ...</span></span>
+<span><span class="co">#&gt;  $ perturbs      : tibble [441 × 4] (S3: tbl_df/tbl/data.frame)</span></span>
+<span><span class="co">#&gt;   ..$ x    : num [1:441] 0.4 0.4 0.4 0.4 0.4 0.4 0.4 0.4 0.4 0.4 ...</span></span>
+<span><span class="co">#&gt;   ..$ y    : num [1:441] 0.4 0.41 0.42 0.43 0.44 0.45 0.46 0.47 0.48 0.49 ...</span></span>
+<span><span class="co">#&gt;   ..$ id   : int [1:441] 1 1 1 1 1 1 1 1 1 1 ...</span></span>
+<span><span class="co">#&gt;   ..$ preds: Factor w/ 2 levels "D","U": 1 1 1 1 1 1 1 1 1 1 ...</span></span>
+<span><span class="co">#&gt;   .. ..- attr(*, "names")= chr [1:441] "1" "2" "3" "4" ...</span></span>
+<span><span class="co">#&gt;  $ perturb_bounds: tibble [2 × 4] (S3: tbl_df/tbl/data.frame)</span></span>
+<span><span class="co">#&gt;   ..$ id   : int [1:2] 1 1</span></span>
+<span><span class="co">#&gt;   ..$ x    : num [1:2] 0.4 0.6</span></span>
+<span><span class="co">#&gt;   ..$ y    : num [1:2] 0.4 0.6</span></span>
+<span><span class="co">#&gt;   ..$ bound: chr [1:2] "lower" "upper"</span></span></code></pre></div>
 <p>The resulting anchor will have the reward, the precision and the coverage of the underlying algorithm as additional diagnostic information.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">final_bounds</span><span class="op">$</span><span class="va">final_anchor</span></span>
-<span><span class="co">#&gt; # A tibble: 2 × 9</span></span>
-<span><span class="co">#&gt;      id bill_length_mm bill_depth_mm flipper_length_mm body_mass_g bound reward</span></span>
-<span><span class="co">#&gt;   &lt;dbl&gt;          &lt;dbl&gt;         &lt;dbl&gt;             &lt;dbl&gt;       &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt; 1     1           45.2          13.2               214        4100 lower  0.500</span></span>
-<span><span class="co">#&gt; 2     1           48.0          15.1               225        4700 upper  0.500</span></span>
-<span><span class="co">#&gt; # ℹ 2 more variables: prec &lt;dbl&gt;, cover &lt;dbl&gt;</span></span></code></pre></div>
+<span><span class="co">#&gt; # A tibble: 2 × 7</span></span>
+<span><span class="co">#&gt;      id     x     y bound reward  prec cover</span></span>
+<span><span class="co">#&gt;   &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt; 1     1  0.4    0.4 lower   1.24 0.714 0.603</span></span>
+<span><span class="co">#&gt; 2     1  0.55   0.6 upper   1.24 0.714 0.603</span></span></code></pre></div>
 <p>The diagnostic information can be helpful in understanding where the algorithm explored in the solution space.</p>
 </div>
 </div>
@@ -183,7 +175,7 @@
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">bnd_box</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/bounding_box.html">bounding_box</a></span><span class="op">(</span></span>
 <span>  bounds_tbl <span class="op">=</span> <span class="va">final_bounds</span><span class="op">$</span><span class="va">final_anchor</span>,</span>
-<span>  target_inst_row <span class="op">=</span> <span class="va">train_data</span><span class="op">[</span><span class="fl">1</span>, <span class="op">]</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">bill_length_mm</span><span class="op">:</span><span class="va">body_mass_g</span><span class="op">)</span>,</span>
+<span>  target_inst_row <span class="op">=</span> <span class="va">train_data</span><span class="op">[</span><span class="fl">1</span>, <span class="op">]</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">x</span>,<span class="va">y</span><span class="op">)</span>,</span>
 <span>  point_colors <span class="op">=</span> <span class="st">"black"</span>,</span>
 <span>  edges_colors <span class="op">=</span> <span class="st">"black"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -194,7 +186,7 @@
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">anc_tour</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/anchor_tour.html">anchor_tour</a></span><span class="op">(</span></span>
 <span>  <span class="va">bnd_box</span>,</span>
-<span>  <span class="va">train_data</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">bill_length_mm</span><span class="op">:</span><span class="va">body_mass_g</span><span class="op">)</span>,</span>
+<span>  <span class="va">train_data</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">x</span>,<span class="va">y</span><span class="op">)</span>,</span>
 <span>  <span class="st">"blue"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -248,7 +240,6 @@
 <h2 data-toc-skip>Dev status</h2>
 <ul class="list-unstyled">
 <li><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle: experimental"></a></li>
-<li><a href="https://CRAN.R-project.org/package=kultarr" class="external-link"><img src="https://www.r-pkg.org/badges/version/kultarr" alt="CRAN status"></a></li>
 </ul>
 </div>
 

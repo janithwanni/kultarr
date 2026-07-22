@@ -2,19 +2,29 @@
 % Please edit documentation in R/precision.R
 \name{precision}
 \alias{precision}
-\title{Generic function to calculate precision of anchors}
+\title{Precision of an anchor}
 \usage{
-## S7 method for class <kultarr::anchors>
-precision(x, model, samples)
+precision(x, ...)
 }
 \arguments{
-\item{model}{a predict function that will provide the predicted labels given a dataset}
+\item{x}{An object.}
 
-\item{samples}{the dataset to test coverage on}
+\item{model}{A predict function that returns predicted labels given a
+dataset.}
+
+\item{samples}{The dataset to test precision on.}
 }
 \value{
-a named vector of proportions for each class type predicted by the model
+A named vector of proportions for each class predicted by
+\code{model}.
 }
 \description{
-Generic function to calculate precision of anchors
+\code{precision()} is an S7 generic that calculates the precision of an
+anchor — the proportion of each predicted class among observations
+satisfying the anchor — with methods available for the following
+classes:
+
+\itemize{
+\item \code{\link[=precision-kultarr-anchors-method]{kultarr::anchors}}
+}
 }

@@ -2,19 +2,26 @@
 % Please edit documentation in R/satisfies.R
 \name{satisfies}
 \alias{satisfies}
-\title{Generic function to calculate the number of rows in a dataset satisfied by an anchor}
+\title{Check whether data satisfies an anchor}
 \usage{
-## S7 method for class <kultarr::anchors>
-satisfies(x, data)
+satisfies(x, ...)
 }
 \arguments{
-\item{x}{Object of S7 class anchor}
+\item{x}{An object.}
 
-\item{data}{The dataframe to apply anchors on. Can be one instance or an entire dataset.}
+\item{data}{The dataframe to apply anchors on. Can be one instance or
+an entire dataset.}
 }
 \value{
-A logical vector indicating whether the anchors satisfies \code{data}
+A logical vector indicating whether the anchor is satisfied
+by each row of \code{data}.
 }
 \description{
-Generic function to calculate the number of rows in a dataset satisfied by an anchor
+\code{satisfies()} is an S7 generic that checks whether each row in a
+dataset is satisfied by an anchor's predicates, with methods available
+for the following classes:
+
+\itemize{
+\item \code{\link[=satisfies-kultarr-anchors-method]{kultarr::anchors}}
+}
 }

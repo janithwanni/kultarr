@@ -4,8 +4,7 @@
 \alias{coverage}
 \title{Generic function calculate coverage of an anchor}
 \usage{
-## S7 method for class <kultarr::anchors>
-coverage(x, samples)
+coverage(x, ...)
 }
 \arguments{
 \item{samples}{the dataset to test coverage on}

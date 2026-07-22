@@ -2,19 +2,28 @@
 % Please edit documentation in R/extend.R
 \name{extend}
 \alias{extend}
-\title{Generic function to extend anchors}
+\title{Extend an anchor}
 \usage{
-## S7 method for class <kultarr::anchors>
-extend(x, pred)
+extend(x, ...)
 }
 \arguments{
-\item{x}{Object of S7 class anchors}
+\item{x}{Object of S7 class \code{anchors}.}
 
-\item{pred}{Object of S7 class predicate}
+\item{pred}{Object of S7 class \code{predicate}.}
 }
 \value{
-An anchor object with the additional predicate
+An \code{anchors} object with the additional predicate.
 }
 \description{
-Generic function to extend anchors
+\code{extend()} adds a new predicate to an anchor's existing set of
+predicates, returning an updated \code{anchors} object.
 }
+\section{Methods}{
+\code{extend()} is an S7 generic with methods available for the following
+classes:
+
+\itemize{
+\item \code{kultarr::anchors}
+}
+}
+

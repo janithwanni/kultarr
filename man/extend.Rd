@@ -29,5 +29,10 @@ predicates, returning an updated \code{anchors} object.
 \section{Methods}{
 \code{extend()} is an S7 generic with methods available for the following
 classes:
+
+\itemize{
+\item \code{ANY}
+\item \code{kultarr::anchors}
+}
 }
 

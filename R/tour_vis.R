@@ -201,6 +201,7 @@ anchor_tour <- S7::new_class(
 #' @description
 #' This function enables the user to animate the anchor in high dimensions using tourrs
 #'
+#' `r doclisting::methods_list("animate_anchor")`
 #'
 #' @param x An object of type anchor_tour
 #' @param gif_file The file location to save the gif file

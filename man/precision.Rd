@@ -31,5 +31,9 @@ A named vector of proportions for each class predicted by
 anchor — the proportion of each predicted class among observations
 satisfying the anchor — with methods available for the following
 classes:
-'
+
+\itemize{
+\item \code{ANY}
+\item \code{kultarr::anchors}
+}
 }

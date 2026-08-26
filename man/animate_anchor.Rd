@@ -68,4 +68,9 @@ None. Saves GIF at file location
 }
 \description{
 This function enables the user to animate the anchor in high dimensions using tourrs
+
+\itemize{
+\item \code{ANY}
+\item \code{kultarr::anchor_tour}
+}
 }

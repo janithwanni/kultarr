@@ -25,3 +25,12 @@ Numeric. Coverage of anchor
 \description{
 The coverage of an anchor is defined as average number of observations satisfied by an anchor
 }
+\section{Methods}{
+\code{coverage()} is an S7 generic with methods available for the following classes:
+
+\itemize{
+\item \code{ANY}
+\item \code{kultarr::anchors}
+}
+}
+

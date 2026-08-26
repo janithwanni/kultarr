@@ -5,7 +5,9 @@
 #' anchor — the proportion of each predicted class among observations
 #' satisfying the anchor — with methods available for the following
 #' classes:
-#''
+#'
+#' `r doclisting::methods_list("precision")`
+#'
 #' @param x An object.
 #' @param model A predict function that returns predicted labels given a
 #'   dataset.

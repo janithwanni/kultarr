@@ -9,6 +9,8 @@
 #' `extend()` is an S7 generic with methods available for the following
 #' classes:
 #'
+#' `r doclisting::methods_list("extend")`
+#'
 #' @param x Object of S7 class `anchors`.
 #' @param pred Object of S7 class `predicate`.
 #' @returns An `anchors` object with the additional predicate.

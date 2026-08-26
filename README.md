@@ -17,7 +17,7 @@ generated in a simpler intuitive approach.
 You can install the development version of kultarr like so:
 
 ``` r
-remotes::install_github("janithwanni/kultarr")
+pak::pak("janithwanni/kultarr")
 ```
 
 ## Example
@@ -59,7 +59,7 @@ model_func <- carrier::crate(function(data) {
 final_bounds <- make_anchors(
   dataset = train_data,
   cols = c("x", "y"),
-  instance = train_data[21,],
+  instance = train_data[21, ],
   model_func = model_func,
   class_col = "cls",
   verbose = FALSE
@@ -129,7 +129,7 @@ under development)
 ``` r
 bnd_box <- bounding_box(
   bounds_tbl = final_bounds$final_anchor,
-  target_inst_row = train_data[1, ] |> select(x,y),
+  target_inst_row = train_data[1, ] |> select(x, y),
   point_colors = "black",
   edges_colors = "black"
 )
@@ -140,7 +140,7 @@ bnd_box <- bounding_box(
 ``` r
 anc_tour <- anchor_tour(
   bnd_box,
-  train_data |> select(x,y),
+  train_data |> select(x, y),
   "blue"
 )
 ```
@@ -157,4 +157,5 @@ animate_anchor(
 )
 ```
 
-![](man/figures/tour_animation.gif)
+<img src="man/figures/tour_animation.gif"
+data-alt-text="Animation of a tour in a high dimensional dataset that shows the anchor as a box" />

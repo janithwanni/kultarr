@@ -2,7 +2,7 @@
 title: "Two dimensional visualization of kultarr"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{twod_vis}
+  %\VignetteIndexEntry{Two dimensional visualization of kultarr}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

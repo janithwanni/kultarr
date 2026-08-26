@@ -1,10 +1,10 @@
 Package: kultarr
-Title: High Dimensional Visualization of Anchors explanations 
-Version: 0.1.0
+Title: High Dimensional Visualization of Anchors Explanations 
+Version: 1.0.0
 Authors@R: 
-    person("Janith", "Wanniarachchi", email = "janithcwanni@gmail.com", role = c("aut", "cre"),
+    person("Janith", "Wanniarachchi", email = "janithcwanni@gmail.com", role = c("aut", "cre", "cph"),
            comment = c(ORCID = "0000-0002-7945-1036"))
-Description: A package to create Anchors as specified in Ribeiro et al. (2018) <doi:10.1609/aaai.v32i1.11491> in a simple to understand intuitive approach and visualize the data and the explanations in high dimensions using the tourrs method.
+Description: Create and visualize 'Anchors' as specified in Ribeiro et al. (2018) <doi:10.1609/aaai.v32i1.11491> with a simple to understand intuitive approach. In addition, tools to visualize the data and the explanations in high dimensions using the 'tourrs' method are provided.
 URL: https://github.com/janithwanni/kultarr
 BugReports: https://github.com/janithwanni/kultarr/issues
 License: MIT + file LICENSE

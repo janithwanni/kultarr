@@ -163,8 +163,8 @@ run_bfs <- function(
     }
   }
   bounds <- envir_to_bounds(max_reward_node, state_space, interest_columns)
-  bounds$reward = max_reward$reward
-  bounds$prec = max_reward$prec
-  bounds$cover = max_reward$cover
+  bounds$reward <- max_reward$reward
+  bounds$prec <- max_reward$prec
+  bounds$cover <- max_reward$cover
   return(list(final_anchor = bounds, reward_history = reward_history))
 }

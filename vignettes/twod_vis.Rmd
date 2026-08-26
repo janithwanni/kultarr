@@ -20,6 +20,7 @@ library(randomForest)
 library(dplyr)
 library(tidyr)
 library(kumquat)
+library(ggplot2)
 
 set.seed(145)
 data("d_multitwo")
@@ -31,16 +32,16 @@ model_func <- carrier::crate(function(data) {
 })
 
 find_closest <- function(pt, data) {
-    dst <- data |>
-        mutate(dst = sqrt((x - pt$x)^2 + (y - pt$y)^2))
-    return(which.min(dst$dst))
+  dst <- data |>
+    mutate(dst = sqrt((x - pt$x)^2 + (y - pt$y)^2))
+  return(which.min(dst$dst))
 }
-obs <- find_closest(tibble(x = 0, y=0), train_data)
+obs <- find_closest(tibble(x = 0, y = 0), train_data)
 
 final_bounds <- make_anchors(
   dataset = train_data,
   cols = c("x", "y"),
-  instance = train_data[obs,],
+  instance = train_data[obs, ],
   model_func = model_func,
   class_col = "class",
   verbose = FALSE
@@ -56,25 +57,25 @@ kultarr has a convenience function called `rule_rect_layers`, which when given a
 This one is on the lower end 
 
 ```{r}
-model_fit <- expand_grid(x = seq(-1,1,length.out=50), y=seq(-1,1,length.out=50))
+model_fit <- expand_grid(x = seq(-1, 1, length.out = 50), y = seq(-1, 1, length.out = 50))
 model_fit$pred <- model_func(model_fit)
-library(ggplot2)
+
 ggplot() +
-  geom_point(data = model_fit, mapping = aes(x = x,y = y,colour = pred),alpha=0.1) +
-  rule_rect_layers(final_bounds$perturb_bounds, fill = "gray", alpha = 0.5) + 
-  rule_rect_layers(final_bounds$final_anchor,fill="black", alpha =0.8) +
-    geom_point(data = train_data[obs, ], mapping = aes(x = x,y = y, colour = class), size = 2, shape = 19, fill="black") +
+  geom_point(data = model_fit, mapping = aes(x = x, y = y, colour = pred), alpha = 0.1) +
+  rule_rect_layers(final_bounds$perturb_bounds, fill = "gray", alpha = 0.5) +
+  rule_rect_layers(final_bounds$final_anchor, fill = "black", alpha = 0.8) +
+  geom_point(data = train_data[obs, ], mapping = aes(x = x, y = y, colour = class), size = 2, shape = 19, fill = "black") +
   theme_minimal() +
   coord_equal()
 ```
 
 ```{r}
-obs <- find_closest(tibble(x = 0, y=0.1), train_data)
+obs <- find_closest(tibble(x = 0, y = 0.1), train_data)
 
 final_bounds <- make_anchors(
   dataset = train_data,
   cols = c("x", "y"),
-  instance = train_data[obs,],
+  instance = train_data[obs, ],
   model_func = model_func,
   class_col = "class",
   verbose = FALSE
@@ -85,22 +86,22 @@ This one is right on the boundary
 
 ```{r}
 ggplot() +
-  geom_point(data = model_fit, mapping = aes(x = x,y = y,colour = pred),alpha=0.1) +
-  rule_rect_layers(final_bounds$perturb_bounds, fill = "gray", alpha = 0.5) + 
-  rule_rect_layers(final_bounds$final_anchor,fill="black", alpha =0.8) +
-    geom_point(data = train_data[obs, ], mapping = aes(x = x,y = y, colour = class), size = 2, shape = 19, fill="black") +
+  geom_point(data = model_fit, mapping = aes(x = x, y = y, colour = pred), alpha = 0.1) +
+  rule_rect_layers(final_bounds$perturb_bounds, fill = "gray", alpha = 0.5) +
+  rule_rect_layers(final_bounds$final_anchor, fill = "black", alpha = 0.8) +
+  geom_point(data = train_data[obs, ], mapping = aes(x = x, y = y, colour = class), size = 2, shape = 19, fill = "black") +
   theme_minimal() +
   coord_equal()
 ```
 
 
 ```{r}
-obs <- find_closest(tibble(x = 0, y=0.2), train_data)
+obs <- find_closest(tibble(x = 0, y = 0.2), train_data)
 
 final_bounds <- make_anchors(
   dataset = train_data,
   cols = c("x", "y"),
-  instance = train_data[obs,],
+  instance = train_data[obs, ],
   model_func = model_func,
   class_col = "class",
   verbose = FALSE
@@ -108,10 +109,10 @@ final_bounds <- make_anchors(
 ```
 ```{r}
 ggplot() +
-  geom_point(data = model_fit, mapping = aes(x = x,y = y,colour = pred),alpha=0.1) +
-  rule_rect_layers(final_bounds$perturb_bounds, fill = "gray", alpha = 0.5) + 
-  rule_rect_layers(final_bounds$final_anchor,fill="black", alpha =0.7) +
-    geom_point(data = train_data[obs, ], mapping = aes(x = x,y = y, colour = class), size = 2, shape = 19, fill="black") +
+  geom_point(data = model_fit, mapping = aes(x = x, y = y, colour = pred), alpha = 0.1) +
+  rule_rect_layers(final_bounds$perturb_bounds, fill = "gray", alpha = 0.5) +
+  rule_rect_layers(final_bounds$final_anchor, fill = "black", alpha = 0.7) +
+  geom_point(data = train_data[obs, ], mapping = aes(x = x, y = y, colour = class), size = 2, shape = 19, fill = "black") +
   theme_minimal() +
   coord_equal()
 ```
@@ -120,8 +121,8 @@ Try six more different places, some from the axis parallel places etc.
 
 ```{r}
 ggplot() +
-  geom_point(data = final_bounds$perturbs, mapping = aes(x = x,y =y, color=preds)) +
+  geom_point(data = final_bounds$perturbs, mapping = aes(x = x, y = y, color = preds)) +
   rule_rect_layers(final_bounds$final_anchor) +
-    geom_point(data = train_data[21, ], mapping = aes(x=x,y=y), size = 2, shape = 19, fill = "black") +
+  geom_point(data = train_data[21, ], mapping = aes(x = x, y = y), size = 2, shape = 19, fill = "black") +
   theme_minimal()
 ```

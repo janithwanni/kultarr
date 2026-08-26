@@ -2,9 +2,17 @@
 % Please edit documentation in R/satisfies.R
 \name{satisfies}
 \alias{satisfies}
+\alias{satisfies,any-method}
+\alias{satisfies,kultarr::anchors-method}
 \title{Check whether data satisfies an anchor}
 \usage{
-satisfies(x, ...)
+satisfies(x, data)
+
+## S7 method for class <any>
+satisfies(x, data)
+
+## S7 method for class <kultarr::anchors>
+satisfies(x, data)
 }
 \arguments{
 \item{x}{An object.}
@@ -22,6 +30,7 @@ dataset is satisfied by an anchor's predicates, with methods available
 for the following classes:
 
 \itemize{
-\item \code{\link[=satisfies-kultarr-anchors-method]{kultarr::anchors}}
+\item \code{ANY}
+\item \code{kultarr::anchors}
 }
 }

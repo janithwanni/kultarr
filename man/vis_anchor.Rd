@@ -7,13 +7,13 @@
 vis_anchor(anchors, dataset, instance, model_func)
 }
 \arguments{
+\item{anchors}{The result of \code{make_anchors()} function call.}
+
 \item{dataset}{The dataset passed to \code{make_anchors()}}
 
 \item{instance}{The point of interest}
 
 \item{model_func}{A crate object containing the prediction function of the modelfor visualisation}
-
-\item{anchor}{The result of \code{make_anchors()} function call.}
 }
 \value{
 A ggplot object

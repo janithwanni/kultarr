@@ -5,9 +5,7 @@
 #' anchor — the proportion of each predicted class among observations
 #' satisfying the anchor — with methods available for the following
 #' classes:
-#'
-#' `r doclisting::methods_list("precision")`
-#'
+#''
 #' @param x An object.
 #' @param model A predict function that returns predicted labels given a
 #'   dataset.
@@ -15,18 +13,20 @@
 #' @returns A named vector of proportions for each class predicted by
 #'   `model`.
 #' @export
-precision <- S7::new_generic("precision", "x")
+precision <- S7::new_generic(
+  name = "precision",
+  dispatch_args = "x",
+  function(x, model, samples) {
+    S7::S7_dispatch()
+  }
+)
 
-#' Precision of an anchor
-#'
-#' Filters `samples` to rows satisfying the anchor (see [satisfies()]),
-#' predicts labels with `model`, and returns the proportion of each
-#' predicted class. See [precision()] for the generic.
-#'
-#' @param x An `anchors` object.
-#' @param model A predict function.
-#' @param samples The dataset to test precision on.
-#' @returns A named vector of proportions.
+#' @rdname precision
+S7::method(precision, S7::class_any) <- function(x, model, samples) {
+  stop("Unimplemented. Provide model and samples instead")
+}
+
+#' @rdname precision
 S7::method(precision, anchors) <- function(x, model, samples) {
   satisfying_rows <- which(satisfies(x, samples), arr.ind = TRUE)
   samples <- samples |>

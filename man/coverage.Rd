@@ -2,11 +2,21 @@
 % Please edit documentation in R/coverage.R
 \name{coverage}
 \alias{coverage}
+\alias{coverage,any-method}
+\alias{coverage,kultarr::anchors-method}
 \title{Generic function calculate coverage of an anchor}
 \usage{
-coverage(x, ...)
+coverage(x, samples)
+
+## S7 method for class <any>
+coverage(x, samples)
+
+## S7 method for class <kultarr::anchors>
+coverage(x, samples)
 }
 \arguments{
+\item{x}{anchors object}
+
 \item{samples}{the dataset to test coverage on}
 }
 \value{

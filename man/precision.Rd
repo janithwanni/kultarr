@@ -2,9 +2,17 @@
 % Please edit documentation in R/precision.R
 \name{precision}
 \alias{precision}
+\alias{precision,any-method}
+\alias{precision,kultarr::anchors-method}
 \title{Precision of an anchor}
 \usage{
-precision(x, ...)
+precision(x, model, samples)
+
+## S7 method for class <any>
+precision(x, model, samples)
+
+## S7 method for class <kultarr::anchors>
+precision(x, model, samples)
 }
 \arguments{
 \item{x}{An object.}
@@ -23,8 +31,5 @@ A named vector of proportions for each class predicted by
 anchor — the proportion of each predicted class among observations
 satisfying the anchor — with methods available for the following
 classes:
-
-\itemize{
-\item \code{\link[=precision-kultarr-anchors-method]{kultarr::anchors}}
-}
+'
 }

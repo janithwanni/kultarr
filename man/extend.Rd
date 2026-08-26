@@ -2,9 +2,17 @@
 % Please edit documentation in R/extend.R
 \name{extend}
 \alias{extend}
+\alias{extend,any-method}
+\alias{extend,kultarr::anchors-method}
 \title{Extend an anchor}
 \usage{
-extend(x, ...)
+extend(x, pred)
+
+## S7 method for class <any>
+extend(x, pred)
+
+## S7 method for class <kultarr::anchors>
+extend(x, pred)
 }
 \arguments{
 \item{x}{Object of S7 class \code{anchors}.}
@@ -21,9 +29,5 @@ predicates, returning an updated \code{anchors} object.
 \section{Methods}{
 \code{extend()} is an S7 generic with methods available for the following
 classes:
-
-\itemize{
-\item \code{kultarr::anchors}
-}
 }
 

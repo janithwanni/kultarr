@@ -196,10 +196,11 @@ anchor_tour <- S7::new_class(
   }
 )
 
-#' @export
-animate_anchor <- S7::new_generic("animate", "x")
-
-#' Generic function to visualize tours
+#' @title Generic function to visualize tours
+#'
+#' @description
+#' This function enables the user to animate the anchor in high dimensions using tourrs
+#'
 #'
 #' @param x An object of type anchor_tour
 #' @param gif_file The file location to save the gif file
@@ -208,11 +209,46 @@ animate_anchor <- S7::new_generic("animate", "x")
 #' @param height the height of the gif file. Defaults to 500
 #' @param frames the number of frames to be included in the gif file. Defaults to 360
 #' @param loop Logical. Defaults to TRUE
+#' @param rescale Logical. whether to rescale the data or not. Defaults to TRUE.
 #' @param ... Additional arguments passed to display_xy
 #'
 #' @return None. Saves GIF at file location
-#' @name animate_anchor
+#' @rdname animate_anchor
 #' @export
+animate_anchor <- S7::new_generic(
+  name = "animate_anchor",
+  dispatch_args = "x",
+  function(
+    x,
+    gif_file,
+    tour_path = tourr::grand_tour(),
+    width = 500,
+    height = 500,
+    frames = 360,
+    loop = TRUE,
+    rescale = TRUE,
+    ...
+  ) {
+    S7::S7_dispatch()
+  }
+)
+
+#' @rdname animate_anchor
+S7::method(animate_anchor, S7::class_any) <- function(
+  x,
+  gif_file,
+  tour_path = tourr::grand_tour(),
+  width = 500,
+  height = 500,
+  frames = 360,
+  loop = TRUE,
+  rescale = TRUE,
+  ...
+) {
+  stop("Unimplemented.")
+}
+
+#' @rdname animate_anchor
 S7::method(animate_anchor, anchor_tour) <- function(
   x,
   gif_file,

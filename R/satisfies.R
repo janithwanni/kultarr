@@ -13,17 +13,20 @@
 #' @returns A logical vector indicating whether the anchor is satisfied
 #'   by each row of `data`.
 #' @export
-satisfies <- S7::new_generic("satisfies", "x")
+satisfies <- S7::new_generic(
+  name = "satisfies",
+  dispatch_args = "x",
+  function(x, data) {
+    S7::S7_dispatch()
+  }
+)
 
-#' Check whether data satisfies an anchor
-#'
-#' Checks each predicate's column exists in `data`, then evaluates every
-#' predicate's `operator` against `data` and combines results with
-#' logical AND. See [satisfies()] for the generic.
-#'
-#' @param x An `anchors` object.
-#' @param data The dataframe to apply anchors on.
-#' @returns A logical vector.
+#' @rdname satisfies
+S7::method(satisfies, S7::class_any) <- function(x, data) {
+  stop("Unimplemented. Pass data frame with anchor")
+}
+
+#' @rdname satisfies
 S7::method(satisfies, anchors) <- function(x, data) {
   predicate_cols <- sapply(x@predicates, \(x) x@feature)
   if (!all(predicate_cols %in% colnames(data))) {

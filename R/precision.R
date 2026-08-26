@@ -23,10 +23,6 @@ precision <- S7::new_generic(
   }
 )
 
-#' @rdname precision
-S7::method(precision, S7::class_any) <- function(x, model, samples) {
-  stop("Unimplemented. Provide model and samples instead")
-}
 
 #' @rdname precision
 S7::method(precision, anchors) <- function(x, model, samples) {

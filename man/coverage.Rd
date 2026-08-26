@@ -2,13 +2,9 @@
 % Please edit documentation in R/coverage.R
 \name{coverage}
 \alias{coverage}
-\alias{coverage,any-method}
 \alias{coverage,kultarr::anchors-method}
 \title{Generic function calculate coverage of an anchor}
 \usage{
-coverage(x, samples)
-
-## S7 method for class <any>
 coverage(x, samples)
 
 ## S7 method for class <kultarr::anchors>
@@ -29,7 +25,6 @@ The coverage of an anchor is defined as average number of observations satisfied
 \code{coverage()} is an S7 generic with methods available for the following classes:
 
 \itemize{
-\item \code{ANY}
 \item \code{kultarr::anchors}
 }
 }

@@ -9,11 +9,10 @@ anchors <- S7::new_class(
     predicates = S7::class_vector # a vector of predicate class
   ),
   validator = function(self) {
-    # print(class(self$predicates))
-    # if (!all(sapply(self@predicates, \(x) S7::S7_inherits(x, predicate)))) {
-    #   return(
-    #     "The list of predicates should all inherit from the predicate class "
-    #   )
-    # }
+    if (!all(sapply(self@predicates, \(x) S7::S7_inherits(x, predicate)))) {
+      return(
+        "The list of predicates should all inherit from the predicate class "
+      )
+    }
   }
 )

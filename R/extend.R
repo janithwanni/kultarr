@@ -24,11 +24,6 @@ extend <- S7::new_generic(
 )
 
 #' @rdname extend
-S7::method(extend, S7::class_any) <- function(x, pred) {
-  stop("Unimplemented.")
-}
-
-#' @rdname extend
 S7::method(extend, anchors) <- function(x, pred) {
   x@predicates <- c(x@predicates, pred)
   return(x)

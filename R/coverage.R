@@ -19,11 +19,6 @@ coverage <- S7::new_generic(
 )
 
 #' @rdname coverage
-S7::method(coverage, S7::class_any) <- function(x, samples) {
-  stop("Unimplemented")
-}
-
-#' @rdname coverage
 S7::method(coverage, anchors) <- function(x, samples) {
   return(mean(satisfies(x, samples)))
 }

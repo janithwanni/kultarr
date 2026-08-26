@@ -2,13 +2,9 @@
 % Please edit documentation in R/extend.R
 \name{extend}
 \alias{extend}
-\alias{extend,any-method}
 \alias{extend,kultarr::anchors-method}
 \title{Extend an anchor}
 \usage{
-extend(x, pred)
-
-## S7 method for class <any>
 extend(x, pred)
 
 ## S7 method for class <kultarr::anchors>
@@ -31,7 +27,6 @@ predicates, returning an updated \code{anchors} object.
 classes:
 
 \itemize{
-\item \code{ANY}
 \item \code{kultarr::anchors}
 }
 }

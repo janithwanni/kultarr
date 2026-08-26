@@ -235,21 +235,6 @@ animate_anchor <- S7::new_generic(
 )
 
 #' @rdname animate_anchor
-S7::method(animate_anchor, S7::class_any) <- function(
-  x,
-  gif_file,
-  tour_path = tourr::grand_tour(),
-  width = 500,
-  height = 500,
-  frames = 360,
-  loop = TRUE,
-  rescale = TRUE,
-  ...
-) {
-  stop("Unimplemented.")
-}
-
-#' @rdname animate_anchor
 S7::method(animate_anchor, anchor_tour) <- function(
   x,
   gif_file,

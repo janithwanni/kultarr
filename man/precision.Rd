@@ -2,13 +2,9 @@
 % Please edit documentation in R/precision.R
 \name{precision}
 \alias{precision}
-\alias{precision,any-method}
 \alias{precision,kultarr::anchors-method}
 \title{Precision of an anchor}
 \usage{
-precision(x, model, samples)
-
-## S7 method for class <any>
 precision(x, model, samples)
 
 ## S7 method for class <kultarr::anchors>
@@ -33,7 +29,6 @@ satisfying the anchor — with methods available for the following
 classes:
 
 \itemize{
-\item \code{ANY}
 \item \code{kultarr::anchors}
 }
 }

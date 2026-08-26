@@ -2,23 +2,9 @@
 % Please edit documentation in R/tour_vis.R
 \name{animate_anchor}
 \alias{animate_anchor}
-\alias{animate_anchor,any-method}
 \alias{animate_anchor,kultarr::anchor_tour-method}
 \title{Generic function to visualize tours}
 \usage{
-animate_anchor(
-  x,
-  gif_file,
-  tour_path = tourr::grand_tour(),
-  width = 500,
-  height = 500,
-  frames = 360,
-  loop = TRUE,
-  rescale = TRUE,
-  ...
-)
-
-## S7 method for class <any>
 animate_anchor(
   x,
   gif_file,
@@ -70,7 +56,6 @@ None. Saves GIF at file location
 This function enables the user to animate the anchor in high dimensions using tourrs
 
 \itemize{
-\item \code{ANY}
 \item \code{kultarr::anchor_tour}
 }
 }

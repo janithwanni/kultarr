@@ -1,4 +1,3 @@
-#'
 #' @keywords internal
 #' @noRd
 get_reward <- function(
@@ -8,7 +7,6 @@ get_reward <- function(
   class_ind = 1,
   verbose
 ) {
-  # cover <- coverage_area(new_anchor, train_df |> select(all_of(interest_cols)))
   cover <- coverage(new_anchor, dataset)
   prec <- precision(new_anchor, model_func, dataset)
   logger::log_info("received precisions {prec[1]} , {prec[2]}")

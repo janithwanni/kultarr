@@ -22,11 +22,6 @@ satisfies <- S7::new_generic(
 )
 
 #' @rdname satisfies
-S7::method(satisfies, S7::class_any) <- function(x, data) {
-  stop("Unimplemented. Pass data frame with anchor")
-}
-
-#' @rdname satisfies
 S7::method(satisfies, anchors) <- function(x, data) {
   predicate_cols <- sapply(x@predicates, \(x) x@feature)
   if (!all(predicate_cols %in% colnames(data))) {

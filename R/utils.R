@@ -7,7 +7,8 @@
 #' @param step Step size for perturbations (default: 0.01)
 #'
 #' @return A data frame of perturbed points
-#' @export
+#' @keywords internal
+#' @noRd
 generate_perturbations <- function(
   data,
   instance,
@@ -40,7 +41,8 @@ generate_perturbations <- function(
 #' @param interest_cols Columns of interest
 #'
 #' @return A tibble of 1 x (2*p) where p is the number of columns of interest
-#' @export
+#' @keywords internal
+#' @noRd
 envir_to_bounds <- function(current_envir, envir, interest_cols) {
   bounds <- matrix(
     rep(NA, 2 * length(interest_cols))
@@ -61,6 +63,7 @@ envir_to_bounds <- function(current_envir, envir, interest_cols) {
 #' @param selected_action The index of selected action from the actions list
 #'
 #' @return New bounds
+#' @keywords internal
 #' @noRd
 update_bounds <- function(current_envir, envir, actions, selected_action) {
   new_bound <- current_envir + actions[[selected_action]]
@@ -78,7 +81,8 @@ update_bounds <- function(current_envir, envir, actions, selected_action) {
 #' @param interest_cols the columns of interest
 #'
 #' @return an instance of the anchor class
-#' @export
+#' @keywords internal
+#' @noRd
 create_anchor_inst <- function(bounds, interest_cols) {
   pred_vec <- c()
   feat_vec <- rep(interest_cols, each = 2)
@@ -102,7 +106,7 @@ create_anchor_inst <- function(bounds, interest_cols) {
 #' @param bin_edges Output of `define_bin_edges` function
 #'
 #' @returns A list. Contains lower and upper bounds for each specific column of interest.
-#'
+#' @keywords internal
 #' @noRd
 generate_environment <- function(
   dataset,

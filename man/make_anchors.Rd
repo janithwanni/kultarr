@@ -53,3 +53,41 @@ A list containing the final anchor which is a data.frame of size 2 x (p+1) where
 \description{
 This function is the main entrypoint that generates anchors by running a Breadth First Search algorithm
 }
+\examples{
+set.seed(145)
+
+# A small dataset containing the response column.
+dataset <- data.frame(
+  x = runif(50),
+  y = runif(50)
+)
+
+dataset$class <- ifelse(
+  dataset$x + dataset$y > 1,
+  "high",
+  "low"
+)
+
+# Model function used to predict the class of new observations.
+model_func <- function(data) {
+  ifelse(data$x + data$y > 1, "high", "low")
+}
+
+# Select one observation to explain.
+instance <- dataset[1, c("x", "y")]
+
+result <- make_anchors(
+  dataset = dataset,
+  cols = c("x", "y"),
+  instance = instance,
+  model_func = model_func,
+  class_col = "class",
+  n_bins = 2,
+  seed = 145
+)
+
+# The result contains the discovered anchors and supporting
+# information about the search.
+names(result)
+result$final_anchor
+}

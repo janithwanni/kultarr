@@ -6,6 +6,15 @@
 #' @param operator Binary operator that works with the column and the constant given
 #' @param constant Value to compare `feature` with using `operator`. Can be numeric/character/logical
 #' @return A predicate object containing the properties `feature`, `operator`, `constant`
+#' @examples
+#' # A predicate specifying that x should be greater than 0.5.
+#' pred <- predicate(
+#'   feature = "x",
+#'   operator = `>`,
+#'   constant = 0.5
+#' )
+#'
+#' pred
 #' @export
 predicate <- S7::new_class(
   "predicate",

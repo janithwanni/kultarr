@@ -59,3 +59,18 @@ This function enables the user to animate the anchor in high dimensions using to
 \item \code{kultarr::anchor_tour}
 }
 }
+\examples{
+\dontrun{
+# Animate the projection of an anchor tour.
+#
+# `anchor_tour` objects can be created using the package's
+# anchor visualisation workflow.
+animate_anchor(
+  x = anchor_tour_object,
+  gif_file = tempfile(fileext = ".gif"),
+  frames = 60,
+  width = 400,
+  height = 400
+)
+}
+}

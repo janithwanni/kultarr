@@ -61,11 +61,50 @@ rule_rect_layers <- function(
 #' @param anchors The result of `make_anchors()` function call.
 #' @param dataset The dataset passed to `make_anchors()`
 #' @param instance The point of interest
-#' @param model_func A crate object containing the prediction function of the modelfor visualisation
 #' @return A ggplot object
 #' @importFrom rlang .data
+#' @examples
+#' set.seed(145)
+#'
+#' dataset <- data.frame(
+#'   x = runif(50),
+#'   y = runif(50)
+#' )
+#'
+#' dataset$cls <- ifelse(
+#'   dataset$x + dataset$y > 1,
+#'   "positive",
+#'   "negative"
+#' )
+#'
+#' # A simple model function.
+#' model_func <- function(data) {
+#'   ifelse(data$x + data$y > 1, "positive", "negative")
+#' }
+#'
+#' # Generate anchors for two observations.
+#' instance <- c(1, 2)
+#'
+#' result <- make_anchors(
+#'   dataset = dataset,
+#'   cols = c("x", "y"),
+#'   instance = dataset[instance, c("x", "y")],
+#'   model_func = model_func,
+#'   class_col = "cls",
+#'   n_bins = 2,
+#'   seed = 145
+#' )
+#'
+#' # Visualise the resulting anchors.
+#' plots <- vis_anchor(
+#'   anchors = list(result),
+#'   dataset = dataset,
+#'   instance = 1
+#' )
+#'
+#' plots[[1]]
 #' @export
-vis_anchor <- function(anchors, dataset, instance, model_func) {
+vis_anchor <- function(anchors, dataset, instance) {
   lapply(anchors, function(anchor) {
     ggplot2::ggplot() +
       ggplot2::geom_point(

@@ -215,6 +215,20 @@ anchor_tour <- S7::new_class(
 #'
 #' @return None. Saves GIF at file location
 #' @rdname animate_anchor
+#' @examples
+#' \dontrun{
+#' # Animate the projection of an anchor tour.
+#' #
+#' # `anchor_tour` objects can be created using the package's
+#' # anchor visualisation workflow.
+#' animate_anchor(
+#'   x = anchor_tour_object,
+#'   gif_file = tempfile(fileext = ".gif"),
+#'   frames = 60,
+#'   width = 400,
+#'   height = 400
+#' )
+#' }
 #' @export
 animate_anchor <- S7::new_generic(
   name = "animate_anchor",

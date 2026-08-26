@@ -12,6 +12,32 @@
 #'   an entire dataset.
 #' @returns A logical vector indicating whether the anchor is satisfied
 #'   by each row of `data`.
+#' @examples
+#' # Construct two predicates.
+#' pred_x <- predicate(
+#'   feature = "x",
+#'   operator = `>`,
+#'   constant = 0.5
+#' )
+#'
+#' pred_y <- predicate(
+#'   feature = "y",
+#'   operator = `<`,
+#'   constant = 0.8
+#' )
+#'
+#' # Combine predicates into an anchor.
+#' anchor <- anchors(
+#'   predicates = c(pred_x, pred_y)
+#' )
+#'
+#' data <- data.frame(
+#'   x = c(0.2, 0.6, 0.7, 0.9),
+#'   y = c(0.3, 0.5, 0.9, 0.7)
+#' )
+#'
+#' # Determine which observations satisfy all predicates.
+#' satisfies(anchor, data)
 #' @export
 satisfies <- S7::new_generic(
   name = "satisfies",

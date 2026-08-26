@@ -14,6 +14,28 @@
 #' @param x Object of S7 class `anchors`.
 #' @param pred Object of S7 class `predicate`.
 #' @returns An `anchors` object with the additional predicate.
+#' @examples
+#' pred_1 <- predicate(
+#'   feature = "x",
+#'   operator = `>`,
+#'   constant = 0.8
+#' )
+#'
+#' pred_2 <- predicate(
+#'   feature = "y",
+#'   operator = `<`,
+#'   constant = 0.9
+#' )
+#'
+#' anchor <- anchors(
+#'   predicates = c(pred_1)
+#' )
+#'
+#' # Add another predicate to the anchor.
+#' extended_anchor <- extend(anchor, pred_2)
+#'
+#' extended_anchor
+#'
 #' @export
 extend <- S7::new_generic(
   name = "extend",

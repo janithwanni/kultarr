@@ -24,3 +24,13 @@ A predicate object containing the properties \code{feature}, \code{operator}, \c
 A predicate is built up of a feature column name, a comparison operator and a constant to compare with
 For example a predicate can take the form of x > 10, which captures all the observations that have the feature x greater than 10
 }
+\examples{
+# A predicate specifying that x should be greater than 0.5.
+pred <- predicate(
+  feature = "x",
+  operator = `>`,
+  constant = 0.5
+)
+
+pred
+}

@@ -15,3 +15,23 @@ A new \code{anchors} object containing the properties \code{predicates}
 \description{
 Defines a new \code{anchor} object
 }
+\examples{
+# Create predicates and combine them into an anchor.
+pred_1 <- predicate(
+  feature = "x",
+  operator = `>`,
+  constant = 0.8
+)
+
+pred_2 <- predicate(
+  feature = "y",
+  operator = `<`,
+  constant = 0.9
+)
+
+anchor <- anchors(
+  predicates = c(pred_1, pred_2)
+)
+
+anchor
+}

@@ -4,7 +4,7 @@
 \alias{vis_anchor}
 \title{Visualize the anchor in two dimensional space}
 \usage{
-vis_anchor(anchors, dataset, instance, model_func)
+vis_anchor(anchors, dataset, instance)
 }
 \arguments{
 \item{anchors}{The result of \code{make_anchors()} function call.}
@@ -12,12 +12,51 @@ vis_anchor(anchors, dataset, instance, model_func)
 \item{dataset}{The dataset passed to \code{make_anchors()}}
 
 \item{instance}{The point of interest}
-
-\item{model_func}{A crate object containing the prediction function of the modelfor visualisation}
 }
 \value{
 A ggplot object
 }
 \description{
 Visualize the anchor in two dimensional space
+}
+\examples{
+set.seed(145)
+
+dataset <- data.frame(
+  x = runif(50),
+  y = runif(50)
+)
+
+dataset$cls <- ifelse(
+  dataset$x + dataset$y > 1,
+  "positive",
+  "negative"
+)
+
+# A simple model function.
+model_func <- function(data) {
+  ifelse(data$x + data$y > 1, "positive", "negative")
+}
+
+# Generate anchors for two observations.
+instance <- c(1, 2)
+
+result <- make_anchors(
+  dataset = dataset,
+  cols = c("x", "y"),
+  instance = dataset[instance, c("x", "y")],
+  model_func = model_func,
+  class_col = "cls",
+  n_bins = 2,
+  seed = 145
+)
+
+# Visualise the resulting anchors.
+plots <- vis_anchor(
+  anchors = list(result),
+  dataset = dataset,
+  instance = 1
+)
+
+plots[[1]]
 }

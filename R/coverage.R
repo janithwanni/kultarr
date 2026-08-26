@@ -9,6 +9,26 @@
 #' @param x anchors object
 #' @param samples the dataset to test coverage on
 #' @return Numeric. Coverage of anchor
+#'
+#' @examples
+#' # Create a simple anchor from two predicates.
+#' pred_1 <- predicate(
+#'   feature = "x",
+#'   operator = `<`,
+#'   constant = 0.8
+#' )
+#'
+#' anchor <- anchors(
+#'   predicates = c(pred_1)
+#' )
+#'
+#' samples <- data.frame(
+#'   x = c(0.1, 0.3, 0.5, 0.7, 0.9)
+#' )
+#'
+#' # Calculate the proportion of samples satisfying the anchor.
+#' coverage(anchor, samples)
+#'
 #' @export
 coverage <- S7::new_generic(
   name = "coverage",

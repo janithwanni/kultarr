@@ -14,6 +14,29 @@
 #' @param samples The dataset to test precision on.
 #' @returns A named vector of proportions for each class predicted by
 #'   `model`.
+#' @examples
+#' pred_1 <- predicate(
+#'   feature = "x",
+#'   operator  = `<`,
+#'   constant = 0.8
+#' )
+#'
+#' anchor <- anchors(
+#'   predicates = c(pred_1)
+#' )
+#'
+#' samples <- data.frame(
+#'   x = c(0.1, 0.3, 0.5, 0.7, 0.9)
+#' )
+#'
+#' # A model function returning predictions for each sample.
+#' model <- function(data) {
+#'   ifelse(data$x > 0.5, "positive", "negative")
+#' }
+#'
+#' # Calculate the prediction distribution among samples
+#' # satisfying the anchor.
+#' precision(anchor, model, samples)
 #' @export
 precision <- S7::new_generic(
   name = "precision",

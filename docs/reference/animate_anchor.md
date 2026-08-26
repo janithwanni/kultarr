@@ -1,6 +1,38 @@
 # Generic function to visualize tours
 
-Generic function to visualize tours
+This function enables the user to animate the anchor in high dimensions
+using tourrs
+
+- [`kultarr::anchor_tour`](anchor_tour.md)
+
+## Usage
+
+``` r
+animate_anchor(
+  x,
+  gif_file,
+  tour_path = tourr::grand_tour(),
+  width = 500,
+  height = 500,
+  frames = 360,
+  loop = TRUE,
+  rescale = TRUE,
+  ...
+)
+
+## S7 method for class <kultarr::anchor_tour>
+animate_anchor(
+  x,
+  gif_file,
+  tour_path = tourr::grand_tour(),
+  width = 500,
+  height = 500,
+  frames = 360,
+  loop = TRUE,
+  rescale = TRUE,
+  ...
+)
+```
 
 ## Arguments
 
@@ -33,6 +65,10 @@ Generic function to visualize tours
 
   Logical. Defaults to TRUE
 
+- rescale:
+
+  Logical. whether to rescale the data or not. Defaults to TRUE.
+
 - ...:
 
   Additional arguments passed to display_xy
@@ -40,3 +76,21 @@ Generic function to visualize tours
 ## Value
 
 None. Saves GIF at file location
+
+## Examples
+
+``` r
+if (FALSE) { # \dontrun{
+# Animate the projection of an anchor tour.
+#
+# `anchor_tour` objects can be created using the package's
+# anchor visualisation workflow.
+animate_anchor(
+  x = anchor_tour_object,
+  gif_file = tempfile(fileext = ".gif"),
+  frames = 60,
+  width = 400,
+  height = 400
+)
+} # }
+```

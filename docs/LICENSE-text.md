@@ -1,4 +1,3 @@
 # License
 
-    YEAR: 2023
-    COPYRIGHT HOLDER: kultarr authors
+YEAR: 2026 COPYRIGHT HOLDER: kultarr authors

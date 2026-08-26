@@ -34,3 +34,20 @@ predicate(
 
 A predicate object containing the properties `feature`, `operator`,
 `constant`
+
+## Examples
+
+``` r
+# A predicate specifying that x should be greater than 0.5.
+pred <- predicate(
+  feature = "x",
+  operator = `>`,
+  constant = 0.5
+)
+
+pred
+#> <kultarr::predicate>
+#>  @ feature : chr "x"
+#>  @ operator: function (e1, e2)  
+#>  @ constant: num 0.5
+```

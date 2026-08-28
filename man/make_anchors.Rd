@@ -35,7 +35,7 @@ make_anchors(
 
 \item{seed}{Numeric. Seed to ensure that the results stay consistent}
 
-\item{verbose}{Logical. Whether to print out diagnostics of the Multi-Armed Bandit Algorithm}
+\item{verbose}{Logical. Whether to print out diagnostics of the algorithm}
 
 \item{parallel}{Logical. Whether to use parallel processing. Default set to FALSE.}
 

@@ -33,7 +33,7 @@ generate_perturbations <- function(
 
 #' Lookup function to get value of upper and lower bounds for the current state
 #'
-#' The current state of the multi armed bandit is marked based on the indices
+#' The current state of the exploration is marked based on the indices
 #' in the list of each combination of column and lower and upper bound type.
 #'
 #' @param current_envir List of indexes, the current state

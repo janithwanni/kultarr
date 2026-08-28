@@ -43,9 +43,9 @@ library(dplyr)
 library(tidyr)
 
 set.seed(145)
-train_data <- data.frame(x = runif(1000), y = runif(1000))
-train_data[21, ] <- c(0.5, 0.5)
-train_data$cls <- factor(ifelse(train_data$x > 0.5, "U", "D"))
+train_data <- data.frame(x = runif(100), y = runif(100), z = runif(100))
+train_data[21, ] <- c(0.5, 0.5, 0.5)
+train_data$cls <- factor(ifelse(train_data$x > 0.5 & train_data$y > 0.5, "U", "D"))
 
 rf_model <- randomForest(cls ~ ., data = train_data)
 
@@ -55,7 +55,7 @@ model_func <- carrier::crate(function(data) {
 
 final_bounds <- make_anchors(
   dataset = train_data,
-  cols = c("x", "y"),
+  cols = c("x", "y", "z"),
   instance = train_data[21, ],
   model_func = model_func,
   class_col = "cls",
@@ -84,12 +84,12 @@ If the anchor has a dimension larger than 3 then it is possible to visualize it 
 There are several S7 classes built to make the process of visualizing the bounding box(es).
 (The option to visualize multiple boxes is still under development)
 
-#### 1. Create a bounding_box object by giving the result from the Multi Armed Bandit algorithm
+#### 1. Create a bounding_box object by giving the result from the underlying algorithm
 
 ```{r step-1}
 bnd_box <- bounding_box(
   bounds_tbl = final_bounds$final_anchor,
-  target_inst_row = train_data[1, ] |> select(x, y),
+  target_inst_row = train_data[1, ] |> select(x, y, z),
   point_colors = "black",
   edges_colors = "black"
 )
@@ -100,7 +100,7 @@ bnd_box <- bounding_box(
 ```{r step-2}
 anc_tour <- anchor_tour(
   bnd_box,
-  train_data |> select(x, y),
+  train_data |> select(x, y, z),
   "blue"
 )
 ```

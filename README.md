@@ -46,9 +46,9 @@ library(dplyr)
 library(tidyr)
 
 set.seed(145)
-train_data <- data.frame(x = runif(1000), y = runif(1000))
-train_data[21, ] <- c(0.5, 0.5)
-train_data$cls <- factor(ifelse(train_data$x > 0.5, "U", "D"))
+train_data <- data.frame(x = runif(100), y = runif(100), z = runif(100))
+train_data[21, ] <- c(0.5, 0.5, 0.5)
+train_data$cls <- factor(ifelse(train_data$x > 0.5 & train_data$y > 0.5, "U", "D"))
 
 rf_model <- randomForest(cls ~ ., data = train_data)
 
@@ -58,7 +58,7 @@ model_func <- carrier::crate(function(data) {
 
 final_bounds <- make_anchors(
   dataset = train_data,
-  cols = c("x", "y"),
+  cols = c("x", "y", "z"),
   instance = train_data[21, ],
   model_func = model_func,
   class_col = "cls",
@@ -72,30 +72,33 @@ algorithm (`reward_history`) and the resulting anchor (`final_anchor`).
 ``` r
 str(final_bounds)
 #> List of 4
-#>  $ final_anchor  : tibble [2 × 7] (S3: tbl_df/tbl/data.frame)
+#>  $ final_anchor  : tibble [2 × 8] (S3: tbl_df/tbl/data.frame)
 #>   ..$ id    : int [1:2] 1 1
 #>   ..$ x     : num [1:2] 0.4 0.55
 #>   ..$ y     : num [1:2] 0.4 0.6
+#>   ..$ z     : num [1:2] 0.4 0.6
 #>   ..$ bound : chr [1:2] "lower" "upper"
-#>   ..$ reward: num [1:2] 1.24 1.24
-#>   ..$ prec  : num [1:2] 0.714 0.714
-#>   ..$ cover : num [1:2] 0.603 0.603
-#>  $ reward_history:'data.frame':  16 obs. of  5 variables:
-#>   ..$ node_tag: chr [1:16] "1:1:1:1" "2:1:1:1" "1:2:1:1" "1:1:2:1" ...
-#>   ..$ reward  : num [1:16] 0.922 1.123 0.766 0.951 0.951 ...
-#>   ..$ prec    : num [1:16] 0.556 0.714 0.357 0.556 0.556 ...
-#>   ..$ cover   : num [1:16] 0.184 0.286 0.286 0.286 0.286 ...
-#>   ..$ id      : int [1:16] 1 1 1 1 1 1 1 1 1 1 ...
-#>  $ perturbs      : tibble [441 × 4] (S3: tbl_df/tbl/data.frame)
-#>   ..$ x    : num [1:441] 0.4 0.4 0.4 0.4 0.4 0.4 0.4 0.4 0.4 0.4 ...
-#>   ..$ y    : num [1:441] 0.4 0.41 0.42 0.43 0.44 0.45 0.46 0.47 0.48 0.49 ...
-#>   ..$ id   : int [1:441] 1 1 1 1 1 1 1 1 1 1 ...
+#>   ..$ reward: num [1:2] 1.48 1.48
+#>   ..$ prec  : num [1:2] 0.901 0.901
+#>   ..$ cover : num [1:2] 0.546 0.546
+#>  $ reward_history:'data.frame':  64 obs. of  5 variables:
+#>   ..$ node_tag: chr [1:64] "1:1:1:1:1:1" "2:1:1:1:1:1" "1:2:1:1:1:1" "1:1:2:1:1:1" ...
+#>   ..$ reward  : num [1:64] 1.21 1.29 1.06 1.29 1.15 ...
+#>   ..$ prec    : num [1:64] 0.852 0.905 0.706 0.905 0.793 ...
+#>   ..$ cover   : num [1:64] 0.0787 0.1224 0.1224 0.1224 0.1224 ...
+#>   ..$ id      : int [1:64] 1 1 1 1 1 1 1 1 1 1 ...
+#>  $ perturbs      : tibble [9,261 × 5] (S3: tbl_df/tbl/data.frame)
+#>   ..$ x    : num [1:9261] 0.4 0.4 0.4 0.4 0.4 0.4 0.4 0.4 0.4 0.4 ...
+#>   ..$ y    : num [1:9261] 0.4 0.4 0.4 0.4 0.4 0.4 0.4 0.4 0.4 0.4 ...
+#>   ..$ z    : num [1:9261] 0.4 0.41 0.42 0.43 0.44 0.45 0.46 0.47 0.48 0.49 ...
+#>   ..$ id   : int [1:9261] 1 1 1 1 1 1 1 1 1 1 ...
 #>   ..$ preds: Factor w/ 2 levels "D","U": 1 1 1 1 1 1 1 1 1 1 ...
-#>   .. ..- attr(*, "names")= chr [1:441] "1" "2" "3" "4" ...
-#>  $ perturb_bounds: tibble [2 × 4] (S3: tbl_df/tbl/data.frame)
+#>   .. ..- attr(*, "names")= chr [1:9261] "1" "2" "3" "4" ...
+#>  $ perturb_bounds: tibble [2 × 5] (S3: tbl_df/tbl/data.frame)
 #>   ..$ id   : int [1:2] 1 1
 #>   ..$ x    : num [1:2] 0.4 0.6
 #>   ..$ y    : num [1:2] 0.4 0.6
+#>   ..$ z    : num [1:2] 0.4 0.6
 #>   ..$ bound: chr [1:2] "lower" "upper"
 ```
 
@@ -105,11 +108,11 @@ information.
 
 ``` r
 final_bounds$final_anchor
-#> # A tibble: 2 × 7
-#>      id     x     y bound reward  prec cover
-#>   <int> <dbl> <dbl> <chr>  <dbl> <dbl> <dbl>
-#> 1     1  0.4    0.4 lower   1.24 0.714 0.603
-#> 2     1  0.55   0.6 upper   1.24 0.714 0.603
+#> # A tibble: 2 × 8
+#>      id     x     y     z bound reward  prec cover
+#>   <int> <dbl> <dbl> <dbl> <chr>  <dbl> <dbl> <dbl>
+#> 1     1  0.4    0.4   0.4 lower   1.48 0.901 0.546
+#> 2     1  0.55   0.6   0.6 upper   1.48 0.901 0.546
 ```
 
 The diagnostic information can be helpful in understanding where the
@@ -124,12 +127,12 @@ There are several S7 classes built to make the process of visualizing
 the bounding box(es). (The option to visualize multiple boxes is still
 under development)
 
-#### 1. Create a bounding_box object by giving the result from the Multi Armed Bandit algorithm
+#### 1. Create a bounding_box object by giving the result from the underlying algorithm
 
 ``` r
 bnd_box <- bounding_box(
   bounds_tbl = final_bounds$final_anchor,
-  target_inst_row = train_data[1, ] |> select(x, y),
+  target_inst_row = train_data[1, ] |> select(x, y, z),
   point_colors = "black",
   edges_colors = "black"
 )
@@ -140,7 +143,7 @@ bnd_box <- bounding_box(
 ``` r
 anc_tour <- anchor_tour(
   bnd_box,
-  train_data |> select(x, y),
+  train_data |> select(x, y, z),
   "blue"
 )
 ```

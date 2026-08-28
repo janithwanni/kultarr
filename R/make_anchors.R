@@ -9,7 +9,7 @@
 #' @param class_col Name of factor column containing class of interest
 #' @param n_bins Number of bins used for binning the perturbation distribution. A higher bin size would make granular anchors but will increase computation time.
 #' @param seed Numeric. Seed to ensure that the results stay consistent
-#' @param verbose Logical. Whether to print out diagnostics of the Multi-Armed Bandit Algorithm
+#' @param verbose Logical. Whether to print out diagnostics of the algorithm
 #' @param parallel Logical. Whether to use parallel processing. Default set to FALSE.
 #' @param progress Logical. Whether to show a bar progress bar when performing parallel computation
 #' @param perturb_distance Numeric. The distance from the given instance to start creating perturbations

@@ -59,8 +59,7 @@ make_anchors(
 
 - verbose:
 
-  Logical. Whether to print out diagnostics of the Multi-Armed Bandit
-  Algorithm
+  Logical. Whether to print out diagnostics of the algorithm
 
 - parallel:
 
@@ -127,23 +126,23 @@ result <- make_anchors(
   n_bins = 2,
   seed = 145
 )
-#> INFO [2026-08-28 16:50:14] setting up bin edges
-#> INFO [2026-08-28 16:50:14] setting lower bounds
-#> INFO [2026-08-28 16:50:14] Have 1 lower bounds with 0.653931205254048
-#> INFO [2026-08-28 16:50:14] setting upper bounds
-#> INFO [2026-08-28 16:50:14] Have 1 upper bounds with 0.853931205254048
-#> INFO [2026-08-28 16:50:14] setting lower bounds
-#> INFO [2026-08-28 16:50:14] Have 2 lower bounds with 0.887393567832187
-#> INFO [2026-08-28 16:50:14] Have 2 lower bounds with 0.792393567832187
-#> INFO [2026-08-28 16:50:14] setting upper bounds
-#> INFO [2026-08-28 16:50:14] Have 1 upper bounds with 0.982393567832187
-#> INFO [2026-08-28 16:50:14] received precisions 1 , NA
-#> INFO [2026-08-28 16:50:14] found new max_reward -1 and node 1:1:1:1
-#> INFO [2026-08-28 16:50:14] max_values
-#> INFO [2026-08-28 16:50:14] 1:1:2:1
-#> INFO [2026-08-28 16:50:14] received precisions 1 , NA
-#> INFO [2026-08-28 16:50:14] max_values
-#> INFO [2026-08-28 16:50:14] 1:1:2:1
+#> INFO [2026-08-28 17:10:18] setting up bin edges
+#> INFO [2026-08-28 17:10:19] setting lower bounds
+#> INFO [2026-08-28 17:10:19] Have 1 lower bounds with 0.653931205254048
+#> INFO [2026-08-28 17:10:19] setting upper bounds
+#> INFO [2026-08-28 17:10:19] Have 1 upper bounds with 0.853931205254048
+#> INFO [2026-08-28 17:10:19] setting lower bounds
+#> INFO [2026-08-28 17:10:19] Have 2 lower bounds with 0.887393567832187
+#> INFO [2026-08-28 17:10:19] Have 2 lower bounds with 0.792393567832187
+#> INFO [2026-08-28 17:10:19] setting upper bounds
+#> INFO [2026-08-28 17:10:19] Have 1 upper bounds with 0.982393567832187
+#> INFO [2026-08-28 17:10:19] received precisions 1 , NA
+#> INFO [2026-08-28 17:10:19] found new max_reward -1 and node 1:1:1:1
+#> INFO [2026-08-28 17:10:19] max_values
+#> INFO [2026-08-28 17:10:19] 1:1:2:1
+#> INFO [2026-08-28 17:10:19] received precisions 1 , NA
+#> INFO [2026-08-28 17:10:19] max_values
+#> INFO [2026-08-28 17:10:19] 1:1:2:1
 
 # The result contains the discovered anchors and supporting
 # information about the search.

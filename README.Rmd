@@ -117,4 +117,4 @@ animate_anchor(
 )
 ```
 
-![](man/figures/tour_animation.gif){alt-text="Animation of a tour in a high dimensional dataset that shows the anchor as a box"}
+![](man/figures/tour_animation.gif){fig-alt="Animation of a tour in a high dimensional dataset that shows the anchor as a box"}

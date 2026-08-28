@@ -110,4 +110,4 @@ animate_anchor(
 )
 ```
 
-![](tour_aes_1.gif){alt-text="An animation containing a tour of a high dimensional space with a box representing the anchor"}
+![](tour_aes_1.gif){fig-alt="An animation containing a tour of a high dimensional space with a box representing the anchor"}

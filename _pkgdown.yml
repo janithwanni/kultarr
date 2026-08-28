@@ -2,6 +2,8 @@ url: ~
 template:
   bootstrap: 5
   light-switch: true
+  bslib:
+    danger: "#A6081A"
 navbar:
   structure:
     left: [intro, reference, articles, news]

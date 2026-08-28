@@ -2,9 +2,6 @@ url: ~
 template:
   bootstrap: 5
   light-switch: true
-  bootswatch: journal
-  theme: github-light
-  theme-dark: github-dark
 navbar:
   structure:
     left: [intro, reference, articles, news]

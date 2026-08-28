@@ -59,35 +59,35 @@ result <- make_anchors(
   n_bins = 2,
   seed = 145
 )
-#> INFO [2026-08-26 23:26:28] setting up bin edges
-#> INFO [2026-08-26 23:26:28] setting lower bounds
-#> INFO [2026-08-26 23:26:28] Have 1 lower bounds with 0.653931205254048
-#> INFO [2026-08-26 23:26:28] setting upper bounds
-#> INFO [2026-08-26 23:26:28] Have 1 upper bounds with 0.853931205254048
-#> INFO [2026-08-26 23:26:28] setting lower bounds
-#> INFO [2026-08-26 23:26:28] Have 2 lower bounds with 0.887393567832187
-#> INFO [2026-08-26 23:26:28] Have 2 lower bounds with 0.792393567832187
-#> INFO [2026-08-26 23:26:28] setting upper bounds
-#> INFO [2026-08-26 23:26:28] Have 1 upper bounds with 0.982393567832187
-#> INFO [2026-08-26 23:26:28] received precisions 1 , NA
-#> INFO [2026-08-26 23:26:28] found new max_reward -1 and node 1:1:1:1
-#> INFO [2026-08-26 23:26:28] max_values
-#> INFO [2026-08-26 23:26:28] 1:1:2:1
-#> INFO [2026-08-26 23:26:28] received precisions 1 , NA
-#> INFO [2026-08-26 23:26:28] max_values
-#> INFO [2026-08-26 23:26:28] 1:1:2:1
-#> INFO [2026-08-26 23:26:28] setting lower bounds
-#> INFO [2026-08-26 23:26:28] Have 1 lower bounds with 0.434021162660792
-#> INFO [2026-08-26 23:26:28] setting upper bounds
-#> INFO [2026-08-26 23:26:28] Have 1 upper bounds with 0.634021162660792
-#> INFO [2026-08-26 23:26:28] setting lower bounds
-#> INFO [2026-08-26 23:26:28] Have 1 lower bounds with 0.101150634791702
-#> INFO [2026-08-26 23:26:28] setting upper bounds
-#> INFO [2026-08-26 23:26:28] Have 1 upper bounds with 0.301150634791702
-#> INFO [2026-08-26 23:26:28] received precisions 1 , NA
-#> INFO [2026-08-26 23:26:28] found new max_reward -1 and node 1:1:1:1
-#> INFO [2026-08-26 23:26:28] max_values
-#> INFO [2026-08-26 23:26:28] 1:1:1:1
+#> INFO [2026-08-28 16:50:16] setting up bin edges
+#> INFO [2026-08-28 16:50:16] setting lower bounds
+#> INFO [2026-08-28 16:50:16] Have 1 lower bounds with 0.653931205254048
+#> INFO [2026-08-28 16:50:16] setting upper bounds
+#> INFO [2026-08-28 16:50:16] Have 1 upper bounds with 0.853931205254048
+#> INFO [2026-08-28 16:50:16] setting lower bounds
+#> INFO [2026-08-28 16:50:16] Have 2 lower bounds with 0.887393567832187
+#> INFO [2026-08-28 16:50:16] Have 2 lower bounds with 0.792393567832187
+#> INFO [2026-08-28 16:50:16] setting upper bounds
+#> INFO [2026-08-28 16:50:16] Have 1 upper bounds with 0.982393567832187
+#> INFO [2026-08-28 16:50:16] received precisions 1 , NA
+#> INFO [2026-08-28 16:50:16] found new max_reward -1 and node 1:1:1:1
+#> INFO [2026-08-28 16:50:16] max_values
+#> INFO [2026-08-28 16:50:16] 1:1:2:1
+#> INFO [2026-08-28 16:50:16] received precisions 1 , NA
+#> INFO [2026-08-28 16:50:16] max_values
+#> INFO [2026-08-28 16:50:16] 1:1:2:1
+#> INFO [2026-08-28 16:50:16] setting lower bounds
+#> INFO [2026-08-28 16:50:16] Have 1 lower bounds with 0.434021162660792
+#> INFO [2026-08-28 16:50:16] setting upper bounds
+#> INFO [2026-08-28 16:50:16] Have 1 upper bounds with 0.634021162660792
+#> INFO [2026-08-28 16:50:16] setting lower bounds
+#> INFO [2026-08-28 16:50:16] Have 1 lower bounds with 0.101150634791702
+#> INFO [2026-08-28 16:50:16] setting upper bounds
+#> INFO [2026-08-28 16:50:16] Have 1 upper bounds with 0.301150634791702
+#> INFO [2026-08-28 16:50:16] received precisions 1 , NA
+#> INFO [2026-08-28 16:50:16] found new max_reward -1 and node 1:1:1:1
+#> INFO [2026-08-28 16:50:16] max_values
+#> INFO [2026-08-28 16:50:16] 1:1:1:1
 
 # Visualise the resulting anchors.
 plots <- vis_anchor(

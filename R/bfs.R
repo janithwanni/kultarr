@@ -4,12 +4,13 @@ get_reward <- function(
   new_anchor,
   model_func,
   dataset,
-  class_ind = 1,
-  verbose
+  class_ind = 1
 ) {
   cover <- coverage(new_anchor, dataset)
   prec <- precision(new_anchor, model_func, dataset)
-  logger::log_info("received precisions {prec[1]} , {prec[2]}")
+  if (isit("verbose")) {
+    logger::log_info("received precisions {prec[1]} , {prec[2]}")
+  }
   prec <- prec[class_ind]
   if (is.null(prec) | is.na(prec)) {
     prec <- 0
@@ -17,7 +18,7 @@ get_reward <- function(
   if (is.infinite(cover)) {
     cover <- 0
   }
-  if (verbose) {
+  if (isit("verbose")) {
     logger::log_info(glue::glue(
       "==== {cover} | {prec} | {mean(c(cover, prec), na.rm = TRUE) }====="
     ))
@@ -29,8 +30,10 @@ get_reward <- function(
 #' Breadth First Search function to get the neighbors
 #' @noRd
 get_neighbors <- function(node, max_values = NULL) {
-  logger::log_info("max_values")
-  logger::log_info(state_tag(max_values))
+  if (isit("verbose")) {
+    logger::log_info("max_values")
+    logger::log_info(state_tag(max_values))
+  }
   dirs <- length(node)
   all_cant_increment <- TRUE
   neighbors <- lapply(seq_len(dirs), function(d) {
@@ -56,8 +59,7 @@ reward_for_node <- function(
   interest_columns,
   model_func,
   dataset,
-  class_ind,
-  verbose
+  class_ind
 ) {
   bounds <- envir_to_bounds(node, state_space, interest_columns)
   anchor <- create_anchor_inst(bounds, interest_columns)
@@ -65,8 +67,7 @@ reward_for_node <- function(
     anchor,
     model_func,
     dataset,
-    class_ind,
-    verbose
+    class_ind
   )
   return(reward)
 }
@@ -86,8 +87,7 @@ run_bfs <- function(
   interest_columns,
   model_func,
   class_ind,
-  seed = seed,
-  verbose = verbose
+  seed = seed
 ) {
   queue <- list(start_state)
   visited <- list()
@@ -107,7 +107,7 @@ run_bfs <- function(
   while (queue_idx <= length(queue)) {
     # Dequeue first element
     node <- queue[[queue_idx]]
-    if (verbose) {
+    if (isit("verbose")) {
       logger::log_info("at node")
       logger::log_info(state_tag(node))
     }
@@ -119,8 +119,7 @@ run_bfs <- function(
       interest_columns,
       model_func,
       dataset,
-      class_ind,
-      verbose
+      class_ind
     )
     reward_history[history_id, ] <- list(
       node_tag = state_tag(node),
@@ -129,15 +128,17 @@ run_bfs <- function(
       cover = reward$cover
     )
     history_id <- history_id + 1
-    if (verbose) {
+    if (isit("verbose")) {
       logger::log_info(
         "current reward for {state_tag(node)} is {reward$reward} and max_reward is {max_reward$reward}"
       )
     }
     if (reward$reward > max_reward$reward) {
-      logger::log_info(
-        "found new max_reward {max_reward$reward} and node {state_tag(node)}"
-      )
+      if (isit("verbose")) {
+        logger::log_info(
+          "found new max_reward {max_reward$reward} and node {state_tag(node)}"
+        )
+      }
       max_reward <- reward
       max_reward_node <- node
     }
@@ -149,7 +150,7 @@ run_bfs <- function(
     }
     for (neighbor in neighbors) {
       neighbor_key <- state_tag(neighbor)
-      if (verbose) {
+      if (isit("verbose")) {
         logger::log_info("going to neighbor")
         logger::log_info(neighbor_key)
       }

@@ -117,34 +117,40 @@ generate_environment <- function(
   envir <- purrr::map(interest_columns, function(cname) {
     vals <- dataset[[cname]] |> sort()
     cutpoints <- bin_edges[[cname]]
-    # print(cutpoints)
-    # print(dataset[instance_id, ][[cname]])
-    logger::log_info("setting lower bounds")
+    if (isit("verbose")) {
+      logger::log_info("setting lower bounds")
+    }
 
     v_l <- sort(
       cutpoints[cutpoints < instance_data[[cname]]],
       decreasing = TRUE
     )
-    logger::log_info(
-      "Have {length(v_l)} lower bounds with {paste(head(v_l, collapse=','))}"
-    )
-    # print(paste(v_l, collapse = ','))
+    if (isit("verbose")) {
+      logger::log_info(
+        "Have {length(v_l)} lower bounds with {paste(head(v_l, collapse=','))}"
+      )
+    }
 
     if (length(v_l) == 0) {
-      logger::log_warn("setting lower bounds to max")
+      if (isit("verbose")) {
+        logger::log_warn("setting lower bounds to max")
+      }
       v_l <- min(dataset[[cname]]) - 1e-3
     }
-    # print("lower bounds")
-    # print(v_l)
-    logger::log_info("setting upper bounds")
+    if (isit("verbose")) {
+      logger::log_info("setting upper bounds")
+    }
     v_u <- cutpoints[cutpoints > instance_data[[cname]]]
-    # print(paste(v_u, collapse = ','))
-    logger::log_info(
-      "Have {length(v_u)} upper bounds with {paste(head(v_u, collapse=','))}"
-    )
+    if (isit("verbose")) {
+      logger::log_info(
+        "Have {length(v_u)} upper bounds with {paste(head(v_u, collapse=','))}"
+      )
+    }
 
     if (length(v_u) == 0) {
-      logger::log_warn("Setting upper bound to max")
+      if (isit("verbose")) {
+        logger::log_warn("Setting upper bound to max")
+      }
       v_u <- max(dataset[[cname]]) + 1e-3
     }
     envir <- list(v_l, v_u)
@@ -178,6 +184,7 @@ define_bin_edges <- function(dataset, interest_columns, num_bins = 3) {
 
 #' Function to validate if a created boundary satisfies a given instance row
 #' @keywords internal
+#' @noRd
 validate_bound <- function(b, cols, instance_row) {
   if (any(is.na(b))) {
     return(FALSE)
@@ -185,4 +192,16 @@ validate_bound <- function(b, cols, instance_row) {
   b |>
     create_anchor_inst(cols) |>
     satisfies(instance_row)
+}
+
+#' Function to check option value
+#' @keywords internal
+#' @noRd
+isit <- function(opt_name) {
+  opt <- rlang::peek_option(paste0("kultarr.", opt_name))
+  if (is.null(opt)) {
+    return(FALSE)
+  } else {
+    return(opt)
+  }
 }

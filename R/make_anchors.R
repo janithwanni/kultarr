@@ -74,9 +74,12 @@ make_anchors <- function(
   if (progress) {
     p <- progressr::progressor(steps = nrow(instance))
   }
+  rlang::push_options(kultarr.verbose = verbose)
 
   # bin_edges <- define_bin_edges(dataset, cols, n_bins)
-  logger::log_info("setting up bin edges")
+  if (isit("verbose")) {
+    logger::log_info("setting up bin edges")
+  }
   # print(bin_edges)
 
   if (is.null(instance_lbls)) {
@@ -100,7 +103,6 @@ make_anchors <- function(
           class_col = class_col,
           n_bins = n_bins,
           seed = seed,
-          verbose = verbose,
           perturb_distance = perturb_distance,
           perturb_step = perturb_step,
           instance_lbl = instance_lbls[i]
@@ -125,7 +127,6 @@ make_anchors <- function(
           class_col = class_col,
           n_bins = n_bins,
           seed = seed,
-          verbose = verbose,
           perturb_distance = perturb_distance,
           perturb_step = perturb_step,
           instance_lbl = instance_lbls[i]
@@ -151,7 +152,6 @@ make_single_anchor <- function(
   class_col,
   n_bins = 4,
   seed = 145,
-  verbose = FALSE,
   perturb_distance = 0.1,
   perturb_step = 0.01,
   instance_lbl = NULL
@@ -182,8 +182,7 @@ make_single_anchor <- function(
     cols,
     model_func,
     class_ind,
-    seed = seed,
-    verbose = verbose
+    seed = seed
   )
 
   final_bounds <- bfs_results[["final_anchor"]]
@@ -198,7 +197,7 @@ make_single_anchor <- function(
   colnames(upper_bound) <- gsub("_u$", "", colnames(upper_bound))
 
   if (is.null(instance_lbl)) {
-    instance_lbl <- uuid::UUIDgenerate(instance)
+    instance_lbl <- uuid::UUIDgenerate(use.time = TRUE)
   }
 
   anchor_df <- rbind(

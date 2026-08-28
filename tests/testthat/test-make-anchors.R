@@ -14,11 +14,11 @@ describe("make_single_anchor", {
 
   # Act
   a <- make_single_anchor(
-    d,
-    cols,
-    instance,
-    model_func,
-    class_col,
+    dataset = d,
+    cols = cols,
+    instance = instance,
+    model_func = model_func,
+    class_col = class_col
   )
   it("should return a list containing the final anchor and the history", {
     # Assert

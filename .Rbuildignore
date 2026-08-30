@@ -18,3 +18,4 @@
 ^\.claude$
 ^.*\.json$
 ^\.github$
+^CRAN-SUBMISSION$

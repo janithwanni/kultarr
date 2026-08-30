@@ -1,6 +1,6 @@
 Package: kultarr
 Title: High Dimensional Visualization of Anchors Explanations 
-Version: 1.0.0
+Version: 2.0.0
 Authors@R: 
     person("Janith", "Wanniarachchi", email = "janithcwanni@gmail.com", role = c("aut", "cre", "cph"),
            comment = c(ORCID = "0000-0002-7945-1036"))

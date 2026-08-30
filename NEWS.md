@@ -1,4 +1,4 @@
-# kultarr (development version)
+# kultarr 2.0.0
 
 ## Improvements
 

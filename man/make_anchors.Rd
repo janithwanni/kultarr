@@ -17,7 +17,9 @@ make_anchors(
   progress = FALSE,
   perturb_distance = 0.1,
   perturb_step = 0.01,
-  instance_lbls = NULL
+  instance_lbls = NULL,
+  search = c("exhaustive", "refine", "coordinate"),
+  prune = TRUE
 )
 }
 \arguments{
@@ -46,6 +48,10 @@ make_anchors(
 \item{perturb_step}{Numeric. The step size to create the grid of points around the given instance}
 
 \item{instance_lbls}{Character. A vector of labels to be used in the result. Needs to have length equal to number of rows in instance}
+
+\item{search}{Character. How the boxes are searched. \code{"exhaustive"} (default) scores every combination of cutpoints and always finds the best box, but its cost grows as roughly \verb{(n_bins / 2)^(2p)} for \code{p} columns. \code{"refine"} searches a coarse grid of cutpoints and then repeatedly halves the spacing around the best box. \code{"coordinate"} starts from the best box of a coarse grid and moves one bound at a time to its best cutpoint until no bound moves. \code{"refine"} and \code{"coordinate"} are deterministic and scale to large \code{n_bins} or many columns, but may return a box with a lower reward than \code{"exhaustive"}.}
+
+\item{prune}{Logical. Whether to drop cutpoints that can never give the best box before searching. This never changes the best reward and makes large \code{n_bins} cheaper. Default set to TRUE.}
 }
 \value{
 A list containing the final anchor which is a data.frame of size 2 x (p+1) where p is the number of columns of interest with each row containing a upper. lower bound, the reward history which contains the reward history for each node traversed and the perturbations generated

@@ -15,6 +15,8 @@
 #' @param perturb_distance Numeric. The distance from the given instance to start creating perturbations
 #' @param perturb_step Numeric. The step size to create the grid of points around the given instance
 #' @param instance_lbls Character. A vector of labels to be used in the result. Needs to have length equal to number of rows in instance
+#' @param search Character. How the boxes are searched. `"exhaustive"` (default) scores every combination of cutpoints and always finds the best box, but its cost grows as roughly `(n_bins / 2)^(2p)` for `p` columns. `"refine"` searches a coarse grid of cutpoints and then repeatedly halves the spacing around the best box. `"coordinate"` starts from the best box of a coarse grid and moves one bound at a time to its best cutpoint until no bound moves. `"refine"` and `"coordinate"` are deterministic and scale to large `n_bins` or many columns, but may return a box with a lower reward than `"exhaustive"`.
+#' @param prune Logical. Whether to drop cutpoints that can never give the best box before searching. This never changes the best reward and makes large `n_bins` cheaper. Default set to TRUE.
 #'
 #' @return A list containing the final anchor which is a data.frame of size 2 x (p+1) where p is the number of columns of interest with each row containing a upper. lower bound, the reward history which contains the reward history for each node traversed and the perturbations generated
 #' @examples
@@ -68,8 +70,11 @@ make_anchors <- function(
   progress = FALSE,
   perturb_distance = 0.1,
   perturb_step = 0.01,
-  instance_lbls = NULL
+  instance_lbls = NULL,
+  search = c("exhaustive", "refine", "coordinate"),
+  prune = TRUE
 ) {
+  search <- match.arg(search)
   # TODO: Assert if instance is a dataframe and has more than 0 rows
   if (progress) {
     p <- progressr::progressor(steps = nrow(instance))
@@ -105,7 +110,9 @@ make_anchors <- function(
           seed = seed,
           perturb_distance = perturb_distance,
           perturb_step = perturb_step,
-          instance_lbl = instance_lbls[i]
+          instance_lbl = instance_lbls[i],
+          search = search,
+          prune = prune
         )
       },
       .options = furrr::furrr_options(seed = seed)
@@ -129,7 +136,9 @@ make_anchors <- function(
           seed = seed,
           perturb_distance = perturb_distance,
           perturb_step = perturb_step,
-          instance_lbl = instance_lbls[i]
+          instance_lbl = instance_lbls[i],
+          search = search,
+          prune = prune
         )
       }
     )
@@ -154,11 +163,11 @@ make_single_anchor <- function(
   seed = 145,
   perturb_distance = 0.1,
   perturb_step = 0.01,
-  instance_lbl = NULL
+  instance_lbl = NULL,
+  search = "exhaustive",
+  prune = TRUE
 ) {
-  cls_levels <- dataset[[class_col]] |> levels()
-  inst_pred <- model_func(instance[, c(cols)])
-  class_ind <- match(as.character(inst_pred), cls_levels)
+  target <- as.character(model_func(instance[, c(cols)]))
   perturbs <- generate_perturbations(
     dataset,
     instance,
@@ -174,15 +183,17 @@ make_single_anchor <- function(
     cols,
     bin_edges
   )
-  start_state <- rep(1, 2 * length(cols))
+  preds <- model_func(perturbs[, cols])
+  hits <- as.character(preds) == target
+  if (prune) {
+    state_space <- prune_state_space(perturbs, cols, state_space, hits)
+  }
   bfs_results <- run_bfs(
-    start_state,
     perturbs,
     state_space,
     cols,
-    model_func,
-    class_ind,
-    seed = seed
+    hits = hits,
+    search = search
   )
 
   final_bounds <- bfs_results[["final_anchor"]]
@@ -227,7 +238,7 @@ make_single_anchor <- function(
       history = bfs_results[["reward_history"]] |>
         dplyr::mutate(id = instance_lbl),
       perturbs = perturbs |>
-        dplyr::mutate(id = instance_lbl, preds = model_func(perturbs[, cols])),
+        dplyr::mutate(id = instance_lbl, preds = preds),
       perturb_bounds = perturb_bounds
     )
   )

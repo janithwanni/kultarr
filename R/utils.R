@@ -182,6 +182,156 @@ define_bin_edges <- function(dataset, interest_columns, num_bins = 3) {
     stats::setNames(interest_columns)
 }
 
+#' Index each row of a dataset into cells delimited by the cutpoints
+#'
+#' For each column the cutpoints of the lower and upper bounds are merged and
+#' sorted as `c_1 < ... < c_m`. A value strictly between `c_k` and `c_{k+1}`
+#' gets cell `2k + 1` and a value equal to `c_k` gets cell `2k`. A box
+#' `c_a < x < c_b` then covers exactly the cells `2a + 1` to `2b - 1`.
+#'
+#' @param dataset Data frame of points to index
+#' @param interest_columns Columns of interest
+#' @param state_space Output of `generate_environment`
+#'
+#' @returns A list with the merged cutpoints `cuts` and the cell indices `idx`,
+#'   both named by column.
+#' @keywords internal
+#' @noRd
+bin_index <- function(dataset, interest_columns, state_space) {
+  cuts <- purrr::map(interest_columns, function(cname) {
+    c(state_space[[paste0(cname, "_l")]], state_space[[paste0(cname, "_u")]]) |>
+      unique() |>
+      sort()
+  }) |>
+    stats::setNames(interest_columns)
+  idx <- purrr::map(interest_columns, function(cname) {
+    v <- dataset[[cname]]
+    cp <- cuts[[cname]]
+    findInterval(v, cp) + findInterval(v, cp, left.open = TRUE) + 1L
+  }) |>
+    stats::setNames(interest_columns)
+  return(list(cuts = cuts, idx = idx))
+}
+
+#' Builds cumulative count tables used to count points inside a box
+#'
+#' The tables are padded with a leading zero slice on every axis, so the count
+#' of points in any box is an inclusion-exclusion sum over its 2^p corners.
+#'
+#' @param binned Output of `bin_index`
+#' @param hits Logical vector. Whether each row is predicted as the target class
+#'
+#' @returns A list with the padded `dims`, their `strides` and the cumulative
+#'   tables `total` and `hits`.
+#' @keywords internal
+#' @noRd
+build_count_tables <- function(binned, hits) {
+  dims <- purrr::map_int(binned$cuts, \(cp) 2L * length(cp) + 2L)
+  strides <- cumprod(c(1, dims[-length(dims)]))
+  lin <- 1 + Reduce(`+`, purrr::map2(binned$idx, strides, \(i, s) i * s))
+  cum_count <- function(rows) {
+    a <- tabulate(lin[rows], nbins = prod(dims))
+    for (j in seq_along(dims)) {
+      pre <- strides[j]
+      post <- length(a) / (pre * dims[j])
+      dim(a) <- c(pre, dims[j], post)
+      for (k in seq_len(dims[j])[-1]) {
+        a[, k, ] <- a[, k, ] + a[, k - 1, ]
+      }
+    }
+    as.vector(a)
+  }
+  return(list(
+    dims = dims,
+    strides = strides,
+    total = cum_count(rep(TRUE, length(lin))),
+    hits = cum_count(hits)
+  ))
+}
+
+#' Counts the points inside many boxes at once
+#'
+#' @param lo,hi Lists with one integer vector per column giving the first and
+#'   last cell of each box (unpadded cell coordinates).
+#' @param tables Output of `build_count_tables`
+#'
+#' @returns A list with the vectors `total` and `hits`, one entry per box.
+#' @keywords internal
+#' @noRd
+box_counts <- function(lo, hi, tables) {
+  p <- length(tables$dims)
+  total <- 0
+  hits <- 0
+  for (corner in 0:(2^p - 1)) {
+    use_lo <- bitwAnd(corner, 2^(seq_len(p) - 1)) > 0
+    lin <- 1
+    for (j in seq_len(p)) {
+      coord <- if (use_lo[j]) lo[[j]] else hi[[j]] + 1
+      lin <- lin + (coord - 1) * tables$strides[j]
+    }
+    sgn <- if (sum(use_lo) %% 2 == 0) 1 else -1
+    total <- total + sgn * tables$total[lin]
+    hits <- hits + sgn * tables$hits[lin]
+  }
+  return(list(total = total, hits = hits))
+}
+
+#' Removes cutpoints that can never give the best box
+#'
+#' Consider the slab of points between two neighbouring cutpoints of the same
+#' bound, taken over the whole dataset. If every point in the slab is a hit,
+#' moving the bound outwards over the slab never lowers precision and never
+#' lowers coverage, so the inner cutpoint is dominated. If every point is a
+#' miss, moving the bound outwards keeps `prec * cover` fixed and lowers
+#' precision, so the outer cutpoint is dominated. Both hold for any position
+#' of the other bounds, since a box only ever sees part of the slab. Dropping
+#' dominated cutpoints therefore keeps the maximum reward of the search.
+#'
+#' @inheritParams bin_index
+#' @param hits Logical vector. Whether each row is predicted as the target class
+#'
+#' @returns `state_space` with dominated cutpoints removed.
+#' @keywords internal
+#' @noRd
+prune_state_space <- function(dataset, interest_columns, state_space, hits) {
+  binned <- bin_index(dataset, interest_columns, state_space)
+  for (cname in interest_columns) {
+    idx <- binned$idx[[cname]]
+    cuts <- binned$cuts[[cname]]
+    n_cells <- 2L * length(cuts) + 1L
+    cum_total <- c(0, cumsum(tabulate(idx, nbins = n_cells)))
+    cum_hits <- c(0, cumsum(tabulate(idx[hits], nbins = n_cells)))
+    for (side in c("_l", "_u")) {
+      bound <- paste0(cname, side)
+      pos <- match(state_space[[bound]], cuts)
+      keep <- rep(TRUE, length(pos))
+      for (i in seq_len(length(pos) - 1)) {
+        # slab between cutpoint i and the next cutpoint outwards, including
+        # points that lie on cutpoint i
+        if (side == "_l") {
+          first <- 2L * pos[i + 1] + 1L
+          last <- 2L * pos[i]
+        } else {
+          first <- 2L * pos[i]
+          last <- 2L * pos[i + 1] - 1L
+        }
+        n_total <- cum_total[last + 1] - cum_total[first]
+        n_hits <- cum_hits[last + 1] - cum_hits[first]
+        if (n_hits == n_total) {
+          keep[i] <- FALSE
+        } else if (n_hits == 0) {
+          keep[i + 1] <- FALSE
+        }
+      }
+      if (isit("verbose")) {
+        logger::log_info("pruned {sum(!keep)} of {length(keep)} cutpoints of {bound}")
+      }
+      state_space[[bound]] <- state_space[[bound]][keep]
+    }
+  }
+  return(state_space)
+}
+
 #' Function to validate if a created boundary satisfies a given instance row
 #' @keywords internal
 #' @noRd
